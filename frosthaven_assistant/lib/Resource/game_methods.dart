@@ -1316,16 +1316,35 @@ class GameMethods {
   static void setTurnDone(_StateModifier _, int index) {
     for (int i = 0; i < index; i++) {
       if (_gameState.currentList[i].turnState != TurnsState.done) {
-        _gameState.currentList[i]._turnState = TurnsState.done;
-        removeExpiringConditionsFromListItem(_, _gameState.currentList[i]);
+        var data = _gameState.currentList[i];
+
+        data._turnState = TurnsState.done;
+
+        if (data is Monster) {
+          EffectHandler.handleMonsterRoundEnd(data);
+        }
+        if (data is Character) {
+          EffectHandler.handleCharacterRoundEnd(data);
+        }
+
+        removeExpiringConditionsFromListItem(_, data);
       }
     }
     //if on index is NOT current then set to current else set to done
     int newIndex = index + 1;
     if (_gameState.currentList[index].turnState == TurnsState.current) {
-      _gameState.currentList[index]._turnState = TurnsState.done;
-      removeExpiringConditionsFromListItem(_, _gameState.currentList[index]);
-      //remove expiring conditions
+      var data = _gameState.currentList[index];
+
+      data._turnState = TurnsState.done;
+
+      if (data is Monster) {
+        EffectHandler.handleMonsterRoundEnd(data);
+      }
+      if (data is Character) {
+        EffectHandler.handleCharacterRoundEnd(data);
+      }
+
+      removeExpiringConditionsFromListItem(_, data);
     } else {
       newIndex = index;
     }
@@ -1338,7 +1357,8 @@ class GameMethods {
           if (data.turnState == TurnsState.done) {
             reapplyConditionsFromListItem(_, data);
           }
-          data._turnState = TurnsState.current;
+          data.setTurnState(TurnsState.current);
+          EffectHandler.handleMonsterRoundStart(data);
           break;
         }
       } else if (data is Character) {
@@ -1346,7 +1366,8 @@ class GameMethods {
           if (data.turnState == TurnsState.done) {
             reapplyConditionsFromListItem(_, data);
           }
-          data._turnState = TurnsState.current;
+          data.setTurnState(TurnsState.current);
+          EffectHandler.handleCharacterRoundStart(data);
           break;
         }
       }

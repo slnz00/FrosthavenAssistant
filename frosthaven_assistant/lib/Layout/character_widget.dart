@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:frosthaven_assistant/Layout/menus/action_type_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/numpad_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/status_menu.dart';
 import 'package:frosthaven_assistant/Resource/commands/set_init_command.dart';
@@ -676,7 +677,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
           //open stats menu
           openDialog(
             context,
-            StatusMenu(figureId: character.id, characterId: character.id),
+            ActionTypeMenu(figureId: character.id, characterId: character.id),
           );
         },
         child: ValueListenableBuilder<dynamic>(

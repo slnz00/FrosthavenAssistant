@@ -7,7 +7,8 @@ import '../services/service_locator.dart';
 
 class CounterButton extends StatefulWidget {
   final ValueListenable<int> notifier;
-  final ChangeStatCommand command;
+  final ChangeStatCommand? command;
+  final Function(int)? callback;
   final int maxValue;
   final String image;
   final String figureId;
@@ -19,6 +20,7 @@ class CounterButton extends StatefulWidget {
   const CounterButton(this.notifier, this.command, this.maxValue, this.image,
       this.showTotalValue, this.color,
       {Key? key,
+      this.callback,
       required this.figureId,
       required this.ownerId,
       required this.scale})
@@ -33,6 +35,7 @@ class CounterButton extends StatefulWidget {
 class CounterButtonState extends State<CounterButton> {
   GameState gameState = getIt<GameState>();
   final totalChangeValue = ValueNotifier<int>(0);
+
   @override
   Widget build(BuildContext context) {
     FigureState? figure =
@@ -49,10 +52,22 @@ class CounterButtonState extends State<CounterButton> {
               icon: Image.asset('assets/images/psd/sub.png'),
 //iconSize: 30,
               onPressed: () {
-                widget.command.setChange(-1);
+                if (widget.command != null) {
+                  widget.command!.setChange(-1);
+                }
+                if (widget.callback != null) {
+                  widget.callback!(-1);
+                  totalChangeValue.value--;
+                  return;
+                }
+
                 if (widget.notifier.value > 0) {
                   totalChangeValue.value--;
-                  gameState.action(widget.command);
+
+                  if (widget.command != null) {
+                    gameState.action(widget.command!);
+                  }
+
                   if (widget.figureId != "unknown" &&
                       widget.notifier == figure!.health &&
                       figure.health.value <= 0) {
@@ -75,7 +90,7 @@ class CounterButtonState extends State<CounterButton> {
           ),
         ),
         ValueListenableBuilder<int>(
-            valueListenable: widget.notifier,
+            valueListenable: widget.showTotalValue ? widget.notifier : totalChangeValue,
             builder: (context, value, child) {
               String text = "";
               if (totalChangeValue.value > 0) {
@@ -111,10 +126,23 @@ class CounterButtonState extends State<CounterButton> {
             icon: Image.asset('assets/images/psd/add.png'),
 //iconSize: 30,
             onPressed: () {
-              widget.command.setChange(1);
-              if (widget.notifier.value < widget.maxValue) {
+              if (widget.command != null) {
+                widget.command!.setChange(1);
+              }
+              if (widget.callback != null) {
+                widget.callback!(1);
                 totalChangeValue.value++;
-                gameState.action(widget.command);
+                return;
+              }
+
+              if (widget.notifier.value < widget.maxValue) {
+
+                if (widget.command != null) {
+                  gameState.action(widget.command!);
+                }
+
+                totalChangeValue.value++;
+
                 if (widget.figureId != "unknown" &&
                     widget.notifier.value <= 0 &&
                     widget.notifier == figure!.health) {

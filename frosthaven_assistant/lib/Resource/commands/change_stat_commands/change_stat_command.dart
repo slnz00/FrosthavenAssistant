@@ -12,6 +12,10 @@ abstract class ChangeStatCommand extends Command {
     this.change = change;
   }
 
+  void alterChange(int change) {
+    this.change += change;
+  }
+
   void handleDeath() {
     for (var item in getIt<GameState>().currentList) {
       if (item is Monster) {

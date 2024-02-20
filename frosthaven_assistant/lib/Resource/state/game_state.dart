@@ -1,5 +1,7 @@
 library game_state;
 
+import 'package:frosthaven_assistant/Resource/effect_handler.dart';
+
 import '../card_stack.dart';
 import '../game_data.dart';
 import '../enums.dart';

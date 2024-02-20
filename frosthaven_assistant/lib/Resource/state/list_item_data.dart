@@ -5,5 +5,7 @@ class ListItemData {
 
   TurnsState get turnState => _turnState;
   TurnsState _turnState = TurnsState.notDone;
-  setTurnState(_StateModifier stateModifier, TurnsState value) {_turnState = value;}
+  setTurnState(TurnsState value) {
+    _turnState = value;
+  }
 }

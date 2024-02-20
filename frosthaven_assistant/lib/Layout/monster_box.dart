@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:frosthaven_assistant/Layout/condition_icon.dart';
 import 'package:frosthaven_assistant/Layout/health_wheel_controller.dart';
+import 'package:frosthaven_assistant/Layout/menus/action_type_menu.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 import '../Resource/color_matrices.dart';
 import '../Resource/enums.dart';
 import '../Resource/ui_utils.dart';
-import 'menus/status_menu.dart';
 
 class MonsterBox extends StatefulWidget {
   final String figureId;
@@ -74,7 +74,7 @@ class MonsterBoxState extends State<MonsterBox> {
     return list;
   }
 
-  String? getMonster() {
+  String? getMonsterId() {
     for (var item in getIt<GameState>().currentList) {
       if (item is Monster) {
         if (item.id == data.name) {
@@ -293,10 +293,11 @@ class MonsterBoxState extends State<MonsterBox> {
           if (!widget.blockInput) {
             openDialog(
               context,
-              StatusMenu(
+              ActionTypeMenu(
                   figureId: figureId,
-                  monsterId: getMonster(),
-                  characterId: characterId),
+                  monsterId: getMonsterId(),
+                  characterId: characterId
+              ),
             );
           }
         },

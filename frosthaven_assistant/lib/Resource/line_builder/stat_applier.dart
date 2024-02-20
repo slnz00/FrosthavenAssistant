@@ -7,7 +7,7 @@ import '../stat_calculator.dart';
 import '../state/game_state.dart';
 
 class StatApplier {
-  static Map<String, int> _getStatTokens(Monster monster, bool elite) {
+  static Map<String, int> getStatTokens(Monster monster, bool elite) {
     var map = <String, int>{};
     MonsterStatsModel data;
     if (monster.type.levels[monster.level.value].boss != null) {
@@ -272,8 +272,8 @@ class StatApplier {
     List<String> retVal = [];
 
     //get the data
-    var normalTokens = _getStatTokens(monster, false);
-    var eliteTokens = _getStatTokens(monster, true);
+    var normalTokens = getStatTokens(monster, false);
+    var eliteTokens = getStatTokens(monster, true);
 
     RegExp regExpNumbers = RegExp(r'^[\d ()xCL/*+-]+$');
     //first pass fix values only

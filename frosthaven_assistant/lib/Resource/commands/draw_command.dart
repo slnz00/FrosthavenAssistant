@@ -1,3 +1,5 @@
+import 'package:frosthaven_assistant/Resource/effect_handler.dart';
+
 import '../../Layout/main_list.dart';
 import '../../services/service_locator.dart';
 import '../enums.dart';
@@ -14,7 +16,16 @@ class DrawCommand extends Command {
     GameMethods.sortByInitiative(stateAccess);
     GameMethods.setRoundState(stateAccess, RoundState.playTurns);
     if (_gameState.currentList.isNotEmpty) {
-      _gameState.currentList[0].setTurnState(stateAccess, TurnsState.current);
+      var data = _gameState.currentList[0];
+
+      data.setTurnState(TurnsState.current);
+
+      if (data is Monster) {
+        EffectHandler.handleMonsterRoundStart(data);
+      }
+      if (data is Character) {
+        EffectHandler.handleCharacterRoundStart(data);
+      }
     }
 
     Future.delayed(const Duration(milliseconds: 600), () {

@@ -20,9 +20,23 @@ class CharacterState extends FigureState {
   final List<MonsterInstance> _summonList = [];
 
   @override
+  String getFigureId() {
+    // TODO: implement getFigureId
+    throw UnimplementedError();
+  }
+
+  @override
+  String getOwnerId() {
+    // TODO: implement getOwnerId
+    throw UnimplementedError();
+  }
+
+  @override
   String toString() {
     return '{'
         '"initiative": ${initiative.value}, '
+        '"startedRound": ${startedRound.value}, '
+        '"endedRound": ${endedRound.value}, '
         '"health": ${health.value}, '
         '"maxHealth": ${maxHealth.value}, '
         '"level": ${level.value}, '
@@ -44,6 +58,17 @@ class CharacterState extends FigureState {
     _level.value = json["level"];
     _maxHealth.value = json["maxHealth"];
     _display.value = json['display'];
+
+    if (json.containsKey("startedRound")) {
+      startedRound.value = json["startedRound"];
+    } else {
+      startedRound.value = 0;
+    }
+    if (json.containsKey("endedRound")) {
+      endedRound.value = json["endedRound"];
+    } else {
+      endedRound.value = 0;
+    }
 
     List<dynamic> summons = json["summonList"];
     for (var item in summons) {

@@ -92,6 +92,8 @@ class MonsterInstance extends FigureState {
   @override
   String toString() {
     return '{'
+        '"startedRound": ${startedRound.value}, '
+        '"endedRound": ${endedRound.value}, '
         '"health": ${health.value}, '
         '"maxHealth": ${maxHealth.value}, '
         '"level": ${level.value}, '
@@ -121,6 +123,16 @@ class MonsterInstance extends FigureState {
     move = json["move"];
     attack = json["attack"];
     range = json["range"];
+    if (json.containsKey("startedRound")) {
+      startedRound.value = json["startedRound"];
+    } else {
+      startedRound.value = 0;
+    }
+    if (json.containsKey("endedRound")) {
+      endedRound.value = json["endedRound"];
+    } else {
+      endedRound.value = 0;
+    }
     if (json.containsKey("roundSummoned")) {
       _roundSummoned = json["roundSummoned"];
     } else {
