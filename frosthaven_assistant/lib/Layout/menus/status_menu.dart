@@ -91,6 +91,7 @@ class StatusMenuState extends State<StatusMenu> {
   final GameState _gameState = getIt<GameState>();
 
   int healthChange = 0;
+  ValueNotifier<List<Condition>> conditions = ValueNotifier([]);
 
   @override
   initState() {
@@ -98,20 +99,63 @@ class StatusMenuState extends State<StatusMenu> {
     super.initState();
 
     healthChange = 0;
+    conditions.value = getConditionsFromGameState();
   }
 
   @override
   deactivate() {
     super.deactivate();
-
-    healthChange = 0;
   }
 
   @override
   dispose() {
     super.dispose();
+  }
 
-    healthChange = 0;
+  void saveChanges() {
+    if (widget.attack) {
+      var conditionsBeforeHealthChange = getConditionsFromGameState();
+      handleHealthChange();
+      handleConditionChanges(conditionsBeforeHealthChange);
+    } else {
+      handleConditionChanges(null);
+      handleHealthChange();
+    }
+
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  List<Condition> getConditionsFromGameState() {
+    var ownerId = getOwnerId();
+    var figureId = widget.figureId;
+
+    var figure = GameMethods.getFigure(ownerId, figureId);
+
+    if (figure is MonsterInstance) {
+      return [...figure.conditions.value];
+    }
+    if (figure is CharacterState) {
+      return [...figure.conditions.value];
+    }
+
+    return [];
+  }
+
+  void handleConditionChanges(List<Condition>? currentConditions) {
+    currentConditions ??= getConditionsFromGameState();
+    var newConditions = conditions.value;
+
+    for (var condition in newConditions) {
+      if (!currentConditions.contains(condition)) {
+        saveConditionToGameState(condition, true);
+      }
+    }
+
+    for (var condition in currentConditions) {
+      if (!newConditions.contains(condition)) {
+        saveConditionToGameState(condition, false);
+      }
+    }
   }
 
   void handleHealthChange() {
@@ -140,22 +184,28 @@ class StatusMenuState extends State<StatusMenu> {
     return ownerId;
   }
 
-  bool isConditionActive(Condition condition, FigureState figure) {
-    bool isActive = false;
-    for (var item in figure.conditions.value) {
-      if (item == condition) {
-        isActive = true;
-        break;
-      }
+  void saveConditionToGameState(Condition condition, bool activate) {
+    var figureId = widget.figureId;
+    var ownerId = getOwnerId();
+
+    if (activate) {
+      _gameState.action(AddConditionCommand(condition, figureId, ownerId));
+    } else {
+      _gameState.action(RemoveConditionCommand(condition, figureId, ownerId));
     }
-    return isActive;
   }
 
-  void activateCondition(Condition condition, FigureState figure) {
-    List<Condition> newList = [];
-    newList.addAll(figure.conditions.value);
-    newList.add(condition);
-    figure.conditions.value = newList;
+  bool isConditionActive(Condition condition, FigureState figure, bool useLocal) {
+    var conditionsSource = useLocal ?
+      conditions.value :
+      getConditionsFromGameState();
+
+    for (var item in conditionsSource) {
+      if (item == condition) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Widget buildChillButtons(ValueListenable<int> notifier, int maxValue,
@@ -306,8 +356,8 @@ class StatusMenuState extends State<StatusMenu> {
       //immobilize or muddle: also chill - doesn't matter: monster can't be chilled and players don't have immunities.
     }
     // enabled = false;
-    return ValueListenableBuilder<int>(
-        valueListenable: _gameState.commandIndex,
+    return ValueListenableBuilder<List<Condition>>(
+        valueListenable: conditions,
         builder: (context, value, child) {
           Color color = Colors.transparent;
           FigureState? figure = GameMethods.getFigure(ownerId, figureId);
@@ -322,7 +372,7 @@ class StatusMenuState extends State<StatusMenu> {
             }
           }
 
-          bool isActive = isConditionActive(condition, figure);
+          bool isActive = isConditionActive(condition, figure, true);
           if (isActive) {
             color =
                 getIt<Settings>().darkMode.value ? Colors.white : Colors.black;
@@ -409,13 +459,15 @@ class StatusMenuState extends State<StatusMenu> {
                 //iconSize: 30,
                 onPressed: enabled
                     ? () {
+                        var newConditions = [...conditions.value];
+
                         if (!isActive) {
-                          _gameState.action(AddConditionCommand(
-                              condition, figureId, ownerId));
+                          newConditions.add(condition);
                         } else {
-                          _gameState.action(RemoveConditionCommand(
-                              condition, figureId, ownerId));
+                          newConditions.remove(condition);
                         }
+
+                        conditions.value = newConditions;
                       }
                     : null,
               ));
@@ -865,10 +917,7 @@ class StatusMenuState extends State<StatusMenu> {
                   backgroundColor: Colors.white,
                   elevation: 4,
                 ),
-                onPressed: () {
-                  handleHealthChange();
-                  Navigator.of(context, rootNavigator: true).pop();
-                },
+                onPressed: saveChanges,
                 child: Text(
                   "Save",
                   style: getTitleTextStyle(scale),
