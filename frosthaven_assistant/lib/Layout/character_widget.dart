@@ -24,9 +24,10 @@ class CharacterWidget extends StatefulWidget {
       {}; //if it's been changed locally then it's not hidden
   final String characterId;
   final int? initPreset;
+  final VoidCallback onInitNumberProvided;
 
   const CharacterWidget(
-      {required this.characterId, required this.initPreset, Key? key})
+      {required this.characterId, required this.initPreset, Key? key, required this.onInitNumberProvided})
       : super(key: key);
 
   @override
@@ -40,6 +41,14 @@ class CharacterWidgetState extends State<CharacterWidget> {
   late List<MonsterInstance> lastList = [];
   late Character character;
   final focusNode = FocusNode();
+
+  String getInitiativeText () {
+    return _initTextFieldController.text;
+  }
+
+  void focusInitiativeInput () {
+    focusNode.requestFocus();
+  }
 
   void _textFieldControllerListener() {
     for (var item in _gameState.currentList) {
@@ -222,64 +231,72 @@ class CharacterWidgetState extends State<CharacterWidget> {
                 width: 25 * scale,
                 padding: EdgeInsets.zero,
                 alignment: Alignment.topCenter,
-                child: TextField(
-                    focusNode: focusNode,
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus && _initTextFieldController.text.isNotEmpty) {
+                      widget.onInitNumberProvided();
+                    }
+                  },
 
-                    //scrollPadding: EdgeInsets.zero,
-                    onTap: () {
-                      //clear on enter focus
-                      _initTextFieldController.clear();
-                      if (getIt<Settings>().softNumpadInput.value) {
-                        openDialog(
-                            context,
-                            NumpadMenu(
-                              controller: _initTextFieldController,
-                              maxLength: 2,
-                            ));
-                      }
-                    },
-                    onChanged: (String str) {
-                      //close soft keyboard on 2 chars entered
-                      if (str.length == 2) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      }
-                    },
+                  child: TextField(
+                      focusNode: focusNode,
 
-                    //expands: true,
-                    textAlign: TextAlign.center,
-                    cursorColor: Colors.white,
-                    maxLength: 2,
-                    style: TextStyle(
-                        height: 1,
-                        //quick fix for web-phone disparity.
-                        fontFamily: frosthavenStyle ? 'GermaniaOne' : 'Pirata',
-                        color: Colors.white,
-                        fontSize: 24 * scale,
-                        shadows: [shadow]),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      //this is what fixes the height issue
-                      counterText: '',
-                      contentPadding: EdgeInsets.zero,
-                      enabledBorder: UnderlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide:
-                            BorderSide(width: 0, color: Colors.transparent),
+                      //scrollPadding: EdgeInsets.zero,
+                      onTap: () {
+                        //clear on enter focus
+                        _initTextFieldController.clear();
+                        if (getIt<Settings>().softNumpadInput.value) {
+                          openDialog(
+                              context,
+                              NumpadMenu(
+                                controller: _initTextFieldController,
+                                maxLength: 2,
+                              ));
+                        }
+                      },
+                      onChanged: (String str) {
+                        //close soft keyboard on 2 chars entered
+                        if (str.length == 2) {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        }
+                      },
+
+                      //expands: true,
+                      textAlign: TextAlign.center,
+                      cursorColor: Colors.white,
+                      maxLength: 2,
+                      style: TextStyle(
+                          height: 1,
+                          //quick fix for web-phone disparity.
+                          fontFamily: frosthavenStyle ? 'GermaniaOne' : 'Pirata',
+                          color: Colors.white,
+                          fontSize: 24 * scale,
+                          shadows: [shadow]),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        //this is what fixes the height issue
+                        counterText: '',
+                        contentPadding: EdgeInsets.zero,
+                        enabledBorder: UnderlineInputBorder(
+                          borderRadius: BorderRadius.zero,
+                          borderSide:
+                              BorderSide(width: 0, color: Colors.transparent),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderRadius: BorderRadius.zero,
+                          borderSide:
+                              BorderSide(width: 0, color: Colors.transparent),
+                        ),
+                        // border: UnderlineInputBorder(
+                        //   borderSide:
+                        //      BorderSide(color: Colors.pink),
+                        // ),
                       ),
-                      focusedBorder: UnderlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide:
-                            BorderSide(width: 0, color: Colors.transparent),
-                      ),
-                      // border: UnderlineInputBorder(
-                      //   borderSide:
-                      //      BorderSide(color: Colors.pink),
-                      // ),
-                    ),
-                    controller: _initTextFieldController,
-                    keyboardType: getIt<Settings>().softNumpadInput.value
-                        ? TextInputType.none
-                        : TextInputType.number),
+                      controller: _initTextFieldController,
+                      keyboardType: getIt<Settings>().softNumpadInput.value
+                          ? TextInputType.none
+                          : TextInputType.number),
+                ),
               );
             } else {
               if (isCharacter) {

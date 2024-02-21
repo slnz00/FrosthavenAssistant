@@ -54,12 +54,11 @@ void rebuildAllChildren(BuildContext context) {
   (context as Element).visitChildren(rebuild);
 }
 
-void openDialog(BuildContext context, Widget widget) {
-  openDialogWithDismissOption(context, widget, true);
+Future<dynamic> openDialog(BuildContext context, Widget widget) {
+  return openDialogWithDismissOption(context, widget, true);
 }
 
-void openDialogWithDismissOption(
-    BuildContext context, Widget widget, bool dismissible) {
+Future<dynamic> openDialogWithDismissOption(BuildContext context, Widget widget, bool dismissible) {
   //could potentially modify edge insets based on screen width.
   Widget innerWidget = Stack(children: [
     Positioned(
@@ -75,7 +74,7 @@ void openDialogWithDismissOption(
               })),
     )
   ]);
-  showDialog(
+  return showDialog(
       barrierDismissible: dismissible,
       context: context,
       builder: (BuildContext context) => innerWidget);

@@ -102,25 +102,10 @@ class StatusMenuState extends State<StatusMenu> {
     conditions.value = getConditionsFromGameState();
   }
 
-  @override
-  deactivate() {
-    super.deactivate();
-  }
-
-  @override
-  dispose() {
-    super.dispose();
-  }
-
   void saveChanges() {
-    if (widget.attack) {
-      var conditionsBeforeHealthChange = getConditionsFromGameState();
-      handleHealthChange();
-      handleConditionChanges(conditionsBeforeHealthChange);
-    } else {
-      handleConditionChanges(null);
-      handleHealthChange();
-    }
+    var conditionsBeforeHealthChange = getConditionsFromGameState();
+    handleHealthChange();
+    handleConditionChanges(conditionsBeforeHealthChange);
 
     Navigator.of(context, rootNavigator: true).pop();
   }

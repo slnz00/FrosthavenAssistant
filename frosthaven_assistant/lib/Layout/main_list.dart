@@ -18,8 +18,14 @@ import 'monster_widget.dart';
 
 class Item extends StatelessWidget {
   final ListItemData data;
+  final GlobalKey globalKey;
+  final VoidCallback onInitNumberProvided;
 
-  const Item({Key? key, required this.data}) : super(key: key);
+  Item({
+    Key? key,
+    required this.globalKey,
+    required this.data, required this.onInitNumberProvided
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +41,9 @@ class Item extends StatelessWidget {
         initPreset = character.characterState.initiative.value;
       }
       child = CharacterWidget(
-          key: Key(character.id),
+          key: globalKey,
           characterId: character.id,
+          onInitNumberProvided: onInitNumberProvided,
           initPreset: initPreset);
       height = 60 * scale;
       if (character.characterState.summonList.isNotEmpty) {
@@ -50,7 +57,7 @@ class Item extends StatelessWidget {
       }
     } else if (data is Monster) {
       Monster monster = data as Monster;
-      child = MonsterWidget(key: Key(monster.id), data: monster);
+      child = MonsterWidget(key: globalKey, data: monster);
       int standeeRows = 0;
       if (monster.monsterInstances.isNotEmpty) {
         standeeRows = 1;
@@ -72,7 +79,7 @@ class Item extends StatelessWidget {
     }
 
     var animatedContainer = AnimatedContainer(
-      key: child.key,
+      key: Key(data.id),
       height: height,
       duration: const Duration(milliseconds: 500),
       //decoration: const BoxDecoration(
@@ -159,6 +166,7 @@ class ListAnimationState extends State<ListAnimation> {
 class MainListState extends State<MainList> {
   final GameState _gameState = getIt<GameState>();
   final GameData _gameData = getIt<GameData>();
+  final Map<String, GlobalKey> globalKeyStore = {};
   List<Widget> _generatedList = [];
   static final scrollController = ScrollController();
 
@@ -292,6 +300,31 @@ class MainListState extends State<MainList> {
     return widgetPositions.length;
   }
 
+  GlobalKey getGlobalKey (ListItemData data) {
+    if (!globalKeyStore.containsKey(data.id)) {
+      globalKeyStore[data.id] = GlobalKey();
+    }
+
+    return globalKeyStore[data.id]!;
+  }
+
+  void focusNextEmptyInitInput () {
+    for (var data in _gameState.currentList) {
+      var globalKey = globalKeyStore[data.id];
+      var state = globalKey?.currentState;
+
+      if (state is CharacterWidgetState) {
+        var initiative = state.getInitiativeText();
+
+        if (initiative.isEmpty) {
+          state.focusInitiativeInput();
+
+          return;
+        }
+      }
+    }
+  }
+
   int getItemsForHalfTotalHeight(List<double> widgetPositions) {
     //too bad this has to be done
     bool canFit2Columns =
@@ -345,13 +378,25 @@ class MainListState extends State<MainList> {
       indices.add(index);
     }
 
-    List<Widget> newList = List<Widget>.generate(
+
+    List<Item> newList = List<Item>.generate(
       _gameState.currentList.length,
       (index) {
-        var item = Item(
-            key: Key(_gameState.currentList[index].id),
-            data: _gameState.currentList[index]);
-        return item;
+
+        var data = _gameState.currentList[index];
+        var id = data.id;
+        var globalKey = getGlobalKey(data);
+
+        var itemWidget = Item(
+          onInitNumberProvided: () {
+            focusNextEmptyInitInput();
+          },
+          key: Key(id),
+          globalKey: globalKey,
+          data: data
+        );
+
+        return itemWidget;
       },
     );
 
