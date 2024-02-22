@@ -28,7 +28,7 @@ void main() {
   _enablePlatformOverrideForDesktop();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowTitle('X-haven Assistant+');
+    setWindowTitle('X-haven+');
     if (!Platform.isMacOS) {
       windowManager.setMinimumSize(const Size(400, 600));
     }
@@ -73,9 +73,9 @@ class MyApp extends StatelessWidget {
       debugShowMaterialGrid: false,
       checkerboardOffscreenLayers: false,
       showPerformanceOverlay: false,
-      title: 'X-haven Assistant+',
+      title: 'X-haven+',
       theme: ThemeSwitcher.of(context).themeData,
-      home: const MyHomePage(title: 'X-haven Assistant+'),
+      home: const MyHomePage(title: 'X-haven+'),
     );
   }
 }

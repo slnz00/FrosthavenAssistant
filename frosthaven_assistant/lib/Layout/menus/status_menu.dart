@@ -7,8 +7,6 @@ import 'package:frosthaven_assistant/Layout/monster_box.dart';
 import 'package:frosthaven_assistant/Resource/commands/change_stat_commands/change_bless_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/change_stat_commands/change_curse_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/change_stat_commands/change_xp_command.dart';
-import 'package:frosthaven_assistant/Resource/effect_handler.dart';
-
 import '../../Resource/commands/add_condition_command.dart';
 import '../../Resource/commands/change_stat_commands/change_chill_command.dart';
 import '../../Resource/commands/change_stat_commands/change_enfeeble_command.dart';
@@ -22,20 +20,23 @@ import '../../Resource/settings.dart';
 import '../../Resource/ui_utils.dart';
 import '../../services/service_locator.dart';
 import '../counter_button.dart';
+import 'action_menu.dart';
 
 class StatusMenu extends StatefulWidget {
-  const StatusMenu(
-      {Key? key,
-      this.attack = false,
-      required this.figureId,
-      this.characterId,
-      this.monsterId})
-      : super(key: key);
+  const StatusMenu({
+    Key? key,
+    required this.actionData
+  }) : super(key: key);
 
-  final bool attack;
-  final String figureId;
-  final String? monsterId;
-  final String? characterId;
+  final ActionData actionData;
+
+  ValueNotifier<List<Condition>> get conditions => actionData.conditions;
+  ValueNotifier<int> get healthChange => actionData.healthChange;
+  bool get attack => actionData.attack;
+  String get figureId => actionData.figureId;
+  String? get monsterId => actionData.monsterId;
+  String? get characterId => actionData.characterId;
+  String get ownerId => actionData.ownerId;
 
   //conditions always:
   //stun,
@@ -90,102 +91,16 @@ class StatusMenu extends StatefulWidget {
 class StatusMenuState extends State<StatusMenu> {
   final GameState _gameState = getIt<GameState>();
 
-  int healthChange = 0;
-  ValueNotifier<List<Condition>> conditions = ValueNotifier([]);
-
   @override
   initState() {
     // at the beginning, all items are shown
     super.initState();
-
-    healthChange = 0;
-    conditions.value = getConditionsFromGameState();
   }
 
-  void saveChanges() {
-    var conditionsBeforeHealthChange = getConditionsFromGameState();
-    handleHealthChange();
-    handleConditionChanges(conditionsBeforeHealthChange);
+  bool isConditionActive(Condition condition, FigureState figure) {
+    var conditions = widget.actionData.conditions;
 
-    Navigator.of(context, rootNavigator: true).pop();
-  }
-
-  List<Condition> getConditionsFromGameState() {
-    var ownerId = getOwnerId();
-    var figureId = widget.figureId;
-
-    var figure = GameMethods.getFigure(ownerId, figureId);
-
-    if (figure is MonsterInstance) {
-      return [...figure.conditions.value];
-    }
-    if (figure is CharacterState) {
-      return [...figure.conditions.value];
-    }
-
-    return [];
-  }
-
-  void handleConditionChanges(List<Condition>? currentConditions) {
-    currentConditions ??= getConditionsFromGameState();
-    var newConditions = conditions.value;
-
-    for (var condition in newConditions) {
-      if (!currentConditions.contains(condition)) {
-        saveConditionToGameState(condition, true);
-      }
-    }
-
-    for (var condition in currentConditions) {
-      if (!newConditions.contains(condition)) {
-        saveConditionToGameState(condition, false);
-      }
-    }
-  }
-
-  void handleHealthChange() {
-    var ownerId = getOwnerId();
-    var figureId = widget.figureId;
-    var attack = widget.attack;
-
-    if (attack && healthChange > 0) {
-      healthChange *= -1;
-    }
-
-    EffectHandler.handleHealthChange(FigureData(ownerId, figureId), healthChange, attack);
-
-    healthChange = 0;
-  }
-
-  String getOwnerId() {
-    String ownerId = "";
-
-    if (widget.monsterId != null) {
-      ownerId = widget.monsterId!;
-    } else if (widget.characterId != null) {
-      ownerId = widget.characterId!;
-    }
-
-    return ownerId;
-  }
-
-  void saveConditionToGameState(Condition condition, bool activate) {
-    var figureId = widget.figureId;
-    var ownerId = getOwnerId();
-
-    if (activate) {
-      _gameState.action(AddConditionCommand(condition, figureId, ownerId));
-    } else {
-      _gameState.action(RemoveConditionCommand(condition, figureId, ownerId));
-    }
-  }
-
-  bool isConditionActive(Condition condition, FigureState figure, bool useLocal) {
-    var conditionsSource = useLocal ?
-      conditions.value :
-      getConditionsFromGameState();
-
-    for (var item in conditionsSource) {
+    for (var item in conditions.value) {
       if (item == condition) {
         return true;
       }
@@ -315,6 +230,8 @@ class StatusMenuState extends State<StatusMenu> {
 
   Widget buildConditionButton(Condition condition, String figureId,
       String ownerId, List<String> immunities, double scale) {
+    var actionData = widget.actionData;
+
     bool enabled = true;
     String suffix = "";
     if (GameMethods.isFrosthavenStyle(null)) {
@@ -342,7 +259,7 @@ class StatusMenuState extends State<StatusMenu> {
     }
     // enabled = false;
     return ValueListenableBuilder<List<Condition>>(
-        valueListenable: conditions,
+        valueListenable: actionData.conditions,
         builder: (context, value, child) {
           Color color = Colors.transparent;
           FigureState? figure = GameMethods.getFigure(ownerId, figureId);
@@ -357,7 +274,7 @@ class StatusMenuState extends State<StatusMenu> {
             }
           }
 
-          bool isActive = isConditionActive(condition, figure, true);
+          bool isActive = isConditionActive(condition, figure);
           if (isActive) {
             color =
                 getIt<Settings>().darkMode.value ? Colors.white : Colors.black;
@@ -444,7 +361,7 @@ class StatusMenuState extends State<StatusMenu> {
                 //iconSize: 30,
                 onPressed: enabled
                     ? () {
-                        var newConditions = [...conditions.value];
+                        var newConditions = [...actionData.conditions.value];
 
                         if (!isActive) {
                           newConditions.add(condition);
@@ -452,7 +369,7 @@ class StatusMenuState extends State<StatusMenu> {
                           newConditions.remove(condition);
                         }
 
-                        conditions.value = newConditions;
+                        actionData.conditions.value = newConditions;
                       }
                     : null,
               ));
@@ -547,7 +464,7 @@ class StatusMenuState extends State<StatusMenu> {
 
     return Container(
         width: 340 * scale,
-        height: 280 * scale +
+        height: 220 * scale +
             30 * scale +
             ((hasIncarnate && widget.monsterId != null && !isSummon)
                 ? 40 * scale
@@ -650,7 +567,7 @@ class StatusMenuState extends State<StatusMenu> {
                           "assets/images/abilities/heal.png",
                           false,
                           Colors.red, callback: (int change) {
-                        healthChange += change;
+                          widget.healthChange.value += change;
                       }, figureId: figureId, ownerId: ownerId, scale: scale),
                       const SizedBox(height: 2),
                       hasXp
@@ -889,28 +806,6 @@ class StatusMenuState extends State<StatusMenu> {
               ],
             ),
           ]),
-          SizedBox(height: 10 * scale, width: 50 * scale),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  foregroundColor: Colors.black,
-                  disabledBackgroundColor: Colors.blueGrey,
-                  fixedSize: Size(80 * scale, 25 * scale),
-                  backgroundColor: Colors.white,
-                  elevation: 4,
-                ),
-                onPressed: saveChanges,
-                child: Text(
-                  "Save",
-                  style: getTitleTextStyle(scale),
-                  maxLines: 1,
-                ),
-              )
-            ],
-          )
         ]));
   }
 }

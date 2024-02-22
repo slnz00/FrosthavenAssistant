@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.dart';
 import 'package:frosthaven_assistant/Layout/condition_icon.dart';
 import 'package:frosthaven_assistant/Layout/health_wheel_controller.dart';
-import 'package:frosthaven_assistant/Layout/menus/action_type_menu.dart';
+import 'package:frosthaven_assistant/Layout/menus/action_menu.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 import '../Resource/color_matrices.dart';
@@ -293,7 +293,7 @@ class MonsterBoxState extends State<MonsterBox> {
           if (!widget.blockInput) {
             openDialog(
               context,
-              ActionTypeMenu(
+              ActionMenu(
                   figureId: figureId,
                   monsterId: getMonsterId(),
                   characterId: characterId
