@@ -35,7 +35,7 @@ PreferredSize createTopBar() {
                 padding:
                     EdgeInsets.only(left: 2.0 * settings.userScalingBars.value),
                 child: Text(
-                  "X-haven\nAssistant",
+                  "X-haven+",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16 * settings.userScalingBars.value,

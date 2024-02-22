@@ -64,230 +64,241 @@ bool redoEnabled() {
       gameState.commandDescriptions.length - 1;
 }
 
-Drawer createMainMenu(BuildContext context) {
+Container createMainMenu(BuildContext context) {
   GameState gameState = getIt<GameState>();
   Settings settings = getIt<Settings>();
 
-  return Drawer(
-    child: ValueListenableBuilder<int>(
-      valueListenable: gameState.commandIndex,
-      builder: (context, value, child) {
-        String undoText = "Undo";
-        if (settings.client.value != ClientState.connected &&
-            gameState.commandIndex.value >= 0 &&
-            gameState.commandDescriptions.length >
-                gameState.commandIndex.value) {
-          undoText +=
-              ": ${gameState.commandDescriptions[gameState.commandIndex.value]}";
-        }
-        String redoText = "Redo";
-        if (settings.client.value != ClientState.connected &&
-            gameState.commandIndex.value <
-                gameState.commandDescriptions.length - 1) {
-          redoText +=
-              ": ${gameState.commandDescriptions[gameState.commandIndex.value + 1]}";
-        }
+  return Container(
+    width: 260,
+    child: Drawer(
+      child: ValueListenableBuilder<int>(
+        valueListenable: gameState.commandIndex,
+        builder: (context, value, child) {
+          String undoText = "Undo";
+          if (settings.client.value != ClientState.connected &&
+              gameState.commandIndex.value >= 0 &&
+              gameState.commandDescriptions.length >
+                  gameState.commandIndex.value) {
+            undoText +=
+                ": ${gameState.commandDescriptions[gameState.commandIndex.value]}";
+          }
+          String redoText = "Redo";
+          if (settings.client.value != ClientState.connected &&
+              gameState.commandIndex.value <
+                  gameState.commandDescriptions.length - 1) {
+            redoText +=
+                ": ${gameState.commandDescriptions[gameState.commandIndex.value + 1]}";
+          }
 
-        return ListView(
-// Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                padding: EdgeInsets.zero,
-                margin: EdgeInsets.zero,
-                decoration: BoxDecoration(
-                    color: Colors.blue,
-                    image: DecorationImage(
-                        fit: BoxFit.fitWidth,
-                        image: AssetImage("assets/images/icon.png"))),
-                child: Stack(
-                  children: [
-                    Positioned(
-                        right: 6, bottom: 0, child: Text("Version 1.8.7"))
-                  ],
+          return ListView(
+    // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: [
+                const DrawerHeader(
+                  padding: EdgeInsets.zero,
+                  margin: EdgeInsets.zero,
+                  decoration: BoxDecoration(
+                      color: Colors.blue,
+                      image: DecorationImage(
+                          fit: BoxFit.fitWidth,
+                          image: AssetImage("assets/images/header.png"))),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: 7,
+                        bottom: 3,
+                        child: Text(
+                          "V 1.9.0",
+                          style: TextStyle(
+                            fontSize: 16
+                          )
+                        )
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              ListTile(
-                title: Text(undoText),
-                enabled: undoEnabled(),
-                onTap: () {
-                  gameState.undo();
-                  //Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(redoText),
-                enabled: redoEnabled(),
-                onTap: () {
-                  gameState.redo();
-                  //Navigator.pop(context);
-                },
-              ),
-              const Divider(),
-              ListTile(
-                      title: const Text('Set Scenario'),
-                      onTap: () {
-                        Navigator.pop(context);
-                        openDialog(context, const SelectScenarioMenu());
-                      },
-                    ),
-              ListTile(
-                title: const Text('Add Section'),
-                enabled: true,
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const AddSectionMenu());
-                },
-              ),
-              const Divider(),
-              ListTile(
-                title: const Text('Add Character'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const AddCharacterMenu());
-                },
-              ),
-              ListTile(
-                title: const Text('Remove Characters'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const RemoveCharacterMenu());
-                },
-              ),
-              ListTile(
-                title: const Text('Set Level'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const SetLevelMenu());
-                },
-              ),
-              if(gameState.currentCampaign.value == "Frosthaven")
                 ListTile(
-                  title: const Text('Loot Deck Menu'),
+                  title: Text(undoText),
+                  enabled: undoEnabled(),
                   onTap: () {
-                    Navigator.pop(context);
-                    openDialog(context, const LootCardMenu());
+                    gameState.undo();
+                    //Navigator.pop(context);
                   },
                 ),
-              const Divider(),
-              ListTile(
-                title: const Text('Add Monsters'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const AddMonsterMenu());
-                },
-              ),
-              ListTile(
-                title: const Text('Remove Monsters'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const RemoveMonsterMenu());
-                },
-              ),
-              if (gameState.showAllyDeck.value == false && !GameMethods.shouldShowAlliesDeck() && settings.showAmdDeck.value)
                 ListTile(
-                  title: const Text('Show Ally Attack Modifier Deck'),
+                  title: Text(redoText),
+                  enabled: redoEnabled(),
                   onTap: () {
-                    Navigator.pop(context);
-
-                    gameState.action(ShowAllyDeckCommand());
-                    getIt<GameState>().updateAllUI();
+                    gameState.redo();
+                    //Navigator.pop(context);
                   },
                 ),
-              const Divider(),
-              ListTile(
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.pop(context);
-                  openDialog(context, const SettingsMenu());
-                },
-              ),
-              const Divider(),
-              if (!settings.lastKnownConnection.endsWith('?'))
-                ValueListenableBuilder<ClientState>(
-                    valueListenable: settings.client,
+                const Divider(),
+                ListTile(
+                        title: const Text('Set Scenario'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          openDialog(context, const SelectScenarioMenu());
+                        },
+                      ),
+                ListTile(
+                  title: const Text('Add Section'),
+                  enabled: true,
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const AddSectionMenu());
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  title: const Text('Add Character'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const AddCharacterMenu());
+                  },
+                ),
+                ListTile(
+                  title: const Text('Remove Characters'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const RemoveCharacterMenu());
+                  },
+                ),
+                ListTile(
+                  title: const Text('Set Level'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const SetLevelMenu());
+                  },
+                ),
+                if(gameState.currentCampaign.value == "Frosthaven")
+                  ListTile(
+                    title: const Text('Loot Deck Menu'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      openDialog(context, const LootCardMenu());
+                    },
+                  ),
+                const Divider(),
+                ListTile(
+                  title: const Text('Add Monsters'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const AddMonsterMenu());
+                  },
+                ),
+                ListTile(
+                  title: const Text('Remove Monsters'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const RemoveMonsterMenu());
+                  },
+                ),
+                if (gameState.showAllyDeck.value == false && !GameMethods.shouldShowAlliesDeck() && settings.showAmdDeck.value)
+                  ListTile(
+                    title: const Text('Show Ally Attack Modifier Deck'),
+                    onTap: () {
+                      Navigator.pop(context);
+
+                      gameState.action(ShowAllyDeckCommand());
+                      getIt<GameState>().updateAllUI();
+                    },
+                  ),
+                const Divider(),
+                ListTile(
+                  title: const Text('Settings'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    openDialog(context, const SettingsMenu());
+                  },
+                ),
+                const Divider(),
+                if (!settings.lastKnownConnection.endsWith('?'))
+                  ValueListenableBuilder<ClientState>(
+                      valueListenable: settings.client,
+                      builder: (context, value, child) {
+                        bool connected = false;
+                        String connectionText =
+                            "Connect as Client (${settings.lastKnownConnection})";
+                        if (settings.client.value == ClientState.connected) {
+                          connected = true;
+                          connectionText = "Connected as Client";
+                        }
+                        if (settings.client.value == ClientState.connecting) {
+                          connectionText = "Connecting...";
+                        }
+                        return CheckboxListTile(
+                            enabled: settings.server.value == false &&
+                                settings.client.value != ClientState.connecting,
+                            title: Text(connectionText),
+                            value: connected,
+                            onChanged: (bool? value) {
+                              if (settings.client.value !=
+                                  ClientState.connected) {
+                                settings.client.value = ClientState.connecting;
+                                getIt<Client>()
+                                    .connect(settings.lastKnownConnection)
+                                    .then((value) => null);
+                                settings.saveToDisk();
+                              } else {
+                                getIt<Client>().disconnect(null);
+                              }
+                            });
+                      }),
+                ValueListenableBuilder<bool>(
+                    valueListenable: settings.server,
                     builder: (context, value, child) {
-                      bool connected = false;
-                      String connectionText =
-                          "Connect as Client (${settings.lastKnownConnection})";
-                      if (settings.client.value == ClientState.connected) {
-                        connected = true;
-                        connectionText = "Connected as Client";
-                      }
-                      if (settings.client.value == ClientState.connecting) {
-                        connectionText = "Connecting...";
-                      }
+                      String hostIPText =
+                          'Start Host Server ${settings.lastKnownHostIP}';
                       return CheckboxListTile(
-                          enabled: settings.server.value == false &&
-                              settings.client.value != ClientState.connecting,
-                          title: Text(connectionText),
-                          value: connected,
+                          title: Text(settings.server.value
+                              ? "Stop Server ${settings.lastKnownHostIP}"
+                              : hostIPText),
+                          value: settings.server.value,
                           onChanged: (bool? value) {
-                            if (settings.client.value !=
-                                ClientState.connected) {
-                              settings.client.value = ClientState.connecting;
-                              getIt<Client>()
-                                  .connect(settings.lastKnownConnection)
-                                  .then((value) => null);
-                              settings.saveToDisk();
+                            settings.lastKnownHostIP =
+                                "(${getIt<Network>().networkInfo.wifiIPv4.value})";
+                            settings.saveToDisk();
+                            //setState(() {
+                            //do the thing
+                            if (!settings.server.value) {
+                              getIt<Network>().server.startServer();
                             } else {
-                              getIt<Client>().disconnect(null);
+                              //close server?
+                              getIt<Network>().server.stopServer(null);
                             }
                           });
+                      //});
                     }),
-              ValueListenableBuilder<bool>(
-                  valueListenable: settings.server,
-                  builder: (context, value, child) {
-                    String hostIPText =
-                        'Start Host Server ${settings.lastKnownHostIP}';
-                    return CheckboxListTile(
-                        title: Text(settings.server.value
-                            ? "Stop Server ${settings.lastKnownHostIP}"
-                            : hostIPText),
-                        value: settings.server.value,
-                        onChanged: (bool? value) {
-                          settings.lastKnownHostIP =
-                              "(${getIt<Network>().networkInfo.wifiIPv4.value})";
-                          settings.saveToDisk();
-                          //setState(() {
-                          //do the thing
-                          if (!settings.server.value) {
-                            getIt<Network>().server.startServer();
-                          } else {
-                            //close server?
-                            getIt<Network>().server.stopServer(null);
-                          }
-                        });
-                    //});
-                  }),
-              //checkbox client + host + port
-              //checkbox server - show ip, port
-              const Divider(),
-              ListTile(
-                title: const Text('Documentation'),
-                onTap: () {
-                  final Uri toLaunch = Uri(
-                      scheme: 'https',
-                      host: 'www.github.com',
-                      path: 'Tarmslitaren/FrosthavenAssistant',
-                      fragment: "#readme");
-                  launchUrlInBrowser(toLaunch);
-                  Navigator.pop(context);
-                },
-              ),
-              Platform.isMacOS || Platform.isLinux || Platform.isWindows
-                  ? ListTile(
-                      title: const Text('Exit'),
-                      enabled: true,
-                      onTap: () {
-                        Navigator.pop(context);
-                        gameState.save();
-                        windowManager.close();
-                      },
-                    )
-                  : Container(),
-            ]);
-      },
+                //checkbox client + host + port
+                //checkbox server - show ip, port
+                const Divider(),
+                ListTile(
+                  title: const Text('Documentation'),
+                  onTap: () {
+                    final Uri toLaunch = Uri(
+                        scheme: 'https',
+                        host: 'www.github.com',
+                        path: 'Tarmslitaren/FrosthavenAssistant',
+                        fragment: "#readme");
+                    launchUrlInBrowser(toLaunch);
+                    Navigator.pop(context);
+                  },
+                ),
+                Platform.isMacOS || Platform.isLinux || Platform.isWindows
+                    ? ListTile(
+                        title: const Text('Exit'),
+                        enabled: true,
+                        onTap: () {
+                          Navigator.pop(context);
+                          gameState.save();
+                          windowManager.close();
+                        },
+                      )
+                    : Container(),
+              ]);
+        },
+      ),
     ),
   );
 }
