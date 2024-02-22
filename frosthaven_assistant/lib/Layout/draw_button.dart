@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:frosthaven_assistant/Layout/main_list.dart';
 
 import '../Resource/commands/draw_command.dart';
 import '../Resource/commands/next_round_command.dart';
 import '../Resource/enums.dart';
+import '../Resource/global_keys.dart';
 import '../Resource/state/game_state.dart';
 import '../Resource/settings.dart';
 import '../Resource/ui_utils.dart';
@@ -29,15 +31,22 @@ class DrawButtonState extends State<DrawButton> {
     if (_gameState.roundState.value == RoundState.chooseInitiative) {
       if (GameMethods.canDraw()) {
         _gameState.action(DrawCommand());
-      } else {
-        //show toast
-        String text =
-            "Player Initiative numbers must be set (under the initiative marker to the right of the character symbol)";
-        if (_gameState.currentList.isEmpty) {
-          text = "Add characters first.";
-        }
-        //TODO: show other message if no characters or no monsters
-        showToast(context, text);
+        return;
+      }
+
+      if (_gameState.currentList.isEmpty) {
+        showToast(context, "Add characters first.");
+        return;
+      }
+
+      showToast(
+        context,
+        "Player Initiative numbers must be set (under the initiative marker to the right of the character symbol)"
+      );
+
+      var mainListState = GlobalKeys.mainList.currentState;
+      if (mainListState is MainListState) {
+        mainListState.focusNextEmptyInitInput();
       }
     } else {
       _gameState.action(NextRoundCommand());

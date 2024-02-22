@@ -8,6 +8,7 @@ import 'package:frosthaven_assistant/Model/campaign.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/Resource/scaling.dart';
 import 'package:frosthaven_assistant/Resource/settings.dart';
+import 'package:frosthaven_assistant/Resource/global_keys.dart';
 
 import 'package:reorderables/reorderables.dart';
 import '../Resource/commands/reorder_list_command.dart';
@@ -166,7 +167,6 @@ class ListAnimationState extends State<ListAnimation> {
 class MainListState extends State<MainList> {
   final GameState _gameState = getIt<GameState>();
   final GameData _gameData = getIt<GameData>();
-  final Map<String, GlobalKey> globalKeyStore = {};
   List<Widget> _generatedList = [];
   static final scrollController = ScrollController();
 
@@ -301,16 +301,18 @@ class MainListState extends State<MainList> {
   }
 
   GlobalKey getGlobalKey (ListItemData data) {
-    if (!globalKeyStore.containsKey(data.id)) {
-      globalKeyStore[data.id] = GlobalKey();
+    var keys = GlobalKeys.mainListItems;
+
+    if (!keys.containsKey(data.id)) {
+      keys[data.id] = GlobalKey();
     }
 
-    return globalKeyStore[data.id]!;
+    return keys[data.id]!;
   }
 
   void focusNextEmptyInitInput () {
     for (var data in _gameState.currentList) {
-      var globalKey = globalKeyStore[data.id];
+      var globalKey = GlobalKeys.mainListItems[data.id];
       var state = globalKey?.currentState;
 
       if (state is CharacterWidgetState) {

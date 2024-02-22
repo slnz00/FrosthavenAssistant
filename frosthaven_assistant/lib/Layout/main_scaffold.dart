@@ -6,6 +6,7 @@ import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 
 import '../Model/campaign.dart';
 import '../Resource/game_data.dart';
+import '../Resource/global_keys.dart';
 import '../Resource/scaling.dart';
 import '../Resource/settings.dart';
 import '../Resource/ui_utils.dart';
@@ -33,7 +34,7 @@ Widget createMainScaffold(BuildContext context) {
               drawer: createMainMenu(context),
               body: Stack(
                 children: [
-                  const MainList(),
+                  MainList(key: GlobalKeys.mainList),
                   ValueListenableBuilder<String>(
                       valueListenable: getIt<GameState>().toastMessage,
                       builder: (context, value, child) {
