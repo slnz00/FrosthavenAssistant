@@ -8,7 +8,7 @@ import '../services/service_locator.dart';
 class CounterButton extends StatefulWidget {
   final ValueListenable<int> notifier;
   final ChangeStatCommand? command;
-  final Function(int)? callback;
+  final bool Function(int)? callback;
   final int maxValue;
   final String image;
   final String figureId;
@@ -56,8 +56,10 @@ class CounterButtonState extends State<CounterButton> {
                   widget.command!.setChange(-1);
                 }
                 if (widget.callback != null) {
-                  widget.callback!(-1);
-                  totalChangeValue.value--;
+                  if (widget.callback!(-1)) {
+                    totalChangeValue.value--;
+                  }
+
                   return;
                 }
 
@@ -130,8 +132,10 @@ class CounterButtonState extends State<CounterButton> {
                 widget.command!.setChange(1);
               }
               if (widget.callback != null) {
-                widget.callback!(1);
-                totalChangeValue.value++;
+                if (widget.callback!(1)) {
+                  totalChangeValue.value++;
+                }
+
                 return;
               }
 

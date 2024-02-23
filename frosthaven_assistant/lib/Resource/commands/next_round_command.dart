@@ -33,7 +33,7 @@ class NextRoundCommand extends Command {
     }
   }
 
-  void processUnhandledEffects () {
+  void applyUnhandledEffects () {
     for (var data in _gameState.currentList) {
       if (data.turnState == TurnsState.done) {
         continue;
@@ -52,7 +52,7 @@ class NextRoundCommand extends Command {
 
   @override
   void execute() {
-    processUnhandledEffects();
+    applyUnhandledEffects();
 
     for (var item in _gameState.currentList) {
       if (item is Character) {

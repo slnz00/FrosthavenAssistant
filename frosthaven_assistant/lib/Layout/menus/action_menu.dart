@@ -9,19 +9,30 @@ import '../../Resource/state/game_state.dart';
 import '../../Resource/ui_utils.dart';
 import '../../services/service_locator.dart';
 
+class ActionStats {
+  final ValueNotifier<int> pierceAmount = ValueNotifier(0);
+
+  final bool attack;
+
+  ActionStats({required this.attack});
+}
+
 class ActionData {
   final GameState _gameState = getIt<GameState>();
+
+  late final ActionStats stats;
 
   final ValueNotifier<List<Condition>> conditions = ValueNotifier([]);
   final ValueNotifier<int> healthChange = ValueNotifier(0);
 
-  final bool attack;
+  bool get attack => stats.attack;
+
   final String figureId;
   final String? monsterId;
   final String? characterId;
   late final String ownerId;
 
-  ActionData({ required this.figureId, this.monsterId, this.characterId, required this.attack }) {
+  ActionData({ required this.figureId, this.monsterId, this.characterId, required bool attack }) {
     var localOwnerId = "";
 
     if (monsterId != null) {
@@ -32,6 +43,7 @@ class ActionData {
 
     ownerId = localOwnerId;
     conditions.value = _getConditionsFromGameState();
+    stats = ActionStats(attack: attack);
   }
 
   void process () {
@@ -71,7 +83,7 @@ class ActionData {
       changeValue *= -1;
     }
 
-    EffectHandler.handleHealthChange(FigureData(ownerId, figureId), changeValue, attack);
+    EffectHandler.handleHealthChange(FigureData(ownerId, figureId), changeValue, stats);
 
     healthChange.value = 0;
   }

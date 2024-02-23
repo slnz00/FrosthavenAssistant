@@ -32,6 +32,8 @@ class StatusMenu extends StatefulWidget {
 
   ValueNotifier<List<Condition>> get conditions => actionData.conditions;
   ValueNotifier<int> get healthChange => actionData.healthChange;
+  ActionStats get actionStats => actionData.stats;
+
   bool get attack => actionData.attack;
   String get figureId => actionData.figureId;
   String? get monsterId => actionData.monsterId;
@@ -98,7 +100,7 @@ class StatusMenuState extends State<StatusMenu> {
   }
 
   bool isConditionActive(Condition condition, FigureState figure) {
-    var conditions = widget.actionData.conditions;
+    var conditions = widget.conditions;
 
     for (var item in conditions.value) {
       if (item == condition) {
@@ -166,8 +168,7 @@ class StatusMenuState extends State<StatusMenu> {
             onPressed: () {
               if (notifier.value < maxValue) {
                 _gameState.action(ChangeChillCommand(1, figureId, ownerId));
-                _gameState.action(
-                    AddConditionCommand(Condition.chill, figureId, ownerId));
+                _gameState.action(AddConditionCommand(Condition.chill, figureId, ownerId));
               }
               //increment
             },
@@ -466,6 +467,9 @@ class StatusMenuState extends State<StatusMenu> {
         width: 340 * scale,
         height: 220 * scale +
             30 * scale +
+            ((widget.attack)
+                ? 40 * scale
+                : 0) +
             ((hasIncarnate && widget.monsterId != null && !isSummon)
                 ? 40 * scale
                 : 0),
@@ -566,9 +570,11 @@ class StatusMenuState extends State<StatusMenu> {
                           figure.maxHealth.value,
                           "assets/images/abilities/heal.png",
                           false,
-                          Colors.red, callback: (int change) {
-                          widget.healthChange.value += change;
-                      }, figureId: figureId, ownerId: ownerId, scale: scale),
+                          Colors.red,
+                          callback: (int change) {
+                            widget.healthChange.value += change;
+                            return true;
+                          }, figureId: figureId, ownerId: ownerId, scale: scale),
                       const SizedBox(height: 2),
                       hasXp
                           ? CounterButton(
@@ -583,6 +589,27 @@ class StatusMenuState extends State<StatusMenu> {
                               scale: scale)
                           : Container(),
                       SizedBox(height: hasXp ? 2 : 0),
+                      widget.attack
+                          ? CounterButton(
+                          widget.actionStats.pierceAmount,
+                          null,
+                          999,
+                          "assets/images/abilities/pierce.png",
+                          true,
+                          Colors.white,
+                          callback: (int change) {
+                            var pierceAmount = widget.actionStats.pierceAmount.value;
+
+                            if (pierceAmount + change < 0) {
+                              return false;
+                            }
+
+                            widget.actionStats.pierceAmount.value += change;
+                            return true;
+                          },
+                          figureId: figureId, ownerId: ownerId, scale: scale)
+                          : Container(),
+                      SizedBox(height: widget.attack ? 2 : 0),
                       SizedBox(
                           height:
                               widget.characterId != null || isSummon ? 2 : 0),
