@@ -3,6 +3,7 @@ import 'package:frosthaven_assistant/Model/scenario.dart';
 
 import '../../Layout/main_list.dart';
 import '../../services/service_locator.dart';
+import '../effect_handler.dart';
 import '../enums.dart';
 import '../game_data.dart';
 import '../settings.dart';
@@ -32,8 +33,27 @@ class NextRoundCommand extends Command {
     }
   }
 
+  void processUnhandledEffects () {
+    for (var data in _gameState.currentList) {
+      if (data.turnState == TurnsState.done) {
+        continue;
+      }
+
+      if (data is Monster) {
+        EffectHandler.handleMonsterRoundStart(data);
+        EffectHandler.handleMonsterRoundEnd(data);
+      }
+      if (data is Character) {
+        EffectHandler.handleCharacterRoundStart(data);
+        EffectHandler.handleCharacterRoundEnd(data);
+      }
+    }
+  }
+
   @override
   void execute() {
+    processUnhandledEffects();
+
     for (var item in _gameState.currentList) {
       if (item is Character) {
         item.nextRound(stateAccess);

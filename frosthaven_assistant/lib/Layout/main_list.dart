@@ -310,7 +310,13 @@ class MainListState extends State<MainList> {
     return keys[data.id]!;
   }
 
-  void focusNextEmptyInitInput () {
+  void focusNextEmptyInitiative () {
+    Settings settings = getIt<Settings>();
+
+    if (!settings.focusEmptyInitiatives.value) {
+      return;
+    }
+
     for (var data in _gameState.currentList) {
       var globalKey = GlobalKeys.mainListItems[data.id];
       var state = globalKey?.currentState;
@@ -391,7 +397,7 @@ class MainListState extends State<MainList> {
 
         var itemWidget = Item(
           onInitNumberProvided: () {
-            focusNextEmptyInitInput();
+            focusNextEmptyInitiative();
           },
           key: Key(id),
           globalKey: globalKey,

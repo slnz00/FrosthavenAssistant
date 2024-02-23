@@ -46,7 +46,7 @@ class DrawButtonState extends State<DrawButton> {
 
       var mainListState = GlobalKeys.mainList.currentState;
       if (mainListState is MainListState) {
-        mainListState.focusNextEmptyInitInput();
+        mainListState.focusNextEmptyInitiative();
       }
     } else {
       _gameState.action(NextRoundCommand());
