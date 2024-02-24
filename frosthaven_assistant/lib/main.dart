@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:frosthaven_assistant/Layout/theme.dart';
 import 'package:frosthaven_assistant/Resource/settings.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
@@ -21,8 +22,8 @@ void _enablePlatformOverrideForDesktop() {
 }
 
 void main() {
-
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterDisplayMode.setHighRefreshRate();
   setupGetIt();
 
   _enablePlatformOverrideForDesktop();

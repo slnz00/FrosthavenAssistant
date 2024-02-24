@@ -26,7 +26,7 @@ class Settings {
   final noStandees = ValueNotifier<bool>(false);
   final randomStandees = ValueNotifier<bool>(false);
   final noCalculation = ValueNotifier<bool>(false);
-  final expireConditions = ValueNotifier<bool>(false);
+  final expireConditions = ValueNotifier<bool>(true);
   final hideLootDeck = ValueNotifier<bool>(false);
   final shimmer = ValueNotifier<bool>(true);
   final showScenarioNames = ValueNotifier<bool>(true);
