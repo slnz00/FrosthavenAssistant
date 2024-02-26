@@ -20,7 +20,7 @@ import 'menus/add_summon_menu.dart';
 import 'monster_box.dart';
 
 class CharacterWidget extends StatefulWidget {
-  static final Set<String> localCharacterInitChanges =
+  static final Map<String, int> localCharacterInitChanges =
       {}; //if it's been changed locally then it's not hidden
   final String characterId;
   final int? initPreset;
@@ -61,7 +61,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
               _initTextFieldController.value.text != "??") {
             int? init = int.tryParse(_initTextFieldController.value.text);
             if (init != null && init != 0) {
-              CharacterWidget.localCharacterInitChanges.add(character.id);
+              CharacterWidget.localCharacterInitChanges[character.id] = init;
               _gameState.action(SetInitCommand(character.id, init));
             }
           }
@@ -194,10 +194,12 @@ class CharacterWidgetState extends State<CharacterWidget> {
       ValueListenableBuilder<int>(
           valueListenable: character.characterState.initiative,
           builder: (context, value, child) {
+            var init = character.characterState.initiative.value;
+
             bool secret = (getIt<Settings>().server.value ||
                     getIt<Settings>().client.value == ClientState.connected) &&
-                (!CharacterWidget.localCharacterInitChanges
-                    .contains(character.id));
+                (CharacterWidget.localCharacterInitChanges[character.id] != init);
+
             if (_initTextFieldController.text !=
                     character.characterState.initiative.value.toString() &&
                 character.characterState.initiative.value != 0 &&
@@ -209,10 +211,13 @@ class CharacterWidgetState extends State<CharacterWidget> {
               } else {
                 _initTextFieldController.text =
                     character.characterState.initiative.value.toString();
+
+                CharacterWidget.localCharacterInitChanges.remove(character.id);
               }
             }
             if (_gameState.roundState.value == RoundState.playTurns &&
                 isCharacter) {
+              CharacterWidget.localCharacterInitChanges.clear();
               _initTextFieldController.clear();
             }
 
@@ -244,7 +249,10 @@ class CharacterWidgetState extends State<CharacterWidget> {
                       //scrollPadding: EdgeInsets.zero,
                       onTap: () {
                         //clear on enter focus
-                        _initTextFieldController.clear();
+                        if (_initTextFieldController.text != "??") {
+                          _initTextFieldController.clear();
+                        }
+
                         if (getIt<Settings>().softNumpadInput.value) {
                           openDialog(
                               context,
@@ -588,26 +596,55 @@ class CharacterWidgetState extends State<CharacterWidget> {
             ),
             isCharacter
                 ? Positioned(
-                    top: 10 * scale,
-                    left: 314 * scale,
+                top: 10 * scale,
+                left: 314 * scale,
+                child: Row(
+                  children: [
+                    Image(
+                      height: 16 * scale,
+                      color: Colors.blue,
+                      colorBlendMode: BlendMode.modulate,
+                      image: const AssetImage("assets/images/psd/xp.png"),
+                    ),
+                    ValueListenableBuilder<int>(
+                        valueListenable: character.characterState.xp,
+                        builder: (context, value, child) {
+                          return Text(
+                            character.characterState.xp.value.toString(),
+                            style: TextStyle(
+                                fontFamily: frosthavenStyle
+                                    ? 'GermaniaOne'
+                                    : 'Pirata',
+                                color: Colors.blue,
+                                fontSize: 14 * scale,
+                                shadows: [shadow]),
+                          );
+                        }),
+                  ],
+                ))
+                : Container(),
+            isCharacter
+                ? Positioned(
+                    top: 20 * scale,
+                    left: 290 * scale,
                     child: Row(
                       children: [
                         Image(
                           height: 16 * scale,
-                          color: Colors.blue,
+                          color: Colors.white,
                           colorBlendMode: BlendMode.modulate,
-                          image: const AssetImage("assets/images/psd/xp.png"),
+                          image: const AssetImage("assets/images/abilities/shield_fh.png"),
                         ),
-                        ValueListenableBuilder<int>(
-                            valueListenable: character.characterState.xp,
+                        ValueListenableBuilder<dynamic>(
+                            valueListenable: _gameState.characterShields,
                             builder: (context, value, child) {
                               return Text(
-                                character.characterState.xp.value.toString(),
+                                (_gameState.characterShields.value[character.id] ?? 0).toString(),
                                 style: TextStyle(
                                     fontFamily: frosthavenStyle
                                         ? 'GermaniaOne'
                                         : 'Pirata',
-                                    color: Colors.blue,
+                                    color: Colors.white,
                                     fontSize: 14 * scale,
                                     shadows: [shadow]),
                               );

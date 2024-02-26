@@ -8,7 +8,7 @@ import 'package:frosthaven_assistant/services/network/network.dart';
 import '../../Resource/state/game_state.dart';
 import '../../Resource/settings.dart';
 import '../service_locator.dart';
-import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode, utf8;
 
 import 'connection.dart';
 
@@ -107,7 +107,16 @@ class Client {
           _network.networkMessage.value =
               "Your state was not up to date, try again.";
         }
-        if (message.startsWith("Index:")) {
+
+        if (message.startsWith("SyncCharacterShields:")) {
+          String characterShieldsJson = message.substring("SyncCharacterShields:".length);
+
+          _gameState.setCharacterShieldsFromJson(characterShieldsJson);
+        } else if (message.startsWith("SyncCharacterRoundFlags:")) {
+          String characterRoundFlagsJson = message.substring("SyncCharacterRoundFlags:".length);
+
+          _gameState.setCharacterRoundFlagsFromJson(characterRoundFlagsJson);
+        } else if (message.startsWith("Index:")) {
           List<String> messageParts1 = message.split("Description:");
           String indexString = messageParts1[0].substring("Index:".length);
           List<String> messageParts2 = messageParts1[1].split("GameState:");

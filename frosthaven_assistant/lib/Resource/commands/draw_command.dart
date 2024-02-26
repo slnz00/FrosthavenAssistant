@@ -21,10 +21,10 @@ class DrawCommand extends Command {
       data.setTurnState(TurnsState.current);
 
       if (data is Monster) {
-        EffectHandler.handleMonsterRoundStart(data);
+        EffectHandler.handleRoundStart(data);
       }
       if (data is Character) {
-        EffectHandler.handleCharacterRoundStart(data);
+        EffectHandler.handleRoundStart(data);
       }
     }
 

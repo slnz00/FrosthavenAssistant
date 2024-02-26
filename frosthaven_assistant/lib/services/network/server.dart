@@ -133,7 +133,18 @@ class Server {
           for (var message in messages) {
             if (message.endsWith("[EOM]")) {
               message = message.substring(0, message.length - "[EOM]".length);
-              if (message.startsWith("Index:")) {
+
+              if (message.startsWith("SyncCharacterShields:")) {
+                String characterShieldsJson = message.substring("SyncCharacterShields:".length);
+
+                _gameState.setCharacterShieldsFromJson(characterShieldsJson);
+
+                sendToOthers(message, client);
+              } else if (message.startsWith("SyncCharacterRoundFlags:")) {
+                String characterRoundFlagsJson = message.substring("SyncCharacterRoundFlags:".length);
+
+                _gameState.setCharacterRoundFlagsFromJson(characterRoundFlagsJson);
+              } else if (message.startsWith("Index:")) {
                 log('Server Receive data');
                 List<String> messageParts1 = message.split("Description:");
                 String indexString =
@@ -204,11 +215,16 @@ class Server {
                       print("?");
                     }
                   }
+
                   log(
                       'Server sends init response: "S3nD:Index:${_gameState.commandIndex.value}Description:$commandDescription');
                   sendToOnly(
                       "Index:${_gameState.commandIndex.value}Description:${commandDescription}GameState:${_gameState.gameSaveStates.last!.getState()}",
                       client);
+
+                  // Sync custom game states:
+                  _gameState.syncCharacterShields();
+                  _gameState.syncCharacterRoundFlags();
                 }
               } else if (message.startsWith("undo")) {
                 log('Server Receive undo command');

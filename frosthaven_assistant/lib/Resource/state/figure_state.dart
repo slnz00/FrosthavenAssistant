@@ -17,9 +17,6 @@ class FigureState {
   final _chill = ValueNotifier<int>(0);
   setChill(_StateModifier stateModifier, int value) {_chill.value = value;}
 
-  final startedRound = ValueNotifier<int>(0);
-  final endedRound = ValueNotifier<int>(0);
-
   //TODO:  no valuenotifier for lists - make non mutable version
   final conditions = ValueNotifier<List<Condition>>([]);
 

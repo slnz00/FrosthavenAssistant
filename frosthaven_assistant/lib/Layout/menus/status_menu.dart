@@ -93,10 +93,14 @@ class StatusMenu extends StatefulWidget {
 class StatusMenuState extends State<StatusMenu> {
   final GameState _gameState = getIt<GameState>();
 
+  bool isObjective = false;
+
   @override
   initState() {
     // at the beginning, all items are shown
     super.initState();
+
+    isObjective = ["Objective", "Escort"].contains(widget.characterId);
   }
 
   bool isConditionActive(Condition condition, FigureState figure) {
@@ -589,7 +593,7 @@ class StatusMenuState extends State<StatusMenu> {
                               scale: scale)
                           : Container(),
                       SizedBox(height: hasXp ? 2 : 0),
-                      widget.attack
+                      widget.attack && !isObjective
                           ? CounterButton(
                           widget.actionStats.pierceAmount,
                           null,
@@ -610,6 +614,56 @@ class StatusMenuState extends State<StatusMenu> {
                           figureId: figureId, ownerId: ownerId, scale: scale)
                           : Container(),
                       SizedBox(height: widget.attack ? 2 : 0),
+                      widget.characterId != null && !isObjective
+                          ? CounterButton(
+                          widget.attack ? widget.actionStats.characterShieldModifier : _gameState.characterShields,
+                          null,
+                          999,
+                          "assets/images/abilities/shield_fh.png",
+                          true,
+                          Colors.white,
+                          getValue: () {
+                            if (widget.characterId == null) {
+                              return 0;
+                            }
+
+                            var shieldMap = _gameState.characterShields.value;
+                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+
+                            if (widget.attack) {
+                              shieldAmount += widget.actionStats.characterShieldModifier.value;
+                            }
+
+                            return shieldAmount;
+                          },
+                          callback: (int change) {
+                            if (widget.characterId == null) {
+                              return false;
+                            }
+
+                            var shieldMap = _gameState.characterShields.value;
+                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+                            var modifier = widget.actionStats.characterShieldModifier.value;
+
+                            if (widget.attack && shieldAmount + modifier + change < 0) {
+                              return false;
+                            }
+                            if (!widget.attack && shieldAmount + change < 0) {
+                              return false;
+                            }
+
+                            if (widget.attack) {
+                              widget.actionStats.characterShieldModifier.value = modifier + change;
+                            } else {
+                              shieldMap[widget.characterId!] = shieldAmount + change;
+                              _gameState.characterShields.value = Map<String,int>.from(shieldMap);
+                            }
+
+                            return true;
+                          },
+                          figureId: figureId, ownerId: ownerId, scale: scale)
+                          : Container(),
+                      SizedBox(height: widget.characterId != null ? 2 : 0),
                       SizedBox(
                           height:
                               widget.characterId != null || isSummon ? 2 : 0),

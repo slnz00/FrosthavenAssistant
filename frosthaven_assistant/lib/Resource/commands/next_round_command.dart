@@ -39,14 +39,8 @@ class NextRoundCommand extends Command {
         continue;
       }
 
-      if (data is Monster) {
-        EffectHandler.handleMonsterRoundStart(data);
-        EffectHandler.handleMonsterRoundEnd(data);
-      }
-      if (data is Character) {
-        EffectHandler.handleCharacterRoundStart(data);
-        EffectHandler.handleCharacterRoundEnd(data);
-      }
+      EffectHandler.handleRoundStart(data);
+      EffectHandler.handleRoundEnd(data);
     }
   }
 

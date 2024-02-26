@@ -355,6 +355,13 @@ class GameMethods {
 
   static void setRoundState(_StateModifier _, RoundState state) {
     _gameState._roundState.value = state;
+
+    if (state == RoundState.chooseInitiative) {
+      _gameState.characterShields.value = {};
+      _gameState.characterRoundFlags.value = {};
+      _gameState.syncCharacterRoundFlags();
+      _gameState.syncCharacterShields();
+    }
   }
 
   static void setLevel(_StateModifier _, int level) {
@@ -1321,10 +1328,10 @@ class GameMethods {
         data._turnState = TurnsState.done;
 
         if (data is Monster) {
-          EffectHandler.handleMonsterRoundEnd(data);
+          EffectHandler.handleRoundEnd(data);
         }
         if (data is Character) {
-          EffectHandler.handleCharacterRoundEnd(data);
+          EffectHandler.handleRoundEnd(data);
         }
 
         removeExpiringConditionsFromListItem(_, data);
@@ -1338,10 +1345,10 @@ class GameMethods {
       data._turnState = TurnsState.done;
 
       if (data is Monster) {
-        EffectHandler.handleMonsterRoundEnd(data);
+        EffectHandler.handleRoundEnd(data);
       }
       if (data is Character) {
-        EffectHandler.handleCharacterRoundEnd(data);
+        EffectHandler.handleRoundEnd(data);
       }
 
       removeExpiringConditionsFromListItem(_, data);
@@ -1358,7 +1365,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleMonsterRoundStart(data);
+          EffectHandler.handleRoundStart(data);
           break;
         }
       } else if (data is Character) {
@@ -1367,7 +1374,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleCharacterRoundStart(data);
+          EffectHandler.handleRoundStart(data);
           break;
         }
       }

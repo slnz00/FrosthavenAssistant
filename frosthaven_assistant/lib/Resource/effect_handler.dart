@@ -43,6 +43,8 @@ class MonsterAbilityAttribute {
 }
 
 class MonsterAbilityParser {
+  static final List<String> persistentAttributes = ["shield"];
+
   static final Map<String, Elements> elementMap = {
     'air': Elements.air,
     'dark': Elements.dark,
@@ -76,6 +78,8 @@ class MonsterAbilityParser {
 
   MonsterAbilityAttribute getAttribute (String attributeName) {
     var attribute = MonsterAbilityAttribute(name: attributeName);
+
+    attribute.baseModifier = MonsterAbilityParser.persistentAttributes.contains(attributeName);
 
     _setBase(attribute);
     _setUpgrade(attribute);
@@ -207,79 +211,67 @@ class EffectHandler {
     Condition.wound,
   ];
 
-  static void handleMonsterRoundStart(Monster monster) {
-    if (monster.monsterInstances.isEmpty) {
+  static void handleRoundStart(ListItemData data) {
+    var gameState = getIt<GameState>();
+    var roundFlags = gameState.characterRoundFlags.value[data.id] ?? "";
+
+    if (roundFlags.contains("s")) {
       return;
     }
 
-    var gameState = getIt<GameState>();
-    var round = gameState.round.value;
+    gameState.characterRoundFlags.value[data.id] = roundFlags + "s";
+    gameState.syncCharacterRoundFlags();
 
-    for (var instance in monster.monsterInstances) {
-      if (instance.startedRound.value == round) {
-        continue;
+    if (data is Monster) {
+      if (data.monsterInstances.isEmpty) {
+        return;
       }
 
-      var figure = FigureData(monster.id, instance.getId());
+      for (var instance in data.monsterInstances) {
+        var figure = FigureData(data.id, instance.getId());
+        _applyRoundStartEffects(figure);
+      }
+    }
+    if (data is Character) {
+      var figure = FigureData(data.id, data.id);
       _applyRoundStartEffects(figure);
-      instance.startedRound.value = round;
     }
   }
 
-  static void handleMonsterRoundEnd(Monster monster) {
-    if (monster.monsterInstances.isEmpty) {
+  static void handleRoundEnd(ListItemData data) {
+    var gameState = getIt<GameState>();
+    var roundFlags = gameState.characterRoundFlags.value[data.id] ?? "";
+
+    if (roundFlags.contains("e")) {
       return;
     }
 
-    var gameState = getIt<GameState>();
-    var round = gameState.round.value;
+    gameState.characterRoundFlags.value[data.id] = roundFlags + "e";
+    gameState.syncCharacterRoundFlags();
 
-    for (var instance in monster.monsterInstances) {
-      if (instance.endedRound.value == round) {
-        continue;
+    if (data is Monster) {
+      if (data.monsterInstances.isEmpty) {
+        return;
       }
 
-      var figure = FigureData(monster.id, instance.getId());
+      for (var instance in data.monsterInstances) {
+        var figure = FigureData(data.id, instance.getId());
+        _applyRoundEndEffects(figure);
+      }
+    }
+    if (data is Character) {
+      var figure = FigureData(data.id, data.id);
       _applyRoundEndEffects(figure);
-      instance.endedRound.value = round;
     }
-  }
-
-  static void handleCharacterRoundStart(Character character) {
-    if (character.characterState.health.value <= 0) {
-      return;
-    }
-
-    var gameState = getIt<GameState>();
-    var round = gameState.round.value;
-
-    if (character.characterState.startedRound.value == round) {
-      return;
-    }
-
-    var figure = FigureData(character.id, character.id);
-    _applyRoundStartEffects(figure);
-    character.characterState.startedRound.value = round;
-  }
-
-  static void handleCharacterRoundEnd(Character character) {
-    if (character.characterState.health.value <= 0) {
-      return;
-    }
-
-    var gameState = getIt<GameState>();
-    var round = gameState.round.value;
-
-    if (character.characterState.endedRound.value == round) {
-      return;
-    }
-    var figure = FigureData(character.id, character.id);
-    _applyRoundEndEffects(figure);
-    character.characterState.endedRound.value = round;
   }
 
   static void _applyRoundStartEffects(FigureData figure) {
     var actionStats = ActionStats(attack: false);
+
+    if (_isConditionActive(Condition.strengthen, figure) && _isConditionActive(Condition.muddle, figure)) {
+      _removeCondition(Condition.strengthen, figure);
+      _removeCondition(Condition.muddle, figure);
+    }
 
     if (_isConditionActive(Condition.regenerate, figure)) {
       handleHealthChange(figure, 1, actionStats);
@@ -336,7 +328,11 @@ class EffectHandler {
 
     if (actionStats.attack) {
       amount += _getPoisonAmount(figure);
-      amount += _getShieldAmount(figure, actionStats.pierceAmount.value);
+      amount += _getShieldAmount(
+          figure,
+          actionStats.pierceAmount.value,
+          actionStats.characterShieldModifier.value
+      );
     }
 
     if (amount < 0) {
@@ -446,11 +442,22 @@ class EffectHandler {
     return 0;
   }
 
-  static int _getShieldAmount(FigureData figure, int pierceAmount) {
+  static int _getShieldAmount(FigureData figure, int pierceAmount, int characterShieldModifier) {
     var owner = figure.getOwner();
 
     if (pierceAmount < 0) {
       pierceAmount = 0;
+    }
+
+    if (owner is Character) {
+      var gameState = getIt<GameState>();
+      var baseShield = gameState.characterShields.value[owner.id] ?? 0;
+      var shieldAmount = baseShield + characterShieldModifier - pierceAmount;
+
+      if (shieldAmount < 0) {
+        return 0;
+      }
+      return shieldAmount;
     }
 
     if (owner is Monster) {
@@ -458,13 +465,12 @@ class EffectHandler {
       var monsterStats = StatApplier.getStatTokens(owner, elite);
       var shieldStat = monsterStats['shield'] ?? 0;
 
-      var shieldAmount = _calculateAbilityAttributeValue(shieldStat, 'shield', owner);
+      var shieldAmount = _calculateAbilityAttributeValue(shieldStat, 'shield', owner) - pierceAmount;
 
-      if (pierceAmount > shieldAmount) {
+      if (shieldAmount < 0) {
         return 0;
       }
-
-      return shieldAmount - pierceAmount;
+      return shieldAmount;
     }
 
     return 0;

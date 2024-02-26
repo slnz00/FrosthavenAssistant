@@ -11,6 +11,7 @@ import '../../services/service_locator.dart';
 
 class ActionStats {
   final ValueNotifier<int> pierceAmount = ValueNotifier(0);
+  final ValueNotifier<int> characterShieldModifier = ValueNotifier(0);
 
   final bool attack;
 
@@ -116,6 +117,8 @@ class ActionMenu extends StatefulWidget {
 }
 
 class ActionMenuState extends State<ActionMenu> {
+  final GameState _gameState = getIt<GameState>();
+
   @override
   initState() {
     // at the beginning, all items are shown
@@ -196,6 +199,7 @@ class ActionMenuState extends State<ActionMenu> {
               StatusMenu(actionData: actionData)
             ).then((val) {
               actionData.process();
+              _gameState.syncCharacterShields();
             });
           },
           child: Text(

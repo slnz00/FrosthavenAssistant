@@ -2,6 +2,8 @@ library game_state;
 
 import 'package:frosthaven_assistant/Resource/effect_handler.dart';
 
+import '../../services/network/communication.dart';
+import '../../services/network/network.dart';
 import '../card_stack.dart';
 import '../game_data.dart';
 import '../enums.dart';
@@ -79,6 +81,53 @@ class GameState extends ActionHandler {
   final updateList = ValueNotifier<int>(0);
   final killMonsterStandee = ValueNotifier<int>(-1);
   final updateForUndo = ValueNotifier<int>(0);
+
+  final characterShields = ValueNotifier<Map<String, int>>({});
+  final characterRoundFlags = ValueNotifier<Map<String, String>>({});
+
+  void setCharacterRoundFlagsFromJson (String flagsJson) {
+    try {
+      characterRoundFlags.value = Map<String, String>.from(jsonDecode(flagsJson));
+    } catch (e) {}
+  }
+
+  void setCharacterShieldsFromJson (String shieldsJson) {
+    try {
+      characterShields.value = Map<String, int>.from(jsonDecode(shieldsJson));
+    } catch (e) {}
+  }
+
+  void syncCharacterRoundFlags () {
+    var isServer = getIt<Settings>().server.value;
+    var isClient = getIt<Settings>().client.value == ClientState.connected;
+    var flagsJson = json.encode(characterRoundFlags.value);
+
+    if (isServer) {
+      getIt<Network>().server.send(
+          "SyncCharacterRoundFlags:$flagsJson"
+      );
+    } else if (isClient) {
+      getIt<Communication>().sendToAll(
+          "SyncCharacterRoundFlags:$flagsJson"
+      );
+    }
+  }
+
+  void syncCharacterShields () {
+    var isServer = getIt<Settings>().server.value;
+    var isClient = getIt<Settings>().client.value == ClientState.connected;
+    var characterShieldsJson = json.encode(characterShields.value);
+
+    if (isServer) {
+      getIt<Network>().server.send(
+          "SyncCharacterShields:$characterShieldsJson"
+      );
+    } else if (isClient) {
+      getIt<Communication>().sendToAll(
+          "SyncCharacterShields:$characterShieldsJson"
+      );
+    }
+  }
 
   //state
   ValueListenable<String> get currentCampaign => _currentCampaign;
