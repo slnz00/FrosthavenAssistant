@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:collection/collection.dart';
 import 'package:frosthaven_assistant/Model/MonsterAbility.dart';
+import 'package:frosthaven_assistant/Resource/commands/imbue_element_command.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/stat_applier.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 
@@ -42,6 +45,11 @@ class MonsterAbilityAttribute {
   MonsterAbilityAttribute({required this.name});
 }
 
+enum ElementAction {
+  use,
+  activate
+}
+
 class MonsterAbilityParser {
   static final List<String> persistentAttributes = ["shield"];
 
@@ -53,6 +61,11 @@ class MonsterAbilityParser {
     'ice': Elements.ice,
     'light': Elements.light,
   };
+
+  static patternElementActivate () {
+    var elements = elementMap.keys.toList().join('|');
+    return r'%(' + elements + '|any)%\$';
+  }
 
   static patternElementUse () {
     return r'%([^%]+)%%use%';
@@ -70,10 +83,50 @@ class MonsterAbilityParser {
     return r'^(.)([0-9]+) %' + attributeName + '%';
   }
 
+  static String? getElementUseType(String line) {
+    var match = RegExp(patternElementUse()).firstMatch(line);
+
+    if (match == null) {
+      return null;
+    }
+    return match.group(1);
+  }
+
   late final List<String> lines;
 
   MonsterAbilityParser(MonsterAbilityCardModel ability) {
     lines = _extractLines(ability);
+  }
+
+  (List<Elements>, bool) getElements(ElementAction action) {
+    List<Elements> elements = [];
+    bool anyElement = false;
+
+    var elementActivateRegex = RegExp(
+        action == ElementAction.use ? patternElementUse() : patternElementActivate()
+    );
+
+    for (int i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      var match = elementActivateRegex.firstMatch(line);
+      var elementType = match?.group(1);
+      if (elementType == null) {
+        continue;
+      }
+
+      if (elementType == 'any') {
+        anyElement = true;
+        continue;
+      }
+
+      var element = elementMap[elementType];
+      if (element != null) {
+        elements.add(element);
+      }
+    }
+
+    return (elements, anyElement);
   }
 
   MonsterAbilityAttribute getAttribute (String attributeName) {
@@ -124,12 +177,17 @@ class MonsterAbilityParser {
     for (int i = lines.length - 1; i >= 0; i--) {
       var line = lines[i];
 
+      if (line.contains('....')) {
+        value = null;
+        continue;
+      }
+
       if (value == null) {
         (value, modifier) = _getValue(attribute, line);
         continue;
       }
 
-      elementType = _getElementUseType(line);
+      elementType = getElementUseType(line);
       if (elementType != null) {
         break;
       }
@@ -143,15 +201,6 @@ class MonsterAbilityParser {
     attribute.upgradeElementAny = elementType == 'any';
     attribute.upgradeValue = value;
     attribute.upgradeModifier = modifier;
-  }
-
-  String? _getElementUseType(String line) {
-    var match = RegExp(patternElementUse()).firstMatch(line);
-
-    if (match == null) {
-      return null;
-    }
-    return match.group(1);
   }
 
   (int?, bool) _getValue (MonsterAbilityAttribute attribute, String line) {
@@ -183,7 +232,7 @@ class MonsterAbilityParser {
   }
 
   List<String> _extractLines (MonsterAbilityCardModel ability) {
-    return ability.lines
+    var lines = ability.lines
       .map((line) {
         line = line.toLowerCase().trim();
 
@@ -193,12 +242,24 @@ class MonsterAbilityParser {
 
         return line;
       })
-      .where((line) => line.contains('%'))
+      .where((line) => line.contains('%') || line.contains('....'))
       .toList();
+
+    var elementTypes = ['any', ...elementMap.keys];
+
+    for (var pos in ability.graphicPositional) {
+      if (elementTypes.contains(pos.gfx)) {
+        lines.add('%${pos.gfx}%');
+      }
+    }
+
+    return lines;
   }
 }
 
 class EffectHandler {
+  static final _random = new Random();
+
   static final List<Condition> _poisonConditions = [
     Condition.poison4,
     Condition.poison3,
@@ -213,14 +274,13 @@ class EffectHandler {
 
   static void handleRoundStart(ListItemData data) {
     var gameState = getIt<GameState>();
-    var roundFlags = gameState.characterRoundFlags.value[data.id] ?? "";
 
-    if (roundFlags.contains("s")) {
+    var roundStarted = gameState.isRoundFlagSet(data.id, Flags.roundStart);
+    if (roundStarted) {
       return;
     }
 
-    gameState.characterRoundFlags.value[data.id] = roundFlags + "s";
-    gameState.syncCharacterRoundFlags();
+    gameState.setRoundFlag(data.id, Flags.roundStart);
 
     if (data is Monster) {
       if (data.monsterInstances.isEmpty) {
@@ -239,15 +299,19 @@ class EffectHandler {
   }
 
   static void handleRoundEnd(ListItemData data) {
-    var gameState = getIt<GameState>();
-    var roundFlags = gameState.characterRoundFlags.value[data.id] ?? "";
 
-    if (roundFlags.contains("e")) {
+    // Currently doesn't have any round end events
+    return;
+
+    var gameState = getIt<GameState>();
+
+    var roundStarted = gameState.isRoundFlagSet(data.id, Flags.roundStart);
+    var roundEnded = gameState.isRoundFlagSet(data.id, Flags.roundEnd);
+    if (roundEnded || !roundStarted) {
       return;
     }
 
-    gameState.characterRoundFlags.value[data.id] = roundFlags + "e";
-    gameState.syncCharacterRoundFlags();
+    gameState.setRoundFlag(data.id, Flags.roundEnd);
 
     if (data is Monster) {
       if (data.monsterInstances.isEmpty) {
@@ -267,6 +331,8 @@ class EffectHandler {
 
   static void _applyRoundStartEffects(FigureData figure) {
     var actionStats = ActionStats(attack: false);
+
+    _handleElements(figure);
 
     if (_isConditionActive(Condition.strengthen, figure) && _isConditionActive(Condition.muddle, figure)) {
       _removeCondition(Condition.strengthen, figure);
@@ -304,6 +370,38 @@ class EffectHandler {
     var gameState = getIt<GameState>();
 
     gameState.action(command);
+  }
+
+  static void _handleElements(FigureData figure) {
+    var gameState = getIt<GameState>();
+    var data = figure.getOwner();
+
+    if (data is Monster) {
+      var ability = _getCurrentMonsterAbility(data);
+      if (ability == null) {
+        return;
+      }
+
+      var parser = MonsterAbilityParser(ability);
+      var (useElements, useAny) = parser.getElements(ElementAction.use);
+      var (activateElements, activateAny) = parser.getElements(ElementAction.activate);
+
+      for (var element in useElements) {
+        _useElement(data.id, element);
+      }
+      if (useAny) {
+        _useAnyElement(data.id);
+      }
+
+      for (var element in activateElements) {
+        _activateElement(element);
+      }
+      if (activateAny) {
+        _activateAnyElement();
+      }
+
+      gameState.syncCharacterRoundFlags();
+    }
   }
 
   static int _calculateDamage(int initialAmount, FigureData figure, ActionStats actionStats) {
@@ -476,6 +574,21 @@ class EffectHandler {
     return 0;
   }
 
+  static bool _isElementUsed (String characterId, Elements? element, bool anyElement) {
+    var gameState = getIt<GameState>();
+
+    if (anyElement) {
+      return gameState.isRoundFlagSet(characterId, Flags.anyElement);
+    }
+
+    var flag = element != null ? Flags.elements[element] : null;
+    if (flag == null) {
+      return false;
+    }
+
+    return gameState.isRoundFlagSet(characterId, flag);
+  }
+
   static int _calculateAbilityAttributeValue (int statValue, String attributeName, Monster monster) {
     var attribute = _getAbilityAttribute('shield', monster);
 
@@ -483,7 +596,7 @@ class EffectHandler {
       return statValue;
     }
 
-    var upgraded = _tryUseElement(attribute.upgradeElement, attribute.upgradeElementAny);
+    var upgraded = _isElementUsed(monster.id, attribute.upgradeElement, attribute.upgradeElementAny);
 
     var totalBase = attribute.baseModifier ?
       statValue + attribute.baseValue :
@@ -498,30 +611,73 @@ class EffectHandler {
       statValue + attribute.upgradeValue;
   }
 
-  static bool _tryUseElement (Elements? element, bool any) {
+  static void _activateElement (Elements element) {
     var gameState = getIt<GameState>();
 
-    if (element == null && !any) {
-      return false;
+    var isFull = gameState.elementState.entries
+      .any((entry) => (
+        entry.key == element && entry.value == ElementState.full
+      ));
+
+    if (isFull) {
+      return;
     }
 
-    for (var entry in gameState.elementState.entries) {
-      var currentElement = entry.key;
-      var state = entry.value;
-      var isActive = state != ElementState.inert;
+    gameState.action(ImbueElementCommand(element, false));
+  }
 
-      if (isActive && any) {
-        gameState.action(UseElementCommand(currentElement));
-        return true;
-      }
+  static void _activateAnyElement () {
+    var gameState = getIt<GameState>();
 
-      if (isActive && currentElement == element) {
-        gameState.action(UseElementCommand(currentElement));
-        return true;
-      }
+    var element = _getRandomElement([ElementState.half, ElementState.full]);
+    if (element == null) {
+      return;
     }
 
-    return false;
+    gameState.action(ImbueElementCommand(element, false));
+  }
+
+  static void _useAnyElement(String characterId) {
+    var gameState = getIt<GameState>();
+
+    var element = _getRandomElement([ElementState.half, ElementState.full]);
+    if (element == null) {
+      return;
+    }
+
+    gameState.action(UseElementCommand(element));
+    gameState.setRoundFlag(characterId, Flags.anyElement, sync: false);
+  }
+
+  static void _useElement (String characterId, Elements element) {
+    var gameState = getIt<GameState>();
+
+    var isActive = gameState.elementState.entries
+      .any((entry) => (
+        entry.key == element && entry.value != ElementState.inert
+      ));
+
+    if (!isActive) {
+      return;
+    }
+
+    gameState.action(UseElementCommand(element));
+    gameState.setRoundFlag(characterId, Flags.elements[element]!, sync: false);
+  }
+
+  static Elements? _getRandomElement (List<ElementState> states) {
+    var gameState = getIt<GameState>();
+
+    var elements = gameState.elementState.entries
+      .where((entry) => states.contains(entry.value))
+      .map((entry) => entry.key)
+      .toList();
+
+    if (elements.isEmpty) {
+      return null;
+    }
+
+    return elements[_random.nextInt(elements.length)];
   }
 
   static MonsterAbilityAttribute? _getAbilityAttribute (String attributeName, Monster monster) {

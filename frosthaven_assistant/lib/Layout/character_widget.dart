@@ -180,6 +180,24 @@ class CharacterWidgetState extends State<CharacterWidget> {
     );
   }
 
+  void resetInitiativeText () {
+    var init = character.characterState.initiative.value;
+    var settings = getIt<Settings>();
+
+    bool secret = (settings.server.value || settings.client.value == ClientState.connected) &&
+        (CharacterWidget.localCharacterInitChanges[character.id] != init);
+
+    if (_initTextFieldController.text != character.characterState.initiative.value.toString() &&
+        character.characterState.initiative.value != 0) {
+
+      if (secret) {
+        _initTextFieldController.text = "??";
+      } else {
+        _initTextFieldController.text = character.characterState.initiative.value.toString();
+      }
+    }
+  }
+
   Widget buildInitiativeWidget(BuildContext context, double scale,
       double scaledHeight, Shadow shadow, bool frosthavenStyle) {
     return Column(children: [
@@ -240,6 +258,9 @@ class CharacterWidgetState extends State<CharacterWidget> {
                   onFocusChange: (hasFocus) {
                     if (!hasFocus && _initTextFieldController.text.isNotEmpty) {
                       widget.onInitNumberProvided();
+                    }
+                    if (!hasFocus && _initTextFieldController.text.isEmpty) {
+                      resetInitiativeText();
                     }
                   },
 
@@ -494,7 +515,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
                                   colors: [
                                     Color(int.parse("ff759a9d", radix: 16)),
                                     Color(int.parse("ffa0a8ac", radix: 16)),
-                                    Color(int.parse("ff759a9d", radix: 16)),
+                                      Color(int.parse("ff759a9d", radix: 16)),
                                   ],
                                   stops: const [
                                     0,
@@ -597,7 +618,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
             isCharacter
                 ? Positioned(
                 top: 10 * scale,
-                left: 314 * scale,
+                left: 315 * scale,
                 child: Row(
                   children: [
                     Image(

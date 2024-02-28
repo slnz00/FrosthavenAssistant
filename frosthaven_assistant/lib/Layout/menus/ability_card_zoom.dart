@@ -52,7 +52,7 @@ class AbilityCardZoomState extends State<AbilityCardZoom> {
           width: 142.4 * scale * zoomValue,
           height: 92.8 * scale * zoomValue,
           child: MonsterAbilityCardWidget.buildFront(
-              widget.card, widget.monster, scaling, widget.calculateAll)),
+              widget.card, widget.monster, scaling, widget.calculateAll, true)),
     );
   }
 }

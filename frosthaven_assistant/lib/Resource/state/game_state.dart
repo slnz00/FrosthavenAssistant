@@ -48,6 +48,22 @@ part "../game_methods.dart";
 
 // ignore_for_file: library_private_types_in_public_api
 
+class Flags {
+  static final Map<Elements, String> elements = {
+    Elements.fire: ".eF",
+    Elements.light: ".eL",
+    Elements.air: ".eA",
+    Elements.earth: ".eE",
+    Elements.dark: ".eD",
+    Elements.ice: ".eI"
+  };
+
+  static const String anyElement = ".eAny";
+
+  static const String roundStart = ".rS";
+  static const String roundEnd = ".rE";
+}
+
 abstract class Command {
   void execute();
   void undo();
@@ -84,6 +100,29 @@ class GameState extends ActionHandler {
 
   final characterShields = ValueNotifier<Map<String, int>>({});
   final characterRoundFlags = ValueNotifier<Map<String, String>>({});
+
+  void setRoundFlag (String characterId, String flag, { bool sync = true }) {
+    var flagsClone = { ...characterRoundFlags.value };
+    var characterFlags = flagsClone[characterId] ?? "";
+
+    if (characterFlags.contains(flag)) {
+      return;
+    }
+
+    flagsClone[characterId] = characterFlags + flag;
+
+    characterRoundFlags.value = flagsClone;
+
+    if (sync) {
+      syncCharacterRoundFlags();
+    }
+  }
+
+  bool isRoundFlagSet (String characterId, String flag) {
+    var characterFlags = characterRoundFlags.value[characterId] ?? "";
+
+    return characterFlags.contains(flag);
+  }
 
   void setCharacterRoundFlagsFromJson (String flagsJson) {
     try {

@@ -108,7 +108,7 @@ Container createMainMenu(BuildContext context) {
                         right: 7,
                         bottom: 3,
                         child: Text(
-                          "V 1.9.5",
+                          "V 1.9.6",
                           style: TextStyle(
                             fontSize: 16
                           )

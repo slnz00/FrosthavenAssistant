@@ -14,8 +14,9 @@ import 'menus/ability_card_zoom.dart';
 
 class MonsterAbilityCardWidget extends StatefulWidget {
   final Monster data;
+  final bool isMonsterWidget;
 
-  const MonsterAbilityCardWidget({Key? key, required this.data})
+  const MonsterAbilityCardWidget({Key? key, required this.data, this.isMonsterWidget = false })
       : super(key: key);
 
   @override
@@ -56,7 +57,7 @@ class MonsterAbilityCardWidget extends StatefulWidget {
   }
 
   static Widget buildFront(MonsterAbilityCardModel? card, Monster data,
-      double scale, bool calculateAll) {
+      double scale, bool calculateAll, bool isMonsterWidget) {
     bool frosthavenStyle = GameMethods.isFrosthavenStyle(data.type);
 
     String initText = card!.initiative.toString();
@@ -186,7 +187,9 @@ class MonsterAbilityCardWidget extends StatefulWidget {
                     data,
                     CrossAxisAlignment.center,
                     scale,
-                    false),
+                    false,
+                    isMonsterWidget
+                ),
               ),
             )
           ],
@@ -330,7 +333,8 @@ class MonsterAbilityCardWidgetState extends State<MonsterAbilityCardWidget> {
                         AbilityCardZoom(
                             card: card!,
                             monster: widget.data,
-                            calculateAll: false));
+                            calculateAll: false,
+                        ));
                   });
                 }
               },
@@ -345,7 +349,7 @@ class MonsterAbilityCardWidgetState extends State<MonsterAbilityCardWidget> {
                             widget.data.isActive) &&
                         card != null
                     ? MonsterAbilityCardWidget.buildFront(
-                        card, widget.data, scale, false)
+                        card, widget.data, scale, false, widget.isMonsterWidget)
                     : MonsterAbilityCardWidget.buildRear(
                         scale, _deckSize, widget.data),
                 //),

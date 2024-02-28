@@ -181,7 +181,9 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
                       data,
                       CrossAxisAlignment.end,
                       scale,
-                      getIt<Settings>().shimmer.value),
+                      getIt<Settings>().shimmer.value,
+                      true
+                  ),
                 ])),
         Positioned(
           right: 61.6 * scale,
@@ -214,7 +216,9 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
               data,
               CrossAxisAlignment.start,
               scale,
-              getIt<Settings>().shimmer.value),
+              getIt<Settings>().shimmer.value,
+              true
+          ),
         ),
         data.type.flying
             ? Positioned(
@@ -339,7 +343,7 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
     }
 
     Widget attackAttributes = LineBuilder.createLines([bossAttackAttributes],
-        true, false, false, data, CrossAxisAlignment.start, scale, false);
+        true, false, false, data, CrossAxisAlignment.start, scale, false, true);
 
     final specialStyle = TextStyle(
         fontFamily: frosthavenStyle ? 'Markazi' : 'Majalla',
@@ -419,7 +423,9 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
                                   data,
                                   CrossAxisAlignment.start,
                                   scale,
-                                  getIt<Settings>().shimmer.value)),
+                                  getIt<Settings>().shimmer.value,
+                                  true
+                              )),
                         ])
                       : Container(),
                   if (bossOtherAttributes.isNotEmpty)
@@ -453,7 +459,9 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
                                       data,
                                       CrossAxisAlignment.start,
                                       scale,
-                                      false)),
+                                      false,
+                                      true
+                                  )),
                             ])
                       : Container(),
                   normal.special2.isNotEmpty
@@ -484,7 +492,9 @@ class MonsterStatCardWidgetState extends State<MonsterStatCardWidget> {
                                       data,
                                       CrossAxisAlignment.start,
                                       scale,
-                                      false)),
+                                      false,
+                                      true
+                                  )),
                             ])
                       : Container()
                 ])),

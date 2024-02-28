@@ -1,9 +1,11 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:frosthaven_assistant/Resource/effect_handler.dart';
 import 'package:frosthaven_assistant/Resource/enums.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/frosthaven_converter.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/stat_applier.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
+import '../../services/service_locator.dart';
 import '../state/game_state.dart';
 
 class LineBuilder {
@@ -159,7 +161,8 @@ class LineBuilder {
       final Monster monster,
       final CrossAxisAlignment alignment,
       final double scale,
-      final bool animate) {
+      final bool animate,
+      final bool trackElements) {
 
     //todo: for performance - check how often is this being run
     bool isBossStatCard = monster.type.levels[0].boss != null &&
@@ -619,13 +622,13 @@ class LineBuilder {
       bool addText = true;
       for (int i = 0; i < line.length; i++) {
         if (line[i] == "|") {
-          //don't add text for conditions added with calculations
+          // don't add text for conditions added with calculations
           addText = false;
         }
         if (line[i] == '%') {
 
           if (isIconPart) {
-            //create token part
+            // create token part
             String iconToken = line.substring(partStartIndex, i);
             String iconGfx = iconToken;
             if (left) {
@@ -636,6 +639,28 @@ class LineBuilder {
               }
             }
             if (iconToken == "use") {
+              String? iconGfxOverride;
+              bool isElementActive = false;
+
+              if (trackElements) {
+                var elementType = MonsterAbilityParser.getElementUseType(line);
+                var gameState = getIt<GameState>();
+
+                if (elementType == 'any') {
+                  isElementActive = gameState.isRoundFlagSet(monster.id, Flags.anyElement);
+                } else if (elementType != null) {
+                  var element = MonsterAbilityParser.elementMap[elementType];
+                  var elementFlag = element != null ? Flags.elements[element] : null;
+                  if (elementFlag != null) {
+                    isElementActive = gameState.isRoundFlagSet(monster.id, elementFlag);
+                  }
+                }
+              }
+
+              if (isElementActive) {
+                iconGfxOverride = "active";
+              }
+
               //put use gfx on top of previous and add ':'
               // WidgetSpan part = textPartList.removeLast() as WidgetSpan;
               Widget part = textPartListRowContent.removeLast();
@@ -672,7 +697,7 @@ class LineBuilder {
                             filterQuality: FilterQuality.medium,
                             semanticLabel: iconGfx,
                             image: AssetImage(
-                                "assets/images/abilities/${iconGfx + imageSuffix}.png"),
+                                "assets/images/abilities/${iconGfxOverride ?? iconGfx + imageSuffix}.png"),
                           ))
                     ],
                   )));

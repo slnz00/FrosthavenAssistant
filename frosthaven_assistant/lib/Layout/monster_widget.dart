@@ -161,7 +161,7 @@ class MonsterWidgetState extends State<MonsterWidget> {
                               },
                               child: buildImagePart(height, scale))
                           : buildImagePart(height, scale),
-                      MonsterAbilityCardWidget(data: widget.data),
+                      MonsterAbilityCardWidget(data: widget.data, isMonsterWidget: true,),
                       MonsterStatCardWidget(data: widget.data),
                     ],
                   ),

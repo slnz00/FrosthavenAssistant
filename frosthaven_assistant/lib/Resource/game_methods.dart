@@ -355,13 +355,6 @@ class GameMethods {
 
   static void setRoundState(_StateModifier _, RoundState state) {
     _gameState._roundState.value = state;
-
-    if (state == RoundState.chooseInitiative) {
-      _gameState.characterShields.value = {};
-      _gameState.characterRoundFlags.value = {};
-      _gameState.syncCharacterRoundFlags();
-      _gameState.syncCharacterShields();
-    }
   }
 
   static void setLevel(_StateModifier _, int level) {
@@ -1242,6 +1235,11 @@ class GameMethods {
         }
       }
     }
+
+    _gameState.characterShields.value = {};
+    _gameState.characterRoundFlags.value = {};
+    _gameState.syncCharacterRoundFlags();
+    _gameState.syncCharacterShields();
   }
 
   static bool canExpire(Condition condition) {
