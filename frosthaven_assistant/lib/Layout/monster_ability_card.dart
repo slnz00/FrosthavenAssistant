@@ -74,126 +74,130 @@ class MonsterAbilityCardWidget extends StatefulWidget {
     List<Widget> positionals =
         buildGraphicPositionals(scale, card.graphicPositional);
 
-    return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black45,
-              blurRadius: 4 * scale,
-              offset: Offset(2 * scale, 4 * scale), // Shadow position
-            ),
-          ],
-        ),
-        key: const ValueKey<int>(1),
-        margin: EdgeInsets.all(1.6 * scale),
-        width: 142.4 * scale,
-        height: 94.4 * scale,
-        child: Stack(
-          //fit: StackFit.loose,
-          //alignment: Alignment.topCenter,
-          clipBehavior: Clip.none, //if text overflows it still visible
-
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0 * scale),
-              child: Image(
-                fit: BoxFit.fill,
-                height: 92.8 * scale,
-                width: 142.4 * scale,
-                //height: 123 * 0.8 * scale,
-                image: AssetImage(frosthavenStyle
-                    ? "assets/images/psd/monsterAbility-front_fh.png"
-                    : "assets/images/psd/monsterAbility-front.png"),
-              ),
-            ),
-            Positioned(
-                top: frosthavenStyle ? 2 * scale : 0 * scale,
-                //left: 40 * scale,
-                child: SizedBox(
-                  height: 88 * scale,
-                  width: 142.4 * scale, //needed for line breaks in lines
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text(
-                        card.title,
-                        style: TextStyle(
-                            fontFamily:
-                                frosthavenStyle ? "GermaniaOne" : 'Pirata',
-                            color: Colors.white,
-                            fontSize:
-                                frosthavenStyle ? 10 * scale : 11.2 * scale,
-                            shadows: [shadow]),
-                      ),
-                    ],
-                  ),
-                )),
-            Positioned(
-                left: 4.0 * scale,
-                top: 12.8 * scale,
-                child: Text(
-                  textAlign: TextAlign.center,
-                  initText,
-                  style: TextStyle(
-                      fontFamily: frosthavenStyle ? "GermaniaOne" : 'Pirata',
-                      color: Colors.white,
-                      fontSize: frosthavenStyle ? 15 * scale : 16 * scale,
-                      shadows: [shadow]),
-                )),
-            Positioned(
-                left: 4.8 * scale,
-                bottom: 0.4 * scale,
-                child: Text(
-                  card.nr.toString(),
-                  style: TextStyle(
-                      fontFamily: frosthavenStyle ? 'Markazi' : 'Majalla',
-                      color: Colors.white,
-                      fontSize: 6.4 * scale,
-                      shadows: [shadow]),
-                )),
-            card.shuffle
-                ? Positioned(
-                    left: 124 * scale,
-                    bottom: 3.2 * scale,
-                    child: Image(
-                      height: 98.4 * 0.13 * scale,
-                      fit: BoxFit.cover,
-                      image: const AssetImage(
-                          "assets/images/abilities/shuffle.png"),
-                    ))
-                : Container(),
-
-            //add graphic positionals here
-            if (positionals.isNotEmpty) positionals[0],
-            if (positionals.length > 1) positionals[1],
-            if (positionals.length > 2) positionals[2],
-            if (positionals.length > 3) positionals[3],
-
-            Positioned(
-              top: 11 * scale,
-              //alignment: Alignment.center,
-              child: SizedBox(
-                height: 88 * scale,
-                width: 142.4 * scale, //needed for line breaks in lines
-                //color: Colors.amber,
-                child: LineBuilder.createLines(
-                    card.lines,
-                    false,
-                    !getIt<Settings>().noCalculation.value,
-                    calculateAll,
-                    data,
-                    CrossAxisAlignment.center,
-                    scale,
-                    false,
-                    isMonsterWidget
+    return ValueListenableBuilder<dynamic>(
+        valueListenable: getIt<GameState>().characterRoundFlags,
+        builder: (context, value, child) =>
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black45,
+                  blurRadius: 4 * scale,
+                  offset: Offset(2 * scale, 4 * scale), // Shadow position
                 ),
-              ),
-            )
-          ],
-        ));
+              ],
+            ),
+            key: const ValueKey<int>(1),
+            margin: EdgeInsets.all(1.6 * scale),
+            width: 142.4 * scale,
+            height: 94.4 * scale,
+            child: Stack(
+              //fit: StackFit.loose,
+              //alignment: Alignment.topCenter,
+              clipBehavior: Clip.none, //if text overflows it still visible
+
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0 * scale),
+                  child: Image(
+                    fit: BoxFit.fill,
+                    height: 92.8 * scale,
+                    width: 142.4 * scale,
+                    //height: 123 * 0.8 * scale,
+                    image: AssetImage(frosthavenStyle
+                        ? "assets/images/psd/monsterAbility-front_fh.png"
+                        : "assets/images/psd/monsterAbility-front.png"),
+                  ),
+                ),
+                Positioned(
+                    top: frosthavenStyle ? 2 * scale : 0 * scale,
+                    //left: 40 * scale,
+                    child: SizedBox(
+                      height: 88 * scale,
+                      width: 142.4 * scale, //needed for line breaks in lines
+
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Text(
+                            card.title,
+                            style: TextStyle(
+                                fontFamily:
+                                    frosthavenStyle ? "GermaniaOne" : 'Pirata',
+                                color: Colors.white,
+                                fontSize:
+                                    frosthavenStyle ? 10 * scale : 11.2 * scale,
+                                shadows: [shadow]),
+                          ),
+                        ],
+                      ),
+                    )),
+                Positioned(
+                    left: 4.0 * scale,
+                    top: 12.8 * scale,
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      initText,
+                      style: TextStyle(
+                          fontFamily: frosthavenStyle ? "GermaniaOne" : 'Pirata',
+                          color: Colors.white,
+                          fontSize: frosthavenStyle ? 15 * scale : 16 * scale,
+                          shadows: [shadow]),
+                    )),
+                Positioned(
+                    left: 4.8 * scale,
+                    bottom: 0.4 * scale,
+                    child: Text(
+                      card.nr.toString(),
+                      style: TextStyle(
+                          fontFamily: frosthavenStyle ? 'Markazi' : 'Majalla',
+                          color: Colors.white,
+                          fontSize: 6.4 * scale,
+                          shadows: [shadow]),
+                    )),
+                card.shuffle
+                    ? Positioned(
+                        left: 124 * scale,
+                        bottom: 3.2 * scale,
+                        child: Image(
+                          height: 98.4 * 0.13 * scale,
+                          fit: BoxFit.cover,
+                          image: const AssetImage(
+                              "assets/images/abilities/shuffle.png"),
+                        ))
+                    : Container(),
+
+                //add graphic positionals here
+                if (positionals.isNotEmpty) positionals[0],
+                if (positionals.length > 1) positionals[1],
+                if (positionals.length > 2) positionals[2],
+                if (positionals.length > 3) positionals[3],
+
+                Positioned(
+                  top: 11 * scale,
+                  //alignment: Alignment.center,
+                  child: SizedBox(
+                    height: 88 * scale,
+                    width: 142.4 * scale, //needed for line breaks in lines
+                    //color: Colors.amber,
+                    child: LineBuilder.createLines(
+                        card.lines,
+                        false,
+                        !getIt<Settings>().noCalculation.value,
+                        calculateAll,
+                        data,
+                        CrossAxisAlignment.center,
+                        scale,
+                        false,
+                        isMonsterWidget
+                    ),
+                  ),
+                )
+              ],
+        ))
+    );
   }
 
   static Widget buildRear(double scale, int size, Monster monster) {

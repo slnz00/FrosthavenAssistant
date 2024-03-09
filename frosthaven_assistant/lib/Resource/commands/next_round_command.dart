@@ -35,10 +35,6 @@ class NextRoundCommand extends Command {
 
   void applyUnhandledEffects () {
     for (var data in _gameState.currentList) {
-      if (data.turnState == TurnsState.done) {
-        continue;
-      }
-
       EffectHandler.handleRoundStart(data);
       EffectHandler.handleRoundEnd(data);
     }

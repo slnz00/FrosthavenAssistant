@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.9.6+64
+version: 1.9.6+66
 
 environment:
   sdk: ">=3.1.0 <3.4.0"
@@ -50,7 +50,7 @@ dependencies:
   wakelock: ^0.6.2 #keep awake on android
   window_manager: ^0.3.7 #to be able to set fullscreen on windows
   flutter_launcher_icons: ^0.13.1 #I can't believe we need a third party package to do icons..
-  flutter_native_splash: ^2.2.8 # and same for splash :)
+  flutter_native_splash: ^2.3.8 # and same for splash :)
   url_launcher: ^6.2.1
   flutter_keyboard_visibility: ^6.0.0 #only way to check for keyboard closed event.
   responsive_framework: ^1.1.1
@@ -93,6 +93,7 @@ flutter_icons:
 
 flutter_native_splash:
   color: "#dff4fd"
+  color_dark: "#dff4fd"
   image: "assets/images/splash.png"
 
 # For information on the generic Dart part of this file, see the

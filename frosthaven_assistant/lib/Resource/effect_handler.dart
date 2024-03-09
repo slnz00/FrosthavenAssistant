@@ -45,11 +45,6 @@ class MonsterAbilityAttribute {
   MonsterAbilityAttribute({required this.name});
 }
 
-enum ElementAction {
-  use,
-  activate
-}
-
 class MonsterAbilityParser {
   static final List<String> persistentAttributes = ["shield"];
 
@@ -98,18 +93,48 @@ class MonsterAbilityParser {
     lines = _extractLines(ability);
   }
 
-  (List<Elements>, bool) getElements(ElementAction action) {
+  (List<Elements>, bool) getActivateElements() {
     List<Elements> elements = [];
     bool anyElement = false;
 
-    var elementActivateRegex = RegExp(
-        action == ElementAction.use ? patternElementUse() : patternElementActivate()
-    );
+    var elementActivateRegex = RegExp(patternElementActivate());
+
+    for (int i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var parts = line.split(" ");
+
+      for (var part in parts) {
+        var match = elementActivateRegex.firstMatch(part);
+        var elementType = match?.group(1);
+        if (elementType == null) {
+          continue;
+        }
+
+        if (elementType == 'any') {
+          anyElement = true;
+          continue;
+        }
+
+        var element = elementMap[elementType];
+        if (element != null) {
+          elements.add(element);
+        }
+      }
+    }
+
+    return (elements, anyElement);
+  }
+
+  (List<Elements>, bool) getUseElements() {
+    List<Elements> elements = [];
+    bool anyElement = false;
+
+    var elementUseRegex = RegExp(patternElementUse());
 
     for (int i = 0; i < lines.length; i++) {
       var line = lines[i];
 
-      var match = elementActivateRegex.firstMatch(line);
+      var match = elementUseRegex.firstMatch(line);
       var elementType = match?.group(1);
       if (elementType == null) {
         continue;
@@ -287,6 +312,8 @@ class EffectHandler {
         return;
       }
 
+      _handleElements(data);
+
       for (var instance in data.monsterInstances) {
         var figure = FigureData(data.id, instance.getId());
         _applyRoundStartEffects(figure);
@@ -294,6 +321,8 @@ class EffectHandler {
     }
     if (data is Character) {
       var figure = FigureData(data.id, data.id);
+
+      _handleElements(data);
       _applyRoundStartEffects(figure);
     }
   }
@@ -331,8 +360,6 @@ class EffectHandler {
 
   static void _applyRoundStartEffects(FigureData figure) {
     var actionStats = ActionStats(attack: false);
-
-    _handleElements(figure);
 
     if (_isConditionActive(Condition.strengthen, figure) && _isConditionActive(Condition.muddle, figure)) {
       _removeCondition(Condition.strengthen, figure);
@@ -372,9 +399,8 @@ class EffectHandler {
     gameState.action(command);
   }
 
-  static void _handleElements(FigureData figure) {
+  static void _handleElements(ListItemData data) {
     var gameState = getIt<GameState>();
-    var data = figure.getOwner();
 
     if (data is Monster) {
       var ability = _getCurrentMonsterAbility(data);
@@ -383,8 +409,8 @@ class EffectHandler {
       }
 
       var parser = MonsterAbilityParser(ability);
-      var (useElements, useAny) = parser.getElements(ElementAction.use);
-      var (activateElements, activateAny) = parser.getElements(ElementAction.activate);
+      var (useElements, useAny) = parser.getUseElements();
+      var (activateElements, activateAny) = parser.getActivateElements();
 
       for (var element in useElements) {
         _useElement(data.id, element);
@@ -629,7 +655,7 @@ class EffectHandler {
   static void _activateAnyElement () {
     var gameState = getIt<GameState>();
 
-    var element = _getRandomElement([ElementState.half, ElementState.full]);
+    var element = _getRandomElement([ElementState.inert, ElementState.half]);
     if (element == null) {
       return;
     }
