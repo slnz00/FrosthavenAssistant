@@ -190,7 +190,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
     if (_initTextFieldController.text != character.characterState.initiative.value.toString() &&
         character.characterState.initiative.value != 0) {
 
-      if (secret) {
+      if (secret || settings.hideAllInitiatives.value) {
         _initTextFieldController.text = "??";
       } else {
         _initTextFieldController.text = character.characterState.initiative.value.toString();
@@ -224,7 +224,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
                 (_initTextFieldController.text.isNotEmpty || secret)) {
               //handle secret if originating from other device
 
-              if (secret) {
+              if (secret || getIt<Settings>().hideAllInitiatives.value) {
                 _initTextFieldController.text = "??";
               } else {
                 _initTextFieldController.text =
@@ -233,6 +233,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
                 CharacterWidget.localCharacterInitChanges.remove(character.id);
               }
             }
+
             if (_gameState.roundState.value == RoundState.playTurns &&
                 isCharacter) {
               CharacterWidget.localCharacterInitChanges.clear();
@@ -258,6 +259,10 @@ class CharacterWidgetState extends State<CharacterWidget> {
                   onFocusChange: (hasFocus) {
                     if (!hasFocus && _initTextFieldController.text.isNotEmpty) {
                       widget.onInitNumberProvided();
+
+                      if (getIt<Settings>().hideAllInitiatives.value) {
+                        _initTextFieldController.text = "??";
+                      }
                     }
                     if (!hasFocus && _initTextFieldController.text.isEmpty) {
                       resetInitiativeText();

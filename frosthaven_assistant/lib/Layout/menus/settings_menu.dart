@@ -85,6 +85,15 @@ class SettingsMenuState extends State<SettingsMenu> {
                                     });
                                   }),
                               CheckboxListTile(
+                                  title: const Text("Hide all initiatives"),
+                                  value: settings.hideAllInitiatives.value,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      settings.hideAllInitiatives.value = value!;
+                                      settings.saveToDisk();
+                                    });
+                                  }),
+                              CheckboxListTile(
                                   title: const Text("Auto-focus on empty initiatives"),
                                   value: settings.focusEmptyInitiatives.value,
                                   onChanged: (bool? value) {

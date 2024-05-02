@@ -40,6 +40,7 @@ class Settings {
   //used for both initiative and search menus
   final softNumpadInput = ValueNotifier<bool>(false);
   final focusEmptyInitiatives = ValueNotifier<bool>(false);
+  final hideAllInitiatives = ValueNotifier<bool>(false);
 
   final style = ValueNotifier<Style>(Style.original);
 
@@ -180,6 +181,9 @@ class Settings {
       if (data["focusEmptyInitiatives"] != null) {
         focusEmptyInitiatives.value = data["focusEmptyInitiatives"];
       }
+      if (data["hideAllInitiatives"] != null) {
+        hideAllInitiatives.value = data["hideAllInitiatives"];
+      }
       if (data["darkMode"] != null) {
         darkMode.value = data["darkMode"];
       }
@@ -263,6 +267,7 @@ class Settings {
         '"fullScreen": ${fullScreen.value}, '
         '"softNumpadInput": ${softNumpadInput.value}, '
         '"focusEmptyInitiatives": ${focusEmptyInitiatives.value}, '
+        '"hideAllInitiatives": ${hideAllInitiatives.value}, '
         '"noInit": ${noInit.value}, '
         '"noStandees": ${noStandees.value}, '
         '"randomStandees": ${randomStandees.value}, '
