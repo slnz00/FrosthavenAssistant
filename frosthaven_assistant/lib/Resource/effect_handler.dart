@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
 import 'package:frosthaven_assistant/Model/MonsterAbility.dart';
 import 'package:frosthaven_assistant/Resource/commands/imbue_element_command.dart';
@@ -312,17 +313,21 @@ class EffectHandler {
         return;
       }
 
+      _handleInstances(data, data.monsterInstances);
       _handleElements(data);
-
-      for (var instance in data.monsterInstances) {
-        var figure = FigureData(data.id, instance.getId());
-        _applyRoundStartEffects(figure);
-      }
     }
     if (data is Character) {
       var figure = FigureData(data.id, data.id);
 
       _handleElements(data);
+      _handleInstances(data, data.characterState.summonList);
+      _applyRoundStartEffects(figure);
+    }
+  }
+
+  static void _handleInstances(ListItemData owner, BuiltList<MonsterInstance> instances) {
+    for (var instance in instances) {
+      var figure = FigureData(owner.id, instance.getId());
       _applyRoundStartEffects(figure);
     }
   }
