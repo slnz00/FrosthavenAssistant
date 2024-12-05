@@ -47,12 +47,16 @@ class MonsterBox extends StatefulWidget {
 
 class MonsterBoxState extends State<MonsterBox> {
   late MonsterInstance data;
+  late String instanceId;
+
+  final GameState _gameState = getIt<GameState>();
 
   @override
   void initState() {
     super.initState();
     data = GameMethods.getFigure(widget.ownerId, widget.figureId)
         as MonsterInstance;
+    instanceId = data.getId();
   }
 
   List<Widget> createConditionList(double scale) {
@@ -126,6 +130,8 @@ class MonsterBoxState extends State<MonsterBox> {
       }
     }
 
+    var shieldValue = _gameState.characterShields.value[instanceId] ?? 0;
+
     return ColorFiltered(
         //gray out if summoned this turn and it's still the character's/monster's turn
         colorFilter: (data.roundSummoned == getIt<GameState>().round.value &&
@@ -182,59 +188,87 @@ class MonsterBoxState extends State<MonsterBox> {
                       color: color, fontSize: 20 * scale, shadows: [shadow]),
                 ),
               ),
-              Positioned(
-                left: data.health.value > 99 ? 22 * scale : 23 * scale,
-                //width: width-20*scale,
-                top: 0,
 
-                child: Container(
-                    padding: EdgeInsets.zero,
-                    margin: EdgeInsets.zero,
-                    child: Row(children: [
-                      Column(children: [
-                        Image(
-                          //fit: BoxFit.contain,
-                          color: Colors.red,
-                          height: 7 * scale,
-                          image: const AssetImage("assets/images/blood.png"),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(bottom: 2 * scale),
-                          width: data.health.value > 99
-                              ? 21 * scale
-                              : 16.8 * scale,
-                          alignment: Alignment.center,
-                          child: Text(
-                            textAlign: TextAlign.end,
-                            "${data.health.value}",
-                            style: TextStyle(
-                                height: 1,
-                                color: Colors.white,
-                                fontSize: 16 * scale,
-                                shadows: [shadow]),
-                          ),
-                        )
-                      ]),
-                      SizedBox(
-                        width:
-                            data.health.value > 99 ? 4.5 * scale : 6.5 * scale,
+              Positioned(
+              left: shieldValue > 99 ? 22 * scale : 23 * scale,
+              //width: width-20*scale,
+              top: 0,
+
+              child: Container(
+                  padding: EdgeInsets.zero,
+                  margin: EdgeInsets.zero,
+                  child: Row(children: [
+                    Column(children: [
+                      Image(
+                        //fit: BoxFit.contain,
+                        color: Colors.red,
+                        height: 7 * scale,
+                        image: const AssetImage("assets/images/blood.png"),
                       ),
-                      ValueListenableBuilder<List<Condition>>(
-                          valueListenable: data.conditions, //todo: dont use valuelistenabel for lists or sets
-                          builder: (context, value, child) {
-                            return SizedBox(
-                                height: 30 * scale,
-                                child: Wrap(
-                                  spacing: 0,
-                                  runSpacing: 0,
-                                  direction: Axis.vertical,
-                                  alignment: WrapAlignment.center,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: createConditionList(scale),
-                                ));
-                          }),
-                    ])),
-              ),
+                      Container(
+                        margin: EdgeInsets.only(bottom: 2 * scale),
+                        width: data.health.value > 99
+                            ? 21 * scale
+                            : 16.8 * scale,
+                        alignment: Alignment.center,
+                        child: Text(
+                          textAlign: TextAlign.end,
+                          "${data.health.value}",
+                          style: TextStyle(
+                              height: 1,
+                              color: Colors.white,
+                              fontSize: 16 * scale,
+                              shadows: [shadow]),
+                        ),
+                      ),
+                    ]),
+                    Column(children: [
+                      Image(
+                        //fit: BoxFit.contain,
+                        color: Colors.white,
+                        height: 7 * scale,
+                        colorBlendMode: BlendMode.modulate,
+                        image: const AssetImage("assets/images/abilities/shield_fh.png"),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(bottom: 2 * scale),
+                        width: data.health.value > 99
+                            ? 21 * scale
+                            : 16.8 * scale,
+                        alignment: Alignment.center,
+                        child: Text(
+                          textAlign: TextAlign.end,
+                          "${data.health.value}",
+                          style: TextStyle(
+                              height: 1,
+                              color: Colors.white,
+                              fontSize: 16 * scale,
+                              shadows: [shadow]),
+                        ),
+                      ),
+                    ]),
+                    SizedBox(
+                      width:
+                      data.health.value > 99 ? 4.5 * scale : 6.5 * scale,
+                    ),
+                    ValueListenableBuilder<List<Condition>>(
+                        valueListenable: data.conditions, //todo: dont use valuelistenabel for lists or sets
+                        builder: (context, value, child) {
+                          return SizedBox(
+                              height: 30 * scale,
+                              child: Wrap(
+                                spacing: 0,
+                                runSpacing: 0,
+                                direction: Axis.vertical,
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: createConditionList(scale),
+                              ));
+                        }
+                    ),
+                  ])),
+            ),
+
               Container(
                   //the hp bar
                   margin: EdgeInsets.only(
@@ -305,12 +339,15 @@ class MonsterBoxState extends State<MonsterBox> {
           figureId: widget.figureId,
           ownerId: widget.ownerId,
           child: AnimatedContainer(
-              //makes it grow nicely when adding conditions
-              key: Key(figureId.toString()),
-              width: width,
-              curve: Curves.easeInOut,
-              duration: const Duration(milliseconds: 300),
-              child: ValueListenableBuilder<int>(
+            //makes it grow nicely when adding conditions
+            key: Key(figureId.toString()),
+            width: width,
+            curve: Curves.easeInOut,
+            duration: const Duration(milliseconds: 300),
+            child: ValueListenableBuilder<dynamic>(
+              valueListenable: _gameState.characterShields,
+              builder: (context, characterShields, child) {
+                return ValueListenableBuilder<int>(
                   valueListenable: data.health,
                   builder: (context, value, child) {
                     bool alive = true;
@@ -344,7 +381,11 @@ class MonsterBoxState extends State<MonsterBox> {
                             opacityDisabled: 0,
                             opacityEnabled: 1,
                             child: child));
-                  })),
+                  }
+                );
+              }
+            ),
+          ),
         ));
   }
 }
