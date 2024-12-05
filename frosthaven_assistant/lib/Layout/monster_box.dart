@@ -17,22 +17,37 @@ class MonsterBox extends StatefulWidget {
   final bool blockInput;
   final double scale;
 
-  const MonsterBox(
-      {Key? key,
-      required this.figureId,
-      required this.ownerId,
-      required this.displayStartAnimation,
-      required this.blockInput,
-      required this.scale})
+  const MonsterBox({Key? key,
+    required this.figureId,
+    required this.ownerId,
+    required this.displayStartAnimation,
+    required this.blockInput,
+    required this.scale})
       : super(key: key);
 
   static const double conditionSize = 14;
+
+  static double getBoxBaseWidth(MonsterInstance data) {
+    if (data.health.value == 0) {
+      return 0;
+    }
+
+    double width = 47;
+    int shieldValue = getShieldValue(data);
+
+    if (shieldValue > 0) {
+      width += 16;
+    }
+
+    return width;
+  }
 
   static double getWidth(double scale, MonsterInstance data) {
     if (data.health.value == 0) {
       return 0;
     }
-    double width = 47; //some margin there
+
+    double width = getBoxBaseWidth(data);
     width += conditionSize * data.conditions.value.length / 2;
     if (data.conditions.value.length % 2 != 0) {
       width += conditionSize / 2;
@@ -41,18 +56,29 @@ class MonsterBox extends StatefulWidget {
     return width;
   }
 
+  static int getShieldValue(MonsterInstance data) {
+    var instanceId = data.getFullId();
+    var gameState = getIt<GameState>();
+
+    return gameState.characterShields.value[instanceId] ?? 0;
+  }
+
   @override
   MonsterBoxState createState() => MonsterBoxState();
 }
 
 class MonsterBoxState extends State<MonsterBox> {
   late MonsterInstance data;
+  late String instanceId;
+
+  final GameState _gameState = getIt<GameState>();
 
   @override
   void initState() {
     super.initState();
     data = GameMethods.getFigure(widget.ownerId, widget.figureId)
-        as MonsterInstance;
+    as MonsterInstance;
+    instanceId = data.getId();
   }
 
   List<Widget> createConditionList(double scale) {
@@ -126,10 +152,12 @@ class MonsterBoxState extends State<MonsterBox> {
       }
     }
 
+    var shieldValue = MonsterBox.getShieldValue(data);
+
     return ColorFiltered(
-        //gray out if summoned this turn and it's still the character's/monster's turn
+      //gray out if summoned this turn and it's still the character's/monster's turn
         colorFilter: (data.roundSummoned == getIt<GameState>().round.value &&
-                ownerIsCurrent)
+            ownerIsCurrent)
             ? ColorFilter.matrix(grayScale)
             : ColorFilter.matrix(identity),
         child: Container(
@@ -151,17 +179,20 @@ class MonsterBoxState extends State<MonsterBox> {
             child: Stack(alignment: Alignment.centerLeft, children: [
               Image(
                 height: 30 * scale,
-                width: 47 * scale,
+                width: MonsterBox.getBoxBaseWidth(data) * scale,
                 fit: BoxFit.fill,
                 color: borderColor,
                 colorBlendMode: blendMode,
-                // (works but not great),// BlendMode.modulate/color (good for boss), //BlendMode.saturation,(not good for bosss)
-                //scale up disregarding aspect ratio
+                // (works but not great),// BlendMode.modulate/color (good for boss), //BlendMode.saturation,(not good for boss)
+                // scale up disregarding aspect ratio
                 image: const AssetImage("assets/images/psd/monster-box.png"),
               ),
               Container(
                 margin: EdgeInsets.only(
-                    left: 3 * scale, top: 3 * scale, bottom: 2 * scale),
+                    left: shieldValue > 0 ? 4 * scale : 3 * scale,
+                    top: 3 * scale,
+                    bottom: 2 * scale
+                ),
                 child: Image(
                   //fit: BoxFit.contain,
                   height: 100 * scale,
@@ -175,31 +206,34 @@ class MonsterBoxState extends State<MonsterBox> {
                 width: 22 * scale,
                 //baked in edge insets to line up with picture
                 top: 1 * scale,
+                left: shieldValue > 0 ? 1 * scale : 0 * scale,
                 child: Text(
                   textAlign: TextAlign.center,
                   standeeNr,
                   style: TextStyle(
-                      color: color, fontSize: 20 * scale, shadows: [shadow]),
+                      color: color, fontSize: 20 * scale, shadows: [shadow]
+                  ),
                 ),
               ),
               Positioned(
-                left: data.health.value > 99 ? 22 * scale : 23 * scale,
-                //width: width-20*scale,
-                top: 0,
-
+                left: data.health.value > 99 ? 22 * scale : 23.5 * scale,
+                top: 2.5 * scale,
                 child: Container(
                     padding: EdgeInsets.zero,
                     margin: EdgeInsets.zero,
                     child: Row(children: [
                       Column(children: [
-                        Image(
-                          //fit: BoxFit.contain,
-                          color: Colors.red,
-                          height: 7 * scale,
-                          image: const AssetImage("assets/images/blood.png"),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 0.5 * scale),
+                          child: Image(
+                            //fit: BoxFit.contain,
+                            color: Colors.red,
+                            height: 7 * scale,
+                            image: const AssetImage("assets/images/blood.png"),
+                          ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(bottom: 2 * scale),
+                          margin: EdgeInsets.only(bottom: 1 * scale),
                           width: data.health.value > 99
                               ? 21 * scale
                               : 16.8 * scale,
@@ -211,38 +245,72 @@ class MonsterBoxState extends State<MonsterBox> {
                                 height: 1,
                                 color: Colors.white,
                                 fontSize: 16 * scale,
-                                shadows: [shadow]),
+                                shadows: [shadow]
+                            ),
                           ),
-                        )
+                        ),
                       ]),
-                      SizedBox(
-                        width:
-                            data.health.value > 99 ? 4.5 * scale : 6.5 * scale,
-                      ),
-                      ValueListenableBuilder<List<Condition>>(
-                          valueListenable: data.conditions, //todo: dont use valuelistenabel for lists or sets
-                          builder: (context, value, child) {
-                            return SizedBox(
-                                height: 30 * scale,
-                                child: Wrap(
-                                  spacing: 0,
-                                  runSpacing: 0,
-                                  direction: Axis.vertical,
-                                  alignment: WrapAlignment.center,
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  children: createConditionList(scale),
-                                ));
-                          }),
+                      Column(children: [ if (shieldValue > 0) ...[
+                        Container(
+                          margin: EdgeInsets.only(bottom: 0.5 * scale),
+                          child: Image(
+                            //fit: BoxFit.contain,
+                            color: Colors.white,
+                            height: 7 * scale,
+                            colorBlendMode: BlendMode.modulate,
+                            image: const AssetImage(
+                                "assets/images/abilities/shield_fh.png"),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 1 * scale),
+                          width: shieldValue > 99
+                              ? 21 * scale
+                              : 16.8 * scale,
+                          alignment: Alignment.center,
+                          child: Text(
+                            textAlign: TextAlign.end,
+                            "$shieldValue",
+                            style: TextStyle(
+                                height: 1,
+                                color: Colors.white,
+                                fontSize: 16 * scale,
+                                shadows: [shadow]
+                            ),
+                          ),
+                        ),
+                      ]
+                      ]),
                     ])),
               ),
+              Positioned(
+                  top: 0,
+                  left: (MonsterBox.getBoxBaseWidth(data) - 0.5) * scale,
+                  child: ValueListenableBuilder<List<Condition>>(
+                      valueListenable: data.conditions,
+                      builder: (context, value, child) {
+                        return SizedBox(
+                            height: 30 * scale,
+                            child: Wrap(
+                              spacing: 0,
+                              runSpacing: 0,
+                              direction: Axis.vertical,
+                              alignment: WrapAlignment.center,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: createConditionList(scale),
+                            )
+                        );
+                      }
+                  )),
               Container(
-                  //the hp bar
+                //the hp bar
                   margin: EdgeInsets.only(
-                      bottom: 2.5 * scale,
-                      left: 2.5 * scale,
-                      right: 2.7 * scale),
+                    bottom: 2.5 * scale,
+                    left: shieldValue > 0 ? 3.7 * scale : 2.7 * scale,
+                  ),
                   alignment: Alignment.bottomCenter,
-                  width: 42 * scale,
+                  width: (MonsterBox.getBoxBaseWidth(data) -
+                      (shieldValue > 0 ? 7.7 : 5.5)) * scale,
                   child: ValueListenableBuilder<int>(
                       valueListenable: data.maxHealth,
                       builder: (context, value, child) {
@@ -280,7 +348,6 @@ class MonsterBoxState extends State<MonsterBox> {
       color = Colors.red;
     }
 
-    double width = MonsterBox.getWidth(scale, data);
     String figureId = data.getId();
     String? characterId;
     if (widget.ownerId != data.name) {
@@ -288,29 +355,35 @@ class MonsterBoxState extends State<MonsterBox> {
     }
 
     return GestureDetector(
-        onTap: () {
-          //open stats menu
-          if (!widget.blockInput) {
-            openDialog(
-              context,
-              ActionMenu(
-                  figureId: figureId,
-                  monsterId: getMonsterId(),
-                  characterId: characterId
-              ),
-            );
-          }
-        },
-        child: HealthWheelController(
-          figureId: widget.figureId,
-          ownerId: widget.ownerId,
-          child: AnimatedContainer(
+      onTap: () {
+        //open stats menu
+        if (!widget.blockInput) {
+          openDialog(
+            context,
+            ActionMenu(
+                figureId: figureId,
+                monsterId: getMonsterId(),
+                characterId: characterId
+            ),
+          );
+        }
+      },
+      child: ValueListenableBuilder<dynamic>(
+        valueListenable: _gameState.characterShields,
+        builder: (context, value, child) {
+          double width = MonsterBox.getWidth(scale, data);
+
+          return HealthWheelController(
+            figureId: widget.figureId,
+            ownerId: widget.ownerId,
+            child: AnimatedContainer(
               //makes it grow nicely when adding conditions
-              key: Key(figureId.toString()),
-              width: width,
-              curve: Curves.easeInOut,
-              duration: const Duration(milliseconds: 300),
-              child: ValueListenableBuilder<int>(
+                key: Key(figureId.toString()),
+                width: width,
+                curve: Curves.easeInOut,
+                duration: const Duration(milliseconds: 300),
+                child:
+                ValueListenableBuilder<int>(
                   valueListenable: data.health,
                   builder: (context, value, child) {
                     bool alive = true;
@@ -326,7 +399,8 @@ class MonsterBoxState extends State<MonsterBox> {
                       return TranslationAnimatedWidget.tween(
                           enabled: !alive && !widget.blockInput,
                           translationDisabled: const Offset(0, 0),
-                          translationEnabled: Offset(0, alive ? 0 : -offset),
+                          translationEnabled: Offset(
+                              0, alive ? 0 : -offset),
                           duration: const Duration(milliseconds: 600),
                           curve: Curves.linear,
                           child: child);
@@ -335,8 +409,10 @@ class MonsterBoxState extends State<MonsterBox> {
                     return TranslationAnimatedWidget.tween(
                         enabled: true,
                         //fix is to only set enabled on added/removed ones?
-                        translationDisabled: Offset(0, alive ? offset : 0),
-                        translationEnabled: Offset(0, alive ? 0 : -offset),
+                        translationDisabled: Offset(
+                            0, alive ? offset : 0),
+                        translationEnabled: Offset(
+                            0, alive ? 0 : -offset),
                         duration: const Duration(milliseconds: 600),
                         curve: Curves.linear,
                         child: OpacityAnimatedWidget.tween(
@@ -344,7 +420,12 @@ class MonsterBoxState extends State<MonsterBox> {
                             opacityDisabled: 0,
                             opacityEnabled: 1,
                             child: child));
-                  })),
-        ));
+                  }
+                )
+            ),
+          );
+        }
+      )
+    );
   }
 }

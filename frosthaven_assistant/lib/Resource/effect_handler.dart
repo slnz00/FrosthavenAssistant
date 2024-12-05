@@ -29,6 +29,10 @@ class FigureData {
     return null;
   }
 
+  String getFullId () {
+    return state.getFullId();
+  }
+
   FigureData(this.ownerId, this.figureId) {
     state = GameMethods.getFigure(ownerId, figureId)!;
   }
@@ -606,7 +610,7 @@ class EffectHandler {
 
     if (owner is Character) {
       var gameState = getIt<GameState>();
-      var baseShield = gameState.characterShields.value[owner.id] ?? 0;
+      var baseShield = gameState.characterShields.value[figure.getFullId()] ?? 0;
       var shieldAmount = baseShield + characterShieldModifier - pierceAmount;
 
       if (shieldAmount < 0) {

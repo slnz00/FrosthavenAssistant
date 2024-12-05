@@ -14,6 +14,7 @@ import '../../Resource/commands/change_stat_commands/change_health_command.dart'
 import '../../Resource/commands/ice_wraith_change_form_command.dart';
 import '../../Resource/commands/remove_condition_command.dart';
 import '../../Resource/commands/set_as_summon_command.dart';
+import '../../Resource/effect_handler.dart';
 import '../../Resource/enums.dart';
 import '../../Resource/state/game_state.dart';
 import '../../Resource/settings.dart';
@@ -623,12 +624,16 @@ class StatusMenuState extends State<StatusMenu> {
                           true,
                           Colors.white,
                           getValue: () {
-                            if (widget.characterId == null) {
+                            var figure = GameMethods.getFigure(ownerId, figureId);
+
+                            if (figure == null || widget.characterId == null) {
                               return 0;
                             }
 
+                            var fullId = figure.getFullId();
+
                             var shieldMap = _gameState.characterShields.value;
-                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+                            var shieldAmount = shieldMap[fullId] ?? 0;
 
                             if (widget.attack) {
                               shieldAmount += widget.actionStats.characterShieldModifier.value;
@@ -637,12 +642,16 @@ class StatusMenuState extends State<StatusMenu> {
                             return shieldAmount;
                           },
                           callback: (int change) {
-                            if (widget.characterId == null) {
+                            var figure = GameMethods.getFigure(ownerId, figureId);
+
+                            if (figure == null || widget.characterId == null) {
                               return false;
                             }
 
+                            var fullId = figure.getFullId();
+
                             var shieldMap = _gameState.characterShields.value;
-                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+                            var shieldAmount = shieldMap[fullId] ?? 0;
                             var modifier = widget.actionStats.characterShieldModifier.value;
 
                             if (widget.attack && shieldAmount + modifier + change < 0) {
@@ -655,7 +664,7 @@ class StatusMenuState extends State<StatusMenu> {
                             if (widget.attack) {
                               widget.actionStats.characterShieldModifier.value = modifier + change;
                             } else {
-                              shieldMap[widget.characterId!] = shieldAmount + change;
+                              shieldMap[fullId] = shieldAmount + change;
                               _gameState.characterShields.value = Map<String,int>.from(shieldMap);
                             }
 

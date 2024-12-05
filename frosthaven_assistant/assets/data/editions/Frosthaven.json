@@ -195,7 +195,7 @@
       "health": [8,9,11,12,14,15,17,18,20],
       "hidden": true,
       "color": "ffeb5b38",
-      "colorSecondary": "ff303030",
+      "colorSecondary": "ff2b0405",
       "summons": {}
     },
     {
@@ -233,7 +233,7 @@
       "health": [8,9,11,12,14,15,17,18,20],
       "hidden": true,
       "color": "ff7476a7",
-      "colorSecondary": "ff2b2b2b",
+      "colorSecondary": "ff1c1124",
       "summons": {
         "Flesh Fiend": {
           "level": 1,
@@ -257,7 +257,7 @@
       "health": [8,9,11,12,14,15,17,18,20],
       "hidden": true,
       "color": "ff83b5be",
-      "colorSecondary": "ff4b4b4d",
+      "colorSecondary": "ff83b5be",
       "summons": {
         "Snow Fox": {
           "level": 1,
@@ -425,7 +425,7 @@
       "health": [10, 12, 14, 16, 18, 20, 22, 24, 26],
       "hidden": true,
       "color": "ffad8f68",
-      "colorSecondary": "ff363637",
+      "colorSecondary": "ff190e02",
       "summons": {}
     }
   ],
@@ -907,7 +907,7 @@
         ["Face of Darkness", 651, false, 82,"%move% - 1", "*.........","%attack% + 1","[r]","%dark%%use%",  "^%disarm%", "[/r]"],
         ["Arresting Advance", 652, false, 32, "%move% + 1", "*.........","%attack% - 1","[r]","%ice%%use%",  "^%immobilize%", "[/r]"],
         ["Nothing Special", 653, false, 57, "%move% + 0", "*.........","%attack% + 0", "%dark%"],
-        ["Sunless Abyss", 654, false, 11, "%curse%", "^%range% 2","*.........","%shield% + 1", "*.........","%retaliate% + 2", "[r]","%ice%","Å.", "%dark%", "[/r]"],
+        ["Sunless Abyss", 654, false, 11, "%curse%", "^%range% 2","*.........","%shield% + 1", "*.........","%retaliate% + 2","^%range% 2", "[r]","%ice%","Å.", "%dark%", "[/r]"],
         ["Hateful Spikes", 655, false, 17,  "%attack% + 1","*.........","%retaliate% + 2", "%dark%"],
         ["Pull of the Grave", 656, true, 98, "%move% + 1", "*.........","%attack% - 3","^%bane%"],
         ["Call for Souls", 657, true, 78,  "Summon X normal","Living Spirits", "Å*", "^Where X is the Living","^^Doom's current hit point value", "^^divided by 5 (rounded down)," ,"^^up to a maximum of three."]
@@ -1451,6 +1451,55 @@
           "level": 7,
           "normal": { "health": 17, "move": 3, "attack": 4, "attributes": [ "%shield% 3","%retaliate% 2" ]},
           "elite": { "health": 20, "move": 3, "attack": 5, "attributes": [ "%shield% 4","%retaliate% 5"]}
+        }
+      ]
+    },
+    "City Guard Scenario 129": {
+      "display": "City Guard",
+      "gfx": "City Guard",
+      "deck": "Archer (FH)",
+      "hidden": true,
+      "count": 6,
+      "levels": [
+        {
+          "level": 0,
+          "normal": { "health": 5, "move": 2, "attack": 2 },
+          "elite": { "health": 6,  "move": 2,  "attack": 3, "attributes": [ "%shield% 1" ]}
+        },
+        {
+          "level": 1,
+          "normal": { "health": 5, "move": 2, "attack": 2, "attributes": [ "%shield% 1" ]},
+          "elite": { "health": 6, "move": 2, "attack": 3, "attributes": [ "%shield% 2" ]}
+        },
+        {
+          "level": 2,
+          "normal": { "health": 7, "move": 2, "attack": 2, "attributes": [ "%shield% 1" ]},
+          "elite": { "health": 9, "move": 2, "attack": 3, "attributes": [ "%shield% 2" ]}
+        },
+        {
+          "level": 3,
+          "normal": { "health": 8, "move": 2, "attack": 3, "attributes": [ "%shield% 1" ]},
+          "elite": { "health": 9, "move": 2, "attack": 4, "attributes": [ "%shield% 2", "%retaliate% 1"]}
+        },
+        {
+          "level": 4,
+          "normal": { "health": 9, "move": 3, "attack": 3, "attributes": [ "%shield% 1" ]},
+          "elite": { "health": 10, "move": 3, "attack": 4, "attributes": [  "%shield% 2","%retaliate% 2"]}
+        },
+        {
+          "level": 5,
+          "normal": { "health": 10, "move": 3, "attack": 3, "attributes": [ "%shield% 2" ]},
+          "elite": { "health": 13, "move": 3, "attack": 4, "attributes": [  "%shield% 2","%retaliate% 2"]}
+        },
+        {
+          "level": 6,
+          "normal": { "health": 13, "move": 3, "attack": 4, "attributes": [ "%shield% 2" ]},
+          "elite": { "health": 15, "move": 3, "attack": 4, "attributes": [ "%shield% 3","%retaliate% 3" ]}
+        },
+        {
+          "level": 7,
+          "normal": { "health": 17, "move": 3, "attack": 4, "attributes": [ "%shield% 2" ]},
+          "elite": { "health": 20, "move": 3, "attack": 5, "attributes": [ "%shield% 3","%retaliate% 3"]}
         }
       ]
     },
@@ -2614,12 +2663,12 @@
         {
           "level": 6,
           "normal": { "health": 5, "move": 3, "attack": 4, "attributes": [  "%shield% 3","%muddle%" ]},
-          "elite": { "health": 8, "move": 3, "attack": 5, "attributes": [  "%shield% 5","%muddle%" ]}
+          "elite": { "health": 8, "move": 3, "attack": 5, "attributes": [  "%shield% 4","%muddle%" ]}
         },
         {
           "level": 7,
           "normal": { "health": 8, "move": 3, "attack": 4, "attributes": [ "%shield% 3","%muddle%" ]},
-          "elite": { "health": 11, "move": 3, "attack": 5, "attributes": [ "%shield% 5","%muddle%" ]}
+          "elite": { "health": 11, "move": 3, "attack": 5, "attributes": [ "%shield% 4","%muddle%" ]}
         }
       ]
     },
@@ -2929,13 +2978,13 @@
       "levels": [
         {
           "level": 0, "health": 6, "move": 1, "attack": 2, "attributes": ["%retaliate% 1", "^%range% 5"]
-       },
+        },
         {
           "level": 1, "health": 7, "move": 1, "attack": 3,"attributes": ["%retaliate% 1", "^%range% 5"]
         },
         {
           "level": 2, "health": 9, "move": 2, "attack": 3,"attributes": ["%retaliate% 1", "^%range% 5"]
-       },
+        },
         {
           "level": 3, "health": 12, "move": 2, "attack": 3,"attributes":["%retaliate% 1", "^%range% 5"]
         },
@@ -4339,7 +4388,7 @@
     },
     "Polar Bear": {
       "deck": "Polar Bear",
-      "count": 4,
+      "count": 6,
       "levels": [
         {
           "level": 0,
@@ -5837,7 +5886,7 @@
           "attributes": ["%wound%"],
           "special1": [ "^%teleport% to farthest carving and destroy it.","**.........", "%attack% + 2", "^%target% 5,", "^%push% 2"],
           "special2": [ "^Destroy all adjacent carvings.","**.........","%pull% 2","^%target% C,","^%range% 5,", "**.........","%attack% - 1","^%target% all adjacent enemies","**.........","%heal% C","^Self"],
-         "immunities": [ "%brittle%","%immobilize%","%disarm%", "%stun%", "%curse%" ]
+          "immunities": [ "%brittle%","%immobilize%","%disarm%", "%stun%", "%curse%" ]
         },
         {
           "level": 6,
@@ -5847,7 +5896,7 @@
           "attributes": ["%wound%"],
           "special1": [ "^%teleport% to farthest carving and destroy it.","**.........", "%attack% + 2", "^%target% 5,", "^%push% 2"],
           "special2": [ "^Destroy all adjacent carvings.","**.........","%pull% 2","^%target% C,","^%range% 5,", "**.........","%attack% - 1","^%target% all adjacent enemies","**.........","%heal% C","^Self"],
-         "immunities": [ "%brittle%","%immobilize%","%disarm%", "%stun%", "%curse%" ]
+          "immunities": [ "%brittle%","%immobilize%","%disarm%", "%stun%", "%curse%" ]
         },
         {
           "level": 7,
@@ -6242,7 +6291,8 @@
   "scenarios": {
     "#0 Howling in the Snow": {
       "monsters": [ "Hound Scenario 0" ],
-      "lootDeck": {"coin":8,"lumber": 2,"metal":2,"hide": 2}
+      "lootDeck": {"coin":8,"lumber": 2,"metal":2,"hide": 2},
+      "initialMessage": "Masteries cannot be completed in this scenario."
     },
     "#1 A Town in Flames": {
       "monsters": [ "Algox Archer", "Algox Guard", "Algox Priest", "City Guard Scenario 1" ],
@@ -6580,15 +6630,15 @@
           "condition": "C<3",
           "note": "should spawn only 4-C helpers"
         }
-        ],
+      ],
       "sections": {
         "#25.3 Haunted Vault (17)": {
-          "initialMessage": "ERRATA: When Door 1 is opened, read section 62.3"
+          "initialMessage": "1st printing ERRATA: When Door 1 (not door 3) is opened, read section 62.3"
         }
       }
     },
     "#18 Crystal Fields": {
-      "initialMessage": "ERRATA: Map layout and map: The right 11 tile should be 11-C.",
+      "initialMessage": "1st printing ERRATA: Map layout and map: The right 11 tile should be 11-C.",
       "monsters": [ "Algox Guard", "Burrowing Blade", "Frozen Corpse" ],
       "lootDeck": {"coin":6,"lumber": 3,"metal":2,"hide": 5,"corpsecap":1,"arrowvine":2, "snowthistle": 1},
       "special": [
@@ -6948,7 +6998,7 @@
           "health": "2x(L+2)",
           "init": 99
         }
-        ]
+      ]
     },
     "#29 War of the Spire A": {
       "monsters": [ "Algox Archer", "Algox Guard", "Algox Icespeaker", "Algox Priest", "Algox Scout"],
@@ -6958,7 +7008,7 @@
           "type": "Allies",
           "list": ["Algox Archer", "Algox Guard"]
         }
-        ]
+      ]
     },
     "#30 War of the Spire B": {
       "monsters": [ "Algox Archer", "Algox Guard", "Algox Icespeaker", "Algox Scout", "Algox Snowspeaker" ],
@@ -7094,7 +7144,7 @@
           "health": "Cx(L+3)d2",
           "init": 50
         }
-        ],
+      ],
       "sections": {
         "#117.3 Scrap Pit (35)": {
           "special": [
@@ -7123,7 +7173,7 @@
     "#36 Buried Ducts": {
       "monsters": [ "Flaming Bladespinner", "Robotic Boltshooter", "Ruined Machine" ],
       "lootDeck": {"coin":9,"lumber": 3,"metal":5,"arrowvine":2, "treasure": 1},
-      "initialMessage": "ERRATA: Missing reward for completing: item 67",
+      "initialMessage": "1st printing ERRATA: Missing reward for completing: item 67 blueprint.",
       "special": [
         {
           "type": "Objective",
@@ -7232,10 +7282,10 @@
     "#37 The Dead Mile": {
       "monsters": [ "Living Bones (FH)", "Living Spirit (FH)" ,"Ruined Machine" ],
       "lootDeck": {"coin":10,"lumber": 3,"metal":3,"rockroot":1,"arrowvine":2, "treasure": 1},
-      "initialMessage": "ERRATA: Missing reward for completing: item 67",
+      "initialMessage": "1st printing ERRATA: Missing reward for completing: item 67 blueprint.",
       "sections": {
         "#70.1 The Dead Mile (37)": {
-          "initialMessage": "ERRATA: Treasure Chest should be #56",
+          "initialMessage": "1st printing ERRATA: Treasure Chest should be #56",
           "special": [
             {
               "type": "ResetRound"
@@ -7697,7 +7747,7 @@
           "note": "Spawn 1 Lurker Soldier at A and 1 Lurker Mindsnipper at B. both normal for 2 characters, Mindsnipper elite for 3-4 and both elite for 4 characters.",
           "name": "spawn 1"
         }
-        ]
+      ]
     },
     "#54 Among the Wreckage": {
       "monsters": [ "Seeker of the Abyss", "Lightning Eel", "Lurker Clawcrusher", "Lurker Mindsnipper", "Lurker Soldier", "Lurker Wavethrower" ],
@@ -7829,7 +7879,7 @@
       "monsters": [ "Fracture of the Deep", "Lightning Eel", "Lurker Clawcrusher", "Lurker Mindsnipper", "Lurker Wavethrower" ],
       "lootDeck": {"coin":8,"arrowvine": 1,"axenut":1,"corpsecap": 1,"rockroot":1,"flamefruit":1,"snowthistle":1, "treasure": 1},
       "note": "didn't bother to make 3 fractured lieutenants (only +1 attack anyway)",
-      "initialMessage": "ERRATA: Missing reward for completing: item 224"
+      "initialMessage": "1st printing ERRATA: Missing reward for completing: item 224"
     },
     "#61 Life and Death": {
       "monsters": [ "Deep Terror (FH)", "Earth Demon (FH)", "Harrower Infester (FH)" ],
@@ -8184,7 +8234,7 @@
           "note": "Spawn Chaos Demons at both F. One normal each for 2 characters. One elite each for 3. One normal and one Elite each for 4 characters.",
           "name": "spawn 1"
         }
-        ]
+      ]
     },
     "#68 The Face of Torment": {
       "monsters": [ "Tormentor", "Chaos Demon (FH)","Earth Demon (FH)", "Flame Demon (FH)", "Frost Demon (FH)", "Night Demon (FH)", "Sun Demon (FH)", "Wind Demon (FH)" ],
@@ -8289,7 +8339,7 @@
         }],
       "sections": {
         "#111.2 Invasion of the Dock (71)": {
-          "initialMessage": "ERRATA: Map: Lurker Soldier should be Lurker Clawcrusher",
+          "initialMessage": "1st printing ERRATA: Map: Lurker Soldier should be Lurker Clawcrusher",
           "special": [
             {
               "type": "Escort",
@@ -8516,7 +8566,7 @@
     "#82 Expedition North": {
       "monsters": [ "Frost Demon (FH)", "Wind Demon (FH)" ],
       "lootDeck": {"coin":12,"rockroot":1,"arrowvine":1,"snowthistle":1, "treasure": 1},
-     "note": "I don't understand the moving corridors at all.",
+      "note": "I don't understand the moving corridors at all.",
       "special": [
         {
           "type": "Timer",
@@ -8752,7 +8802,7 @@
         {
           "type": "Allies",
           "list": ["Scabwit"]
-       },
+        },
         {
           "type": "Timer",
           "startOfRound": false,
@@ -9011,7 +9061,7 @@
         }],
       "sections": {
         "#14.2 Ruins of the Solstice (104)": {
-          "initialMessage": "ERRATA: Map: Ice Wraith should be Frost Demon"
+          "initialMessage": "1st printing ERRATA: Map: Ice Wraith should be Frost Demon"
         }
       }
     },
@@ -9023,19 +9073,19 @@
           "type": "Timer",
           "startOfRound": false,
           "list": [1,4,7,10,13,16,19,22,25,28],
-          "note": "All characters move 1 hex to the right. Move Air to row b."
+          "note": "All characters and character summons in air token row, move 1 hex to the right. Move Air to row b."
         },
         {
           "type": "Timer",
           "startOfRound": false,
           "list": [2,5,8,11,14,17,20,23,26,29],
-          "note": "All characters move 1 hex to the right. Move Air to row c."
+          "note": "All characters and character summons in air token row, move 1 hex to the right. Move Air to row c."
         },
         {
           "type": "Timer",
           "startOfRound": false,
           "list": [3,6,9,12,15,18,21,24,27,30],
-          "note": "All characters move 1 hex to the right. Move Air to row a."
+          "note": "All characters and character summons in air token row, move 1 hex to the right. Move Air to row a."
         }],
       "sections": {
         "#191.3 Ruins of the Equinox (105)": {
@@ -9046,8 +9096,8 @@
               "list": [-1],
               "note": "All characters suffer 1 damage."
             }]
-          }
         }
+      }
     },
     "#106 The Tempus Forge": {
       "monsters": [ "City Guard (FH)", "Earth Demon (FH)", "Flame Demon (FH)", "Frost Demon (FH)", "Wind Demon (FH)" ],
@@ -9114,7 +9164,12 @@
     },
     "#107 My Private Empire": {
       "monsters": [ "Flaming Bladespinner", "Living Bones (FH)", "Living Doom", "Living Spirit (FH)", "Robotic Boltshooter", "Ruined Machine", "Steel Automaton" ],
-      "lootDeck": {"coin":10,"lumber": 3,"metal":3,"flamefruit":1,"axenut":1,"arrowvine":1, "treasure": 1}
+      "lootDeck": {"coin":10,"lumber": 3,"metal":3,"flamefruit":1,"axenut":1,"arrowvine":1, "treasure": 1},
+      "sections": {
+        "#168.4 Furious Factory (109)": {
+          "initialMessage": "Treat the new monsters as spawns."
+        }
+      }
     },
     "#108 Lustrous Pit": {
       "monsters": [ "Ice Wraith", "Snow Imp" ],
@@ -9250,7 +9305,7 @@
       "lootDeck": {"coin":8,"lumber": 4,"rockroot":2,"arrowvine":2, "flamefruit": 1, "snowthistle": 2, "axenut": 1, "corpsecap":  1},
       "sections": {
         "#154.1 Lush Grotto (113)": {
-          "initialMessage": "ERRATA: Map: Black Imp should be Forest Imp"
+          "initialMessage": "1st printing ERRATA: Map: Black Imp should be Forest Imp"
         }
       }
     },
@@ -9468,7 +9523,7 @@
           "health": "3xL+5",
           "init": 99
         }]
-   },
+    },
     "#120 Under the Influence": {
       "monsters": [ "City Guard (FH)", "Hound (FH)" ,"Robotic Boltshooter", "Steel Automaton", "Vermling Priest", "Vermling Scout (FH)" ],
       "lootDeck": {"coin":8,"lumber": 4,"metal":4,"hide": 4},
@@ -9724,20 +9779,20 @@
           "list": [9],
           "note": "Read section 186.4."
         },
-      {
-        "type": "Timer",
-        "startOfRound": false,
-        "list": [9],
-        "note": "Scenario Complete! Read section 196.3."
-      }]
+        {
+          "type": "Timer",
+          "startOfRound": false,
+          "list": [9],
+          "note": "Scenario Complete! Read section 196.3."
+        }]
     },
     "#129 How to Lay an Ambush": {
-      "monsters": [ "Algox Guard", "Algox Priest", "Algox Scout", "City Guard (FH)" ],
+      "monsters": [ "Algox Guard", "Algox Priest", "Algox Scout", "City Guard Scenario 129" ],
       "lootDeck": {"coin":10,"lumber": 4,"metal":2,"hide": 2,"axenut":1,"snowthistle":1},
       "special": [
         {
           "type": "Allies",
-          "list": ["City Guard (FH)"]
+          "list": ["City Guard Scenario 129"]
         }],
       "sections": {
         "#154.2 How to Lay an Ambush (129)": {

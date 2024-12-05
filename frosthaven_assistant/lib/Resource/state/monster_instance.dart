@@ -27,6 +27,11 @@ class MonsterInstance extends FigureState {
     return name + gfx + standeeNr.toString();
   }
 
+  @override
+  String getFullId() {
+    return name + gfx + standeeNr.toString();
+  }
+
   late final int standeeNr;
 
   setType(_StateModifier stateModifier, MonsterType value) {_type = value;}

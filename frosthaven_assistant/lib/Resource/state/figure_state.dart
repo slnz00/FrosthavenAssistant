@@ -1,6 +1,6 @@
 part of 'game_state.dart';
 // ignore_for_file: library_private_types_in_public_api
-class FigureState {
+abstract class FigureState {
 
   ValueListenable<int> get health => _health;
   final _health = ValueNotifier<int>(0);
@@ -26,4 +26,6 @@ class FigureState {
   BuiltSet<Condition> get conditionsAddedPreviousTurn => BuiltSet.of(_conditionsAddedPreviousTurn);
   final Set<Condition> _conditionsAddedPreviousTurn = {};
   Set<Condition> getMutableConditionsAddedPreviousTurn(_StateModifier stateModifier) {return _conditionsAddedPreviousTurn;}
+
+  String getFullId();
 }

@@ -664,8 +664,13 @@ class CharacterWidgetState extends State<CharacterWidget> {
                         ValueListenableBuilder<dynamic>(
                             valueListenable: _gameState.characterShields,
                             builder: (context, value, child) {
+                              var figure = GameMethods.getFigure(widget.characterId, widget.characterId);
+                              var fullId = figure?.getFullId();
+                              var shieldMap = _gameState.characterShields.value;
+                              var value = (fullId != null ? shieldMap[fullId] : null) ?? 0;
+
                               return Text(
-                                (_gameState.characterShields.value[character.id] ?? 0).toString(),
+                                value.toString(),
                                 style: TextStyle(
                                     fontFamily: frosthavenStyle
                                         ? 'GermaniaOne'

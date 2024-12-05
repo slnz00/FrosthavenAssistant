@@ -20,18 +20,6 @@ class CharacterState extends FigureState {
   final List<MonsterInstance> _summonList = [];
 
   @override
-  String getFigureId() {
-    // TODO: implement getFigureId
-    throw UnimplementedError();
-  }
-
-  @override
-  String getOwnerId() {
-    // TODO: implement getOwnerId
-    throw UnimplementedError();
-  }
-
-  @override
   String toString() {
     return '{'
         '"initiative": ${initiative.value}, '
@@ -79,5 +67,10 @@ class CharacterState extends FigureState {
         _conditionsAddedPreviousTurn.add(Condition.values[item]);
       }
     }
+  }
+
+  @override
+  String getFullId() {
+    return display.value;
   }
 }
