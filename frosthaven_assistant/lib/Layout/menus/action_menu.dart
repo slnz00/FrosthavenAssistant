@@ -79,6 +79,11 @@ class ActionData {
 
   void _handleHealthChange() {
     var changeValue = healthChange.value;
+    var figure = GameMethods.getFigure(ownerId, figureId);
+
+    if (figure == null) {
+      return;
+    }
 
     if (attack && changeValue > 0) {
       changeValue *= -1;

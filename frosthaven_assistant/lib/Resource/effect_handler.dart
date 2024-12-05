@@ -309,12 +309,14 @@ class EffectHandler {
     gameState.setRoundFlag(data.id, Flags.roundStart);
 
     if (data is Monster) {
-      if (data.monsterInstances.isEmpty) {
-        return;
-      }
-
       _handleInstances(data, data.monsterInstances);
-      _handleElements(data);
+
+      var hasInstances = data.monsterInstances.isNotEmpty;
+      var notAllStunned = !_allInstancesAreStunned(data, data.monsterInstances);
+
+      if (hasInstances && notAllStunned) {
+        _handleElements(data);
+      }
     }
     if (data is Character) {
       var figure = FigureData(data.id, data.id);
@@ -323,6 +325,30 @@ class EffectHandler {
       _handleInstances(data, data.characterState.summonList);
       _applyRoundStartEffects(figure);
     }
+  }
+
+  static bool _allInstancesAreStunned(ListItemData owner, BuiltList<MonsterInstance> instances) {
+    for (var instance in instances) {
+      var figure = FigureData(owner.id, instance.getId());
+
+      if (!_isConditionActive(Condition.stun, figure)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  static bool _allInstancesAreCreatedThisRound(ListItemData owner, BuiltList<MonsterInstance> instances) {
+    for (var instance in instances) {
+      var figure = FigureData(owner.id, instance.getId());
+
+      if (!_isConditionActive(Condition.stun, figure)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   static void _handleInstances(ListItemData owner, BuiltList<MonsterInstance> instances) {
