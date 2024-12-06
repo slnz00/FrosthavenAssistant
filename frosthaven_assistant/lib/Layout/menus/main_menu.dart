@@ -105,12 +105,12 @@ Container createMainMenu(BuildContext context) {
                   child: Stack(
                     children: [
                       Positioned(
-                        right: 7,
-                        bottom: 3,
+                        right: 9,
+                        bottom: 4,
                         child: Text(
-                          "V 1.9.6",
+                          "1.10.0",
                           style: TextStyle(
-                            fontSize: 16
+                            fontSize: 15
                           )
                         )
                       )
