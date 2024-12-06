@@ -19,21 +19,21 @@ class FigureData {
   final String figureId;
   late final FigureState state;
 
-  ListItemData? getOwner () {
+  ListItemData? getOwner() {
     for (var item in getIt<GameState>().currentList) {
-       if (item.id == ownerId) {
-         return item;
-       }
+      if (item.id == ownerId) {
+        return item;
+      }
     }
 
     return null;
   }
 
-  String getBaseId () {
+  String getBaseId() {
     return state.getBaseId();
   }
 
-  String getFullId () {
+  String getFullId() {
     return state.getFullId();
   }
 
@@ -66,24 +66,24 @@ class MonsterAbilityParser {
     'light': Elements.light,
   };
 
-  static patternElementActivate () {
+  static patternElementActivate() {
     var elements = elementMap.keys.toList().join('|');
     return r'%(' + elements + '|any)%\$';
   }
 
-  static patternElementUse () {
+  static patternElementUse() {
     return r'%([^%]+)%%use%';
   }
 
-  static patternBaseValue (String attributeName) {
+  static patternBaseValue(String attributeName) {
     return r'%' + attributeName + '%[\\s]*([0-9]+)';
   }
 
-  static patternModifierValue1 (String attributeName) {
+  static patternModifierValue1(String attributeName) {
     return r'%' + attributeName + '%[\\s]*(.)[\\s]*([0-9]+)';
   }
 
-  static patternModifierValue2 (String attributeName) {
+  static patternModifierValue2(String attributeName) {
     return r'^(.)([0-9]+) %' + attributeName + '%';
   }
 
@@ -107,9 +107,11 @@ class MonsterAbilityParser {
     bool anyElement = false;
 
     var elementActivateRegex = RegExp(patternElementActivate());
+    var elementUseRegex = RegExp(patternElementUse());
 
     for (int i = 0; i < lines.length; i++) {
       var line = lines[i];
+      var prevLine = i > 0 ? lines[i-1] : null;
       var parts = line.split(" ");
 
       for (var part in parts) {
@@ -129,6 +131,14 @@ class MonsterAbilityParser {
           elements.add(element);
         }
       }
+
+      var useMatch = prevLine != null ? elementUseRegex.firstMatch(prevLine) : null;
+      var isConvert = elements.isNotEmpty && useMatch != null;
+
+      if (isConvert) {
+        elements.clear();
+        anyElement = false;
+      }
     }
 
     return (elements, anyElement);
@@ -139,11 +149,20 @@ class MonsterAbilityParser {
     bool anyElement = false;
 
     var elementUseRegex = RegExp(patternElementUse());
+    var elementActivateRegex = RegExp(patternElementActivate());
 
     for (int i = 0; i < lines.length; i++) {
       var line = lines[i];
+      var nextLine = i < lines.length - 1 ? lines[i+1] : null;
 
       var match = elementUseRegex.firstMatch(line);
+      var activateMatch = nextLine != null ? elementActivateRegex.firstMatch(nextLine) : null;
+
+      var isConvert = activateMatch != null;
+      if (isConvert) {
+        continue;
+      }
+
       var elementType = match?.group(1);
       if (elementType == null) {
         continue;
@@ -163,10 +182,50 @@ class MonsterAbilityParser {
     return (elements, anyElement);
   }
 
-  MonsterAbilityAttribute getAttribute (String attributeName) {
+  (Elements?, bool, Elements?, bool) getConvertElement() {
+    Elements? from;
+    bool fromAny = false;
+    Elements? to;
+    bool toAny = false;
+
+    var elementUseRegex = RegExp(patternElementUse());
+    var elementActivateRegex = RegExp(patternElementActivate());
+
+    for (int i = 0; i < lines.length - 1; i++) {
+      var line = lines[i];
+      var nextLine = lines[i + 1];
+
+      var useMatch = elementUseRegex.firstMatch(line);
+      var activateMatch = elementActivateRegex.firstMatch(nextLine);
+
+      var fromType = useMatch?.group(1);
+      var toType = activateMatch?.group(1);
+
+      if (fromType == null || toType == null) {
+        continue;
+      }
+
+      if (fromType == 'any') {
+        fromAny = true;
+      } else {
+        from = elementMap[fromType];
+      }
+
+      if (toType == 'any') {
+        toAny = true;
+      } else {
+        to = elementMap[toType];
+      }
+    }
+
+    return (from, fromAny, to, toAny);
+  }
+
+  MonsterAbilityAttribute getAttribute(String attributeName) {
     var attribute = MonsterAbilityAttribute(name: attributeName);
 
-    attribute.baseModifier = MonsterAbilityParser.persistentAttributes.contains(attributeName);
+    attribute.baseModifier =
+        MonsterAbilityParser.persistentAttributes.contains(attributeName);
 
     _setBase(attribute);
     _setUpgrade(attribute);
@@ -174,7 +233,7 @@ class MonsterAbilityParser {
     return attribute;
   }
 
-  void _setBase (MonsterAbilityAttribute attribute) {
+  void _setBase(MonsterAbilityAttribute attribute) {
     if (lines.isEmpty) {
       return;
     }
@@ -199,7 +258,7 @@ class MonsterAbilityParser {
     }
   }
 
-  void _setUpgrade (MonsterAbilityAttribute attribute) {
+  void _setUpgrade(MonsterAbilityAttribute attribute) {
     if (lines.isEmpty) {
       return;
     }
@@ -237,7 +296,7 @@ class MonsterAbilityParser {
     attribute.upgradeModifier = modifier;
   }
 
-  (int?, bool) _getValue (MonsterAbilityAttribute attribute, String line) {
+  (int?, bool) _getValue(MonsterAbilityAttribute attribute, String line) {
     var regexBase = RegExp(patternBaseValue(attribute.name));
     var regexModifier1 = RegExp(patternModifierValue1(attribute.name));
     var regexModifier2 = RegExp(patternModifierValue2(attribute.name));
@@ -256,7 +315,7 @@ class MonsterAbilityParser {
       value = int.parse(match.group(2)!);
     }
 
-    if (modifierType == '-' && value != null)  {
+    if (modifierType == '-' && value != null) {
       value *= -1;
     }
 
@@ -265,19 +324,19 @@ class MonsterAbilityParser {
     return (value, modifier);
   }
 
-  List<String> _extractLines (MonsterAbilityCardModel ability) {
+  List<String> _extractLines(MonsterAbilityCardModel ability) {
     var lines = ability.lines
-      .map((line) {
-        line = line.toLowerCase().trim();
+        .map((line) {
+          line = line.toLowerCase().trim();
 
-        if ('*^>!'.split('').any((c) => line.startsWith(c))) {
-          line = line.substring(1);
-        }
+          if ('*^>!'.split('').any((c) => line.startsWith(c))) {
+            line = line.substring(1);
+          }
 
-        return line;
-      })
-      .where((line) => line.contains('%') || line.contains('....'))
-      .toList();
+          return line;
+        })
+        .where((line) => line.contains('%') || line.contains('....'))
+        .toList();
 
     var elementTypes = ['any', ...elementMap.keys];
 
@@ -301,7 +360,7 @@ class EffectHandler {
     Condition.poison,
   ];
 
-  static  final List<Condition> _woundConditions = [
+  static final List<Condition> _woundConditions = [
     Condition.wound2,
     Condition.wound,
   ];
@@ -330,12 +389,14 @@ class EffectHandler {
       var character = FigureData(data.id, data.id);
 
       _handleElements(data);
-      _handleInstances(data, data.characterState.summonList, _applyTurnStartEffects);
+      _handleInstances(
+          data, data.characterState.summonList, _applyTurnStartEffects);
       _applyTurnStartEffects(character);
     }
   }
 
-  static bool _allInstancesAreStunned(ListItemData owner, BuiltList<MonsterInstance> instances) {
+  static bool _allInstancesAreStunned(
+      ListItemData owner, BuiltList<MonsterInstance> instances) {
     for (var instance in instances) {
       var figure = FigureData(owner.id, instance.getId());
 
@@ -354,7 +415,8 @@ class EffectHandler {
       if (item is Character) {
         var character = FigureData(item.id, item.id);
 
-        _handleInstances(item, item.characterState.summonList, _applyRoundEndEffects);
+        _handleInstances(
+            item, item.characterState.summonList, _applyRoundEndEffects);
         _applyRoundEndEffects(character);
       } else if (item is Monster) {
         _handleInstances(item, item.monsterInstances, _applyRoundEndEffects);
@@ -362,7 +424,8 @@ class EffectHandler {
     }
   }
 
-  static void _handleInstances(ListItemData owner, BuiltList<MonsterInstance> instances, Function(FigureData) handler) {
+  static void _handleInstances(ListItemData owner,
+      BuiltList<MonsterInstance> instances, Function(FigureData) handler) {
     for (var instance in instances) {
       var figure = FigureData(owner.id, instance.getId());
       handler(figure);
@@ -372,7 +435,8 @@ class EffectHandler {
   static void _applyTurnStartEffects(FigureData figure) {
     var actionStats = ActionStats(attack: false);
 
-    if (_isConditionActive(Condition.strengthen, figure) && _isConditionActive(Condition.muddle, figure)) {
+    if (_isConditionActive(Condition.strengthen, figure) &&
+        _isConditionActive(Condition.muddle, figure)) {
       _removeCondition(Condition.strengthen, figure);
       _removeCondition(Condition.muddle, figure);
     }
@@ -397,10 +461,11 @@ class EffectHandler {
     }
   }
 
-  static void handleHealthChange(FigureData figure, int initialChange, ActionStats actionStats) {
-    var amount = initialChange <= 0 ?
-      _calculateDamage(initialChange, figure, actionStats) :
-      _calculateHeal(initialChange, figure);
+  static void handleHealthChange(
+      FigureData figure, int initialChange, ActionStats actionStats) {
+    var amount = initialChange <= 0
+        ? _calculateDamage(initialChange, figure, actionStats)
+        : _calculateHeal(initialChange, figure);
 
     amount = _normalizeHealthChangeAmount(amount, figure);
 
@@ -426,6 +491,9 @@ class EffectHandler {
       var parser = MonsterAbilityParser(ability);
       var (useElements, useAny) = parser.getUseElements();
       var (activateElements, activateAny) = parser.getActivateElements();
+      var (convertFrom, convertFromAny, convertTo, convertToAny) = parser.getConvertElement();
+
+      _convertElement(data.id, convertFrom, convertFromAny, convertTo, convertToAny);
 
       for (var element in useElements) {
         _useElement(data.id, element);
@@ -445,14 +513,16 @@ class EffectHandler {
     }
   }
 
-  static int _calculateDamage(int initialAmount, FigureData figure, ActionStats actionStats) {
+  static int _calculateDamage(
+      int initialAmount, FigureData figure, ActionStats actionStats) {
     var amount = initialAmount;
 
     if (initialAmount == 0 && !actionStats.attack) {
       return 0;
     }
 
-    if (_isConditionActive(Condition.ward, figure) && _isConditionActive(Condition.brittle, figure)) {
+    if (_isConditionActive(Condition.ward, figure) &&
+        _isConditionActive(Condition.brittle, figure)) {
       _removeCondition(Condition.ward, figure);
       _removeCondition(Condition.brittle, figure);
     }
@@ -474,11 +544,8 @@ class EffectHandler {
     }
 
     if (actionStats.attack) {
-      amount += _getShieldAmount(
-          figure,
-          actionStats.pierceAmount.value,
-          actionStats.characterShieldModifier.value
-      );
+      amount += _getShieldAmount(figure, actionStats.pierceAmount.value,
+          actionStats.characterShieldModifier.value);
     }
 
     if (amount < 0) {
@@ -519,7 +586,7 @@ class EffectHandler {
     return amount;
   }
 
-  static int _normalizeHealthChangeAmount (int amount, FigureData figure) {
+  static int _normalizeHealthChangeAmount(int amount, FigureData figure) {
     var health = figure.state.health.value;
     var maxHealth = figure.state.maxHealth.value;
 
@@ -550,7 +617,8 @@ class EffectHandler {
     }
 
     var gameState = getIt<GameState>();
-    var command = RemoveConditionCommand(condition, figure.figureId, figure.ownerId);
+    var command =
+        RemoveConditionCommand(condition, figure.figureId, figure.ownerId);
 
     gameState.action(command);
   }
@@ -593,7 +661,8 @@ class EffectHandler {
     return 0;
   }
 
-  static int _getShieldAmount(FigureData figure, int pierceAmount, int characterShieldModifier) {
+  static int _getShieldAmount(
+      FigureData figure, int pierceAmount, int characterShieldModifier) {
     var owner = figure.getOwner();
 
     if (pierceAmount < 0) {
@@ -602,8 +671,10 @@ class EffectHandler {
 
     if (owner is Character) {
       var gameState = getIt<GameState>();
-      var baseShield = gameState.characterShields.value[figure.getBaseId()] ?? 0;
-      var shieldAmount = baseShield + (gameState.characterShields.value[figure.getFullId()] ?? 0);
+      var baseShield =
+          gameState.characterShields.value[figure.getBaseId()] ?? 0;
+      var shieldAmount = baseShield +
+          (gameState.characterShields.value[figure.getFullId()] ?? 0);
 
       shieldAmount += characterShieldModifier - pierceAmount;
 
@@ -618,7 +689,9 @@ class EffectHandler {
       var monsterStats = StatApplier.getStatTokens(owner, elite);
       var shieldStat = monsterStats['shield'] ?? 0;
 
-      var shieldAmount = _calculateAbilityAttributeValue(shieldStat, 'shield', owner) - pierceAmount;
+      var shieldAmount =
+          _calculateAbilityAttributeValue(shieldStat, 'shield', owner) -
+              pierceAmount;
 
       if (shieldAmount < 0) {
         return 0;
@@ -629,7 +702,8 @@ class EffectHandler {
     return 0;
   }
 
-  static bool _isElementUsed (String characterId, Elements? element, bool anyElement) {
+  static bool _isElementUsed(
+      String characterId, Elements? element, bool anyElement) {
     var gameState = getIt<GameState>();
 
     if (anyElement) {
@@ -644,35 +718,35 @@ class EffectHandler {
     return gameState.isRoundFlagSet(characterId, flag);
   }
 
-  static int _calculateAbilityAttributeValue (int statValue, String attributeName, Monster monster) {
+  static int _calculateAbilityAttributeValue(
+      int statValue, String attributeName, Monster monster) {
     var attribute = _getAbilityAttribute('shield', monster);
 
     if (attribute == null) {
       return statValue;
     }
 
-    var upgraded = _isElementUsed(monster.id, attribute.upgradeElement, attribute.upgradeElementAny);
+    var upgraded = _isElementUsed(
+        monster.id, attribute.upgradeElement, attribute.upgradeElementAny);
 
-    var totalBase = attribute.baseModifier ?
-      statValue + attribute.baseValue :
-      attribute.baseValue;
+    var totalBase = attribute.baseModifier
+        ? statValue + attribute.baseValue
+        : attribute.baseValue;
 
     if (!upgraded) {
       return totalBase;
     }
 
-    return attribute.upgradeModifier ?
-      totalBase + attribute.upgradeValue :
-      statValue + attribute.upgradeValue;
+    return attribute.upgradeModifier
+        ? totalBase + attribute.upgradeValue
+        : statValue + attribute.upgradeValue;
   }
 
-  static void _activateElement (Elements element) {
+  static void _activateElement(Elements element) {
     var gameState = getIt<GameState>();
 
-    var isFull = gameState.elementState.entries
-      .any((entry) => (
-        entry.key == element && entry.value == ElementState.full
-      ));
+    var isFull = gameState.elementState.entries.any(
+        (entry) => (entry.key == element && entry.value == ElementState.full));
 
     if (isFull) {
       return;
@@ -681,7 +755,7 @@ class EffectHandler {
     gameState.action(ImbueElementCommand(element, false));
   }
 
-  static void _activateAnyElement () {
+  static void _activateAnyElement() {
     var gameState = getIt<GameState>();
 
     var element = _getRandomElement([ElementState.inert, ElementState.half]);
@@ -692,41 +766,61 @@ class EffectHandler {
     gameState.action(ImbueElementCommand(element, false));
   }
 
-  static void _useAnyElement(String characterId) {
+  static void _convertElement(String characterId, Elements? from, bool fromAny, Elements? to, bool toAny) {
+    if ((from == null && !fromAny) || (to == null && !toAny)) {
+      return;
+    }
+
+    var used = from != null ? _useElement(characterId, from) : _useAnyElement(characterId);
+
+    if (!used) {
+      return;
+    }
+
+    if (to != null) {
+      _activateElement(to);
+    } else {
+      _activateAnyElement();
+    }
+  }
+
+  static bool _useAnyElement(String characterId) {
     var gameState = getIt<GameState>();
 
     var element = _getRandomElement([ElementState.half, ElementState.full]);
     if (element == null) {
-      return;
+      return false;
     }
 
     gameState.action(UseElementCommand(element));
     gameState.setRoundFlag(characterId, Flags.anyElement, sync: false);
+
+    return true;
   }
 
-  static void _useElement (String characterId, Elements element) {
+  static bool _useElement(String characterId, Elements element) {
     var gameState = getIt<GameState>();
 
-    var isActive = gameState.elementState.entries
-      .any((entry) => (
-        entry.key == element && entry.value != ElementState.inert
-      ));
+    var isActive = gameState.elementState.entries.any(
+        (entry) => (entry.key == element && entry.value != ElementState.inert));
 
     if (!isActive) {
-      return;
+      return false;
     }
 
     gameState.action(UseElementCommand(element));
     gameState.setRoundFlag(characterId, Flags.elements[element]!, sync: false);
+
+    return true;
   }
 
-  static Elements? _getRandomElement (List<ElementState> states) {
+  static Elements? _getRandomElement(List<ElementState> states) {
     var gameState = getIt<GameState>();
 
     var elements = gameState.elementState.entries
-      .where((entry) => states.contains(entry.value))
-      .map((entry) => entry.key)
-      .toList();
+        .where((entry) => states.contains(entry.value))
+        .map((entry) => entry.key)
+        .toList();
 
     if (elements.isEmpty) {
       return null;
@@ -735,22 +829,21 @@ class EffectHandler {
     return elements[_random.nextInt(elements.length)];
   }
 
-  static MonsterAbilityAttribute? _getAbilityAttribute (String attributeName, Monster monster) {
+  static MonsterAbilityAttribute? _getAbilityAttribute(
+      String attributeName, Monster monster) {
     var ability = _getCurrentMonsterAbility(monster);
 
     if (ability == null) {
       return null;
     }
 
-    return MonsterAbilityParser(ability)
-      .getAttribute(attributeName);
+    return MonsterAbilityParser(ability).getAttribute(attributeName);
   }
 
-  static MonsterAbilityCardModel? _getCurrentMonsterAbility (Monster monster) {
+  static MonsterAbilityCardModel? _getCurrentMonsterAbility(Monster monster) {
     var gameState = getIt<GameState>();
 
-    var abilityDeck = gameState
-        .currentAbilityDecks
+    var abilityDeck = gameState.currentAbilityDecks
         .firstWhereOrNull((deck) => deck.name == monster.type.deck);
 
     if (abilityDeck == null || abilityDeck.discardPile.isEmpty) {
