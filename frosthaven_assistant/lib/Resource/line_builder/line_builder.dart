@@ -681,15 +681,21 @@ class LineBuilder {
                       lastImage,
                       Positioned(
                           width: frosthavenStyle
-                              ? styleToUse.fontSize! * 0.8 + scale * 5.0
+                              ? (iconGfxOverride != null
+                                  ? styleToUse.fontSize! * 1.2
+                                  : styleToUse.fontSize! * 0.8 + scale * 5.0)
                               : styleToUse.fontSize! * 1.2,
                           bottom: 0,
-                          left: frosthavenStyle ? 2.8 * scale : 0.0,
+                          left: frosthavenStyle
+                              ? (iconGfxOverride != null ? -1.5 * scale : 2.8 * scale)
+                              : 0.0,
                           //why left?!
 
                           child: Image(
                             height: frosthavenStyle
-                                ? styleToUse.fontSize! * 1.0 * 0.5
+                                ? (iconGfxOverride != null
+                                    ? 13.1 * scale
+                                    : styleToUse.fontSize! * 1.0 * 0.5)
                                 : styleToUse.fontSize! * 1.2,
                             //width: frosthavenStyle? styleToUse.fontSize! * 1.2 * 0.5: styleToUse.fontSize! * 1.2,
                             //alignment: Alignment.topCenter,
