@@ -666,8 +666,12 @@ class CharacterWidgetState extends State<CharacterWidget> {
                             builder: (context, value, child) {
                               var figure = GameMethods.getFigure(widget.characterId, widget.characterId);
                               var fullId = figure?.getFullId();
+                              var baseId = figure?.getBaseId();
                               var shieldMap = _gameState.characterShields.value;
-                              var value = (fullId != null ? shieldMap[fullId] : null) ?? 0;
+
+                              var shieldAmount = (fullId != null ? shieldMap[fullId] : null) ?? 0;
+                              var baseShieldAmount = (fullId != null ? shieldMap[baseId] : null) ?? 0;
+                              var value = baseShieldAmount + shieldAmount;
 
                               return Text(
                                 value.toString(),

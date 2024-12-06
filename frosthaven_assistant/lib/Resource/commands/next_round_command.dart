@@ -64,7 +64,7 @@ class NextRoundCommand extends Command {
 
     EffectHandler.handleRoundEnd();
 
-    GameMethods.clearTurnState(stateAccess, false);
+    GameMethods.clearTurnState(stateAccess, false, false);
     GameMethods.sortCharactersFirst(stateAccess);
 
     GameMethods.setToastMessage("");

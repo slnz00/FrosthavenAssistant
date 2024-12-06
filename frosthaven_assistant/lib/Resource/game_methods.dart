@@ -422,7 +422,7 @@ class GameMethods {
         }
       }
 
-      GameMethods.clearTurnState(_, true);
+      GameMethods.clearTurnState(_, true, true);
       _gameState._toastMessage.value = "";
     }
 
@@ -1221,7 +1221,7 @@ class GameMethods {
     }
   }
 
-  static void clearTurnState(_StateModifier stateModifier, bool clearLastTurnToo) {
+  static void clearTurnState(_StateModifier stateModifier, bool clearLastTurnToo, bool resetBaseShields) {
     for (var item in _gameState._currentList) {
       item._turnState = TurnsState.notDone;
       if (item is Character) {
@@ -1236,8 +1236,14 @@ class GameMethods {
       }
     }
 
-    _gameState.characterShields.value = {};
+    _gameState.characterShields.value = Map<String, int>.fromEntries(
+      _gameState.characterShields.value
+        .entries
+        .where((entry) => !resetBaseShields && entry.key.startsWith("__base__"))
+    );
+
     _gameState.characterRoundFlags.value = {};
+
     _gameState.syncCharacterRoundFlags();
     _gameState.syncCharacterShields();
   }

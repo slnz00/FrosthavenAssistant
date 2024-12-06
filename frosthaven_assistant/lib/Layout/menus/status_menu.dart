@@ -631,9 +631,11 @@ class StatusMenuState extends State<StatusMenu> {
                             }
 
                             var fullId = figure.getFullId();
+                            var baseId = figure.getBaseId();
 
                             var shieldMap = _gameState.characterShields.value;
-                            var shieldAmount = shieldMap[fullId] ?? 0;
+                            var baseShieldAmount = shieldMap[baseId] ?? 0;
+                            var shieldAmount = baseShieldAmount + (shieldMap[fullId] ?? 0);
 
                             if (widget.attack) {
                               shieldAmount += widget.actionStats.characterShieldModifier.value;
@@ -649,12 +651,14 @@ class StatusMenuState extends State<StatusMenu> {
                             }
 
                             var fullId = figure.getFullId();
+                            var baseId = figure.getBaseId();
 
                             var shieldMap = _gameState.characterShields.value;
+                            var baseShieldAmount = shieldMap[baseId] ?? 0;
                             var shieldAmount = shieldMap[fullId] ?? 0;
                             var modifier = widget.actionStats.characterShieldModifier.value;
 
-                            if (widget.attack && shieldAmount + modifier + change < 0) {
+                            if (widget.attack && baseShieldAmount + shieldAmount + modifier + change < 0) {
                               return false;
                             }
                             if (!widget.attack && shieldAmount + change < 0) {
@@ -752,16 +756,18 @@ class StatusMenuState extends State<StatusMenu> {
                                   if (figure is CharacterState) {
                                     openDialog(
                                       context,
-                                      SetCharacterLevelMenu(
-                                          character: character!),
-                                    );
+                                      SetCharacterLevelMenu(character: character!),
+                                    ).then((val) {
+                                      _gameState.syncCharacterShields();
+                                    });
                                   } else {
                                     openDialog(
                                       context,
                                       SetLevelMenu(
-                                          monster: monster,
-                                          figure: figure,
-                                          characterId: widget.characterId),
+                                        monster: monster,
+                                        figure: figure,
+                                        characterId: widget.characterId
+                                      ),
                                     );
                                   }
                                 },

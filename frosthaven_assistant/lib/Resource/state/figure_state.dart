@@ -28,4 +28,8 @@ abstract class FigureState {
   Set<Condition> getMutableConditionsAddedPreviousTurn(_StateModifier stateModifier) {return _conditionsAddedPreviousTurn;}
 
   String getFullId();
+
+  String getBaseId() {
+    return '__base__${getFullId()}';
+  }
 }
