@@ -1325,13 +1325,6 @@ class GameMethods {
 
         data._turnState = TurnsState.done;
 
-        if (data is Monster) {
-          EffectHandler.handleRoundEnd(data);
-        }
-        if (data is Character) {
-          EffectHandler.handleRoundEnd(data);
-        }
-
         removeExpiringConditionsFromListItem(_, data);
       }
     }
@@ -1341,13 +1334,6 @@ class GameMethods {
       var data = _gameState.currentList[index];
 
       data._turnState = TurnsState.done;
-
-      if (data is Monster) {
-        EffectHandler.handleRoundEnd(data);
-      }
-      if (data is Character) {
-        EffectHandler.handleRoundEnd(data);
-      }
 
       removeExpiringConditionsFromListItem(_, data);
     } else {
@@ -1363,7 +1349,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleRoundStart(data);
+          EffectHandler.handleTurnStart(data);
           break;
         }
       } else if (data is Character) {
@@ -1372,7 +1358,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleRoundStart(data);
+          EffectHandler.handleTurnStart(data);
           break;
         }
       }

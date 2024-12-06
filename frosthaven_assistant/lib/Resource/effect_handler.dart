@@ -302,7 +302,7 @@ class EffectHandler {
     Condition.wound,
   ];
 
-  static void handleRoundStart(ListItemData data) {
+  static void handleTurnStart(ListItemData data) {
     var gameState = getIt<GameState>();
 
     var roundStarted = gameState.isRoundFlagSet(data.id, Flags.roundStart);
@@ -313,7 +313,7 @@ class EffectHandler {
     gameState.setRoundFlag(data.id, Flags.roundStart);
 
     if (data is Monster) {
-      _handleInstances(data, data.monsterInstances);
+      _handleInstances(data, data.monsterInstances, _applyTurnStartEffects);
 
       var hasInstances = data.monsterInstances.isNotEmpty;
       var notAllStunned = !_allInstancesAreStunned(data, data.monsterInstances);
@@ -323,11 +323,11 @@ class EffectHandler {
       }
     }
     if (data is Character) {
-      var figure = FigureData(data.id, data.id);
+      var character = FigureData(data.id, data.id);
 
       _handleElements(data);
-      _handleInstances(data, data.characterState.summonList);
-      _applyRoundStartEffects(figure);
+      _handleInstances(data, data.characterState.summonList, _applyTurnStartEffects);
+      _applyTurnStartEffects(character);
     }
   }
 
@@ -343,57 +343,29 @@ class EffectHandler {
     return true;
   }
 
-  static bool _allInstancesAreCreatedThisRound(ListItemData owner, BuiltList<MonsterInstance> instances) {
-    for (var instance in instances) {
-      var figure = FigureData(owner.id, instance.getId());
-
-      if (!_isConditionActive(Condition.stun, figure)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  static void _handleInstances(ListItemData owner, BuiltList<MonsterInstance> instances) {
-    for (var instance in instances) {
-      var figure = FigureData(owner.id, instance.getId());
-      _applyRoundStartEffects(figure);
-    }
-  }
-
-  static void handleRoundEnd(ListItemData data) {
-
-    // Currently doesn't have any round end events
-    return;
-
+  static void handleRoundEnd() {
     var gameState = getIt<GameState>();
 
-    var roundStarted = gameState.isRoundFlagSet(data.id, Flags.roundStart);
-    var roundEnded = gameState.isRoundFlagSet(data.id, Flags.roundEnd);
-    if (roundEnded || !roundStarted) {
-      return;
-    }
+    for (var item in gameState.currentList) {
+      if (item is Character) {
+        var character = FigureData(item.id, item.id);
 
-    gameState.setRoundFlag(data.id, Flags.roundEnd);
-
-    if (data is Monster) {
-      if (data.monsterInstances.isEmpty) {
-        return;
+        _handleInstances(item, item.characterState.summonList, _applyRoundEndEffects);
+        _applyRoundEndEffects(character);
+      } else if (item is Monster) {
+        _handleInstances(item, item.monsterInstances, _applyRoundEndEffects);
       }
-
-      for (var instance in data.monsterInstances) {
-        var figure = FigureData(data.id, instance.getId());
-        _applyRoundEndEffects(figure);
-      }
-    }
-    if (data is Character) {
-      var figure = FigureData(data.id, data.id);
-      _applyRoundEndEffects(figure);
     }
   }
 
-  static void _applyRoundStartEffects(FigureData figure) {
+  static void _handleInstances(ListItemData owner, BuiltList<MonsterInstance> instances, Function(FigureData) handler) {
+    for (var instance in instances) {
+      var figure = FigureData(owner.id, instance.getId());
+      handler(figure);
+    }
+  }
+
+  static void _applyTurnStartEffects(FigureData figure) {
     var actionStats = ActionStats(attack: false);
 
     if (_isConditionActive(Condition.strengthen, figure) && _isConditionActive(Condition.muddle, figure)) {
@@ -411,7 +383,15 @@ class EffectHandler {
     }
   }
 
-  static void _applyRoundEndEffects(FigureData figure) { }
+  static void _applyRoundEndEffects(FigureData figure) {
+    var actionStats = ActionStats(attack: false);
+
+    if (_isConditionActive(Condition.bane, figure)) {
+      _removeCondition(Condition.bane, figure);
+
+      handleHealthChange(figure, -10, actionStats);
+    }
+  }
 
   static void handleHealthChange(FigureData figure, int initialChange, ActionStats actionStats) {
     var amount = initialChange <= 0 ?
@@ -514,6 +494,11 @@ class EffectHandler {
     var isWounded = _getWoundAmount(figure) != 0;
     if (isWounded) {
       _removeWound(figure);
+    }
+
+    var hasBane = _isConditionActive(Condition.bane, figure);
+    if (hasBane) {
+      _removeCondition(Condition.bane, figure);
     }
 
     var isPoisoned = _getPoisonAmount(figure) != 0;
