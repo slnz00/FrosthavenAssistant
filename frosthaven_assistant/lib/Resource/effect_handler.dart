@@ -414,11 +414,7 @@ class EffectHandler {
   static void _applyRoundEndEffects(FigureData figure) { }
 
   static void handleHealthChange(FigureData figure, int initialChange, ActionStats actionStats) {
-    if (initialChange == 0) {
-      return;
-    }
-
-    var amount = initialChange < 0 ?
+    var amount = initialChange <= 0 ?
       _calculateDamage(initialChange, figure, actionStats) :
       _calculateHeal(initialChange, figure);
 
@@ -468,9 +464,17 @@ class EffectHandler {
   static int _calculateDamage(int initialAmount, FigureData figure, ActionStats actionStats) {
     var amount = initialAmount;
 
+    if (initialAmount == 0 && !actionStats.attack) {
+      return 0;
+    }
+
     if (_isConditionActive(Condition.ward, figure) && _isConditionActive(Condition.brittle, figure)) {
       _removeCondition(Condition.ward, figure);
       _removeCondition(Condition.brittle, figure);
+    }
+
+    if (actionStats.attack) {
+      amount += _getPoisonAmount(figure);
     }
 
     if (_isConditionActive(Condition.ward, figure)) {
@@ -486,7 +490,6 @@ class EffectHandler {
     }
 
     if (actionStats.attack) {
-      amount += _getPoisonAmount(figure);
       amount += _getShieldAmount(
           figure,
           actionStats.pierceAmount.value,
