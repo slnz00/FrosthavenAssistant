@@ -5,8 +5,8 @@ import 'package:frosthaven_assistant/Resource/ui_utils.dart';
 
 import '../../Resource/commands/set_scenario_command.dart';
 import '../../Resource/game_data.dart';
-import '../../Resource/state/game_state.dart';
 import '../../Resource/settings.dart';
+import '../../Resource/state/game_state.dart';
 import '../../services/service_locator.dart';
 
 class AddSectionMenu extends StatefulWidget {
@@ -22,28 +22,19 @@ class AddSectionMenuState extends State<AddSectionMenu> {
   final GameState _gameState = getIt<GameState>();
   final GameData _gameData = getIt<GameData>();
   final TextEditingController _controller = TextEditingController();
-  final ScrollController _scrollController =
-      ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   initState() {
     // at the beginning, all items are shown
-    setCampaign(_gameState.currentCampaign.value);
-    super.initState();
-  }
-
-  void setCampaign(String campaign) {
-    //TODO:clear search
-    _gameState.action(SetCampaignCommand(campaign));
-    _foundScenarios = _gameData
-        .modelData
-        .value[_gameState.currentCampaign.value]!
-        .scenarios[_gameState.scenario.value]!
-        .sections
+    var scenarios =  _gameData.modelData.value[_gameState.currentCampaign.value]
+        ?.scenarios[_gameState.scenario.value]?.sections
         .map((e) => e.name)
         .toList();
-    _foundScenarios =
-        _foundScenarios.where((element) => !element.contains("spawn")).toList();
+    if(scenarios != null) {
+      _foundScenarios = scenarios;
+    }
+    _foundScenarios = _foundScenarios.where((element) => !element.contains("spawn")).toList();
     _foundScenarios.sort((a, b) {
       int? aNr = GameMethods.findNrFromScenarioName(a);
       int? bNr = GameMethods.findNrFromScenarioName(b);
@@ -52,6 +43,8 @@ class AddSectionMenuState extends State<AddSectionMenu> {
       }
       return a.compareTo(b);
     });
+
+    super.initState();
   }
 
   // This function is called whenever the text field changes
@@ -69,8 +62,7 @@ class AddSectionMenuState extends State<AddSectionMenu> {
           .scenarios[_gameState.scenario.value]!.sections
           .map((e) => e.name)
           .toList()
-          .where((user) =>
-              user.toLowerCase().contains(enteredKeyword.toLowerCase()))
+          .where((user) => user.toLowerCase().contains(enteredKeyword.toLowerCase()))
           .toList();
       results = results.where((element) => !element.contains("spawn")).toList();
       results.sort((a, b) {
@@ -95,7 +87,7 @@ class AddSectionMenuState extends State<AddSectionMenu> {
     return Container(
         constraints: const BoxConstraints(maxWidth: 400),
         child: Card(
-            //color: Colors.transparent,
+            // color: Colors.transparent,
             // shadowColor: Colors.transparent,
             margin: const EdgeInsets.all(2),
             child: Stack(children: [
@@ -126,8 +118,7 @@ class AddSectionMenuState extends State<AddSectionMenu> {
                         }
                       },
                       decoration: const InputDecoration(
-                          labelText: 'Add Section',
-                          suffixIcon: Icon(Icons.search)),
+                          labelText: 'Add Section', suffixIcon: Icon(Icons.search)),
                     ),
                   ),
                   const SizedBox(
@@ -136,24 +127,28 @@ class AddSectionMenuState extends State<AddSectionMenu> {
                   Expanded(
                     child: _foundScenarios.isNotEmpty
                         ? Scrollbar(
-                            controller: _scrollController,
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _foundScenarios.length,
-                              itemBuilder: (context, index) => ListTile(
-                                title: Text(_foundScenarios[index],
-                                    style: const TextStyle(fontSize: 18)),
-                                onTap: () {
-                                  _gameState.action(SetScenarioCommand(
-                                      _foundScenarios[index], true));
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ))
-                        : const Text(
-                            'No results found',
-                            style: TextStyle(fontSize: 24),
+                        controller: _scrollController,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _foundScenarios.length,
+                          itemBuilder: (context, index) => ListTile(
+                            title: Text(_foundScenarios[index],
+                                style: TextStyle(
+                                    color: _gameState.scenarioSectionsAdded.contains(_foundScenarios[index]) ? Colors.blueGrey : Colors.black,
+                                    fontSize: 18
+                                )),
+                            onTap: () {
+                              if(!_gameState.scenarioSectionsAdded.contains(_foundScenarios[index])) {
+                                Navigator.pop(context);
+                                _gameState.action(SetScenarioCommand(_foundScenarios[index], true));
+                              }
+                            },
                           ),
+                        ))
+                        : const Text(
+                      'No results found',
+                      style: TextStyle(fontSize: 24),
+                    ),
                   ),
                   const SizedBox(
                     height: 34,
