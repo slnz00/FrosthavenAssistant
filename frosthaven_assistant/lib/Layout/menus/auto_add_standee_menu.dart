@@ -23,6 +23,7 @@ class AddStandeeMenuState extends State<AutoAddStandeeMenu> {
   final GameState _gameState = getIt<GameState>();
 
   bool addAsSummon = false;
+  bool ally = false;
   int currentMonsterIndex = 0;
   late final int startCommandIndex;
 
@@ -125,7 +126,7 @@ class AddStandeeMenuState extends State<AutoAddStandeeMenu> {
         onPressed: () {
           if (!isOut) {
             _gameState.action(
-                AddStandeeCommand(nr, null, monster.id, type, addAsSummon));
+                AddStandeeCommand(nr, null, monster.id, type, addAsSummon, ally));
             if (elite) {
               setState(() {
                 currentEliteAdded++;
@@ -368,6 +369,8 @@ class AddStandeeMenuState extends State<AutoAddStandeeMenu> {
             height *= 2;
           }
 
+          height += 15;
+
           return Container(
               width: 250 * scale,
               //need to set any width to center content, overridden by dialog default min width.
@@ -424,6 +427,26 @@ class AddStandeeMenuState extends State<AutoAddStandeeMenu> {
                                     });
                                   },
                                   value: addAsSummon,
+                                )
+                              ]),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("Ally:",
+                                    style: getSmallTextStyle(scale)),
+                                Checkbox(
+                                  checkColor: Colors.black,
+                                  activeColor: Colors.grey.shade200,
+                                  side: BorderSide(
+                                      color: getIt<Settings>().darkMode.value
+                                          ? Colors.white
+                                          : Colors.black),
+                                  onChanged: (bool? newValue) {
+                                    setState(() {
+                                      ally = newValue!;
+                                    });
+                                  },
+                                  value: ally,
                                 )
                               ])
                         ],

@@ -2,7 +2,7 @@ part of 'game_state.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 class MonsterInstance extends FigureState {
-  MonsterInstance(this.standeeNr, this._type, bool summoned, Monster monster) {
+  MonsterInstance(this.standeeNr, this._type, bool summoned, Monster monster, [this.ally = false]) {
     _setLevel(monster);
     gfx = monster.type.gfx;
     name = monster.type.name;
@@ -17,7 +17,7 @@ class MonsterInstance extends FigureState {
   }
 
   MonsterInstance.summon(this.standeeNr, this._type, this.name, int summonHealth,
-      this.move, this.attack, this.range, this.gfx, this._roundSummoned) {
+      this.move, this.attack, this.range, this.gfx, this._roundSummoned, [this.ally = false]) {
     //deal with summon init
     _maxHealth.value = summonHealth;
     _health.value = summonHealth;
@@ -49,7 +49,7 @@ class MonsterInstance extends FigureState {
   setRoundSummoned(_StateModifier stateModifier, int value) {_roundSummoned = value;}
   late int _roundSummoned;
 
-
+  late bool ally;
 
   void _setLevel(Monster monster) {
     dynamic newHealthValue =
@@ -108,6 +108,7 @@ class MonsterInstance extends FigureState {
         '"gfx": "$gfx", '
         '"roundSummoned": $roundSummoned, '
         '"type": ${type.index}, '
+        '"ally": ${ally.toString()}, '
         '"chill": ${chill.value}, '
         '"conditions": ${conditions.value.toString()}, '
         '"conditionsAddedThisTurn": ${_conditionsAddedThisTurn.toList().toString()}, '
@@ -126,6 +127,7 @@ class MonsterInstance extends FigureState {
     move = json["move"];
     attack = json["attack"];
     range = json["range"];
+    ally = json["ally"] ?? false;
 
     if (json.containsKey("roundSummoned")) {
       _roundSummoned = json["roundSummoned"];

@@ -844,7 +844,7 @@ class GameMethods {
   }
 
   static void executeAddStandee(_StateModifier _, final int nr, final SummonData? summon,
-      final MonsterType type, final String ownerId, final bool addAsSummon) {
+      final MonsterType type, final String ownerId, final bool addAsSummon, [final bool ally = false]) {
     MonsterInstance instance;
     Monster? monster;
     if (summon == null) {
@@ -853,7 +853,7 @@ class GameMethods {
           monster = item;
         }
       }
-      instance = MonsterInstance(nr, type, addAsSummon, monster!);
+      instance = MonsterInstance(nr, type, addAsSummon, monster!, ally);
     } else {
       instance = MonsterInstance.summon(
           summon.standeeNr,

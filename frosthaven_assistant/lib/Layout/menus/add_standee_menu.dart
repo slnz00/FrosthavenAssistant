@@ -21,6 +21,7 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
   final GameState _gameState = getIt<GameState>();
 
   bool addAsSummon = false;
+  bool ally = false;
 
   @override
   initState() {
@@ -73,7 +74,7 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
         onPressed: () {
           if (!isOut) {
             _gameState.action(AddStandeeCommand(
-                nr, null, widget.monster.id, type, addAsSummon));
+                nr, null, widget.monster.id, type, addAsSummon, ally));
           }
         },
       ),
@@ -98,6 +99,9 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
     if (nrOfStandees > 8) {
       height = 211;
     }
+
+    height += 15;
+
     return Container(
         width: 250 *
             scale, //need to set any width to center content, overridden by dialog default min width.
@@ -196,6 +200,26 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
                                   });
                                 },
                                 value: addAsSummon,
+                              )
+                            ]),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Ally:",
+                                  style: getSmallTextStyle(scale)),
+                              Checkbox(
+                                checkColor: Colors.black,
+                                activeColor: Colors.grey.shade200,
+                                side: BorderSide(
+                                    color: getIt<Settings>().darkMode.value
+                                        ? Colors.white
+                                        : Colors.black),
+                                onChanged: (bool? newValue) {
+                                  setState(() {
+                                    ally = newValue!;
+                                  });
+                                },
+                                value: ally,
                               )
                             ])
                       ],

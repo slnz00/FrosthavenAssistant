@@ -9,6 +9,7 @@ import 'package:frosthaven_assistant/services/service_locator.dart';
 import '../Resource/color_matrices.dart';
 import '../Resource/enums.dart';
 import '../Resource/ui_utils.dart';
+import 'dart:math' as math;
 
 class MonsterBox extends StatefulWidget {
   final String figureId;
@@ -28,10 +29,6 @@ class MonsterBox extends StatefulWidget {
   static const double conditionSize = 14;
 
   static double getBoxBaseWidth(MonsterInstance data) {
-    if (data.health.value == 0) {
-      return 0;
-    }
-
     double width = 47;
     int shieldValue = getShieldValue(data);
 
@@ -43,10 +40,6 @@ class MonsterBox extends StatefulWidget {
   }
 
   static double getWidth(double scale, MonsterInstance data) {
-    if (data.health.value == 0) {
-      return 0;
-    }
-
     double width = getBoxBaseWidth(data);
     width += conditionSize * data.conditions.value.length / 2;
     if (data.conditions.value.length % 2 != 0) {
@@ -134,6 +127,11 @@ class MonsterBoxState extends State<MonsterBox> {
     }
     if (color == Colors.yellow) {
       borderColor = null;
+    }
+    if (data.ally) {
+      color = Colors.white;
+      borderColor = Colors.green;
+      imagePath = "assets/images/summon/green.png";
     }
 
     var shadow = Shadow(
@@ -309,8 +307,10 @@ class MonsterBoxState extends State<MonsterBox> {
                     left: shieldValue > 0 ? 3.7 * scale : 2.7 * scale,
                   ),
                   alignment: Alignment.bottomCenter,
-                  width: (MonsterBox.getBoxBaseWidth(data) -
-                      (shieldValue > 0 ? 7.7 : 5.5)) * scale,
+                  width: math.max(
+                    0,
+                    (MonsterBox.getBoxBaseWidth(data) - (shieldValue > 0 ? 7.7 : 5.5)) * scale
+                  ),
                   child: ValueListenableBuilder<int>(
                       valueListenable: data.maxHealth,
                       builder: (context, value, child) {
@@ -371,7 +371,7 @@ class MonsterBoxState extends State<MonsterBox> {
       child: ValueListenableBuilder<dynamic>(
         valueListenable: _gameState.characterShields,
         builder: (context, value, child) {
-          double width = MonsterBox.getWidth(scale, data);
+          double width = math.max(0, MonsterBox.getWidth(scale, data));
 
           return HealthWheelController(
             figureId: widget.figureId,
