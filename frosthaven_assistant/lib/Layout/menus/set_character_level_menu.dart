@@ -190,7 +190,7 @@ class SetCharacterLevelMenuState extends State<SetCharacterLevelMenu> {
                     var figure = GameMethods.getFigure(characterId, characterId);
 
                     if (figure == null) {
-                      return false;
+                      return 0;
                     }
 
                     var baseId = figure.getBaseId();
@@ -199,13 +199,13 @@ class SetCharacterLevelMenuState extends State<SetCharacterLevelMenu> {
                     var shieldAmount = _gameState.characterShields.value[baseId] ?? 0;
 
                     if (shieldAmount + change < 0) {
-                      return false;
+                      return 0;
                     }
 
                     shieldMap[baseId] = shieldAmount + change;
                     _gameState.characterShields.value = Map<String,int>.from(shieldMap);
 
-                    return true;
+                    return change;
                   },
                   figureId: widget.character.id, ownerId: widget.character.id, scale: scale
                 )

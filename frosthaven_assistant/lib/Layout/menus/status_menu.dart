@@ -583,7 +583,7 @@ class StatusMenuState extends State<StatusMenu> {
                           Colors.red,
                           callback: (int change) {
                             widget.healthChange.value += change;
-                            return true;
+                            return change;
                           }, figureId: figureId, ownerId: ownerId, scale: scale),
                       const SizedBox(height: 2),
                       hasXp
@@ -611,11 +611,11 @@ class StatusMenuState extends State<StatusMenu> {
                             var pierceAmount = widget.actionStats.pierceAmount.value;
 
                             if (pierceAmount + change < 0) {
-                              return false;
+                              change = pierceAmount * -1;
                             }
 
                             widget.actionStats.pierceAmount.value += change;
-                            return true;
+                            return change;
                           },
                           figureId: figureId, ownerId: ownerId, scale: scale)
                           : Container(),
@@ -652,7 +652,7 @@ class StatusMenuState extends State<StatusMenu> {
                             var figure = GameMethods.getFigure(ownerId, figureId);
 
                             if (figure == null || widget.characterId == null) {
-                              return false;
+                              return 0;
                             }
 
                             var fullId = figure.getFullId();
@@ -662,22 +662,21 @@ class StatusMenuState extends State<StatusMenu> {
                             var baseShieldAmount = shieldMap[baseId] ?? 0;
                             var shieldAmount = shieldMap[fullId] ?? 0;
                             var modifier = widget.actionStats.characterShieldModifier.value;
-
-                            if (widget.attack && baseShieldAmount + shieldAmount + modifier + change < 0) {
-                              return false;
-                            }
-                            if (!widget.attack && shieldAmount + change < 0) {
-                              return false;
-                            }
+                            var totalShieldAmount = baseShieldAmount + shieldAmount + modifier;
 
                             if (widget.attack) {
+                              change = totalShieldAmount + change < 0 ? totalShieldAmount * -1 : change;
+
                               widget.actionStats.characterShieldModifier.value = modifier + change;
-                            } else {
+                            }
+                            else {
+                              change = shieldAmount + change < 0 ? shieldAmount * -1 : change;
+
                               shieldMap[fullId] = shieldAmount + change;
                               _gameState.characterShields.value = Map<String,int>.from(shieldMap);
                             }
 
-                            return true;
+                            return change;
                           },
                           figureId: figureId, ownerId: ownerId, scale: scale)
                           : Container(),
