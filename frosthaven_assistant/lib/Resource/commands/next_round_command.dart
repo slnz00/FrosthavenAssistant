@@ -35,8 +35,7 @@ class NextRoundCommand extends Command {
 
   void applyUnhandledEffects () {
     for (var data in _gameState.currentList) {
-      EffectHandler.handleRoundStart(data);
-      EffectHandler.handleRoundEnd(data);
+      EffectHandler.handleTurnStart(data);
     }
   }
 
@@ -62,7 +61,10 @@ class NextRoundCommand extends Command {
     if (_gameState.currentList.last.turnState != TurnsState.done) {
       GameMethods.setTurnDone(stateAccess, _gameState.currentList.length - 1);
     }
-    GameMethods.clearTurnState(stateAccess, false);
+
+    EffectHandler.handleRoundEnd();
+
+    GameMethods.clearTurnState(stateAccess, false, false);
     GameMethods.sortCharactersFirst(stateAccess);
 
     GameMethods.setToastMessage("");

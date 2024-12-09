@@ -230,8 +230,15 @@ class GameMethods {
           _gameState._currentList = newList;
           return;
         } else {
-          //in case initiative is earlier than current turn, place just after current turn item
-          newList.insert(currentTurnItemIndex + 1, item);
+          //in case initiative is earlier than current turn, ignore anything current turn, and earlier and place later
+          int insertIndex = currentTurnItemIndex + 1;
+          for (int j = currentTurnItemIndex + 1; j < newList.length; j++) {
+            if( getInitiative(newList[j]) >= initiative) {
+              insertIndex = j;
+              break;
+            }
+          }
+          newList.insert(insertIndex, item);
           _gameState._currentList = newList;
           return;
         }
@@ -422,7 +429,7 @@ class GameMethods {
         }
       }
 
-      GameMethods.clearTurnState(_, true);
+      GameMethods.clearTurnState(_, true, true);
       _gameState._toastMessage.value = "";
     }
 
@@ -837,7 +844,7 @@ class GameMethods {
   }
 
   static void executeAddStandee(_StateModifier _, final int nr, final SummonData? summon,
-      final MonsterType type, final String ownerId, final bool addAsSummon) {
+      final MonsterType type, final String ownerId, final bool addAsSummon, [final bool ally = false]) {
     MonsterInstance instance;
     Monster? monster;
     if (summon == null) {
@@ -846,7 +853,7 @@ class GameMethods {
           monster = item;
         }
       }
-      instance = MonsterInstance(nr, type, addAsSummon, monster!);
+      instance = MonsterInstance(nr, type, addAsSummon, monster!, ally);
     } else {
       instance = MonsterInstance.summon(
           summon.standeeNr,
@@ -1221,7 +1228,7 @@ class GameMethods {
     }
   }
 
-  static void clearTurnState(_StateModifier stateModifier, bool clearLastTurnToo) {
+  static void clearTurnState(_StateModifier stateModifier, bool clearLastTurnToo, bool resetBaseShields) {
     for (var item in _gameState._currentList) {
       item._turnState = TurnsState.notDone;
       if (item is Character) {
@@ -1236,8 +1243,14 @@ class GameMethods {
       }
     }
 
-    _gameState.characterShields.value = {};
+    _gameState.characterShields.value = Map<String, int>.fromEntries(
+      _gameState.characterShields.value
+        .entries
+        .where((entry) => !resetBaseShields && entry.key.startsWith("__base__"))
+    );
+
     _gameState.characterRoundFlags.value = {};
+
     _gameState.syncCharacterRoundFlags();
     _gameState.syncCharacterShields();
   }
@@ -1325,13 +1338,6 @@ class GameMethods {
 
         data._turnState = TurnsState.done;
 
-        if (data is Monster) {
-          EffectHandler.handleRoundEnd(data);
-        }
-        if (data is Character) {
-          EffectHandler.handleRoundEnd(data);
-        }
-
         removeExpiringConditionsFromListItem(_, data);
       }
     }
@@ -1341,13 +1347,6 @@ class GameMethods {
       var data = _gameState.currentList[index];
 
       data._turnState = TurnsState.done;
-
-      if (data is Monster) {
-        EffectHandler.handleRoundEnd(data);
-      }
-      if (data is Character) {
-        EffectHandler.handleRoundEnd(data);
-      }
 
       removeExpiringConditionsFromListItem(_, data);
     } else {
@@ -1363,7 +1362,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleRoundStart(data);
+          EffectHandler.handleTurnStart(data);
           break;
         }
       } else if (data is Character) {
@@ -1372,7 +1371,7 @@ class GameMethods {
             reapplyConditionsFromListItem(_, data);
           }
           data.setTurnState(TurnsState.current);
-          EffectHandler.handleRoundStart(data);
+          EffectHandler.handleTurnStart(data);
           break;
         }
       }

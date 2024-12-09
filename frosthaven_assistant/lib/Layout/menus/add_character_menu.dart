@@ -231,9 +231,11 @@ class AddCharacterMenuState extends State<AddCharacterMenu> {
                                       _gameState.action(command); //
                                       //open level menu
                                       openDialog(
-                                          context,
-                                          SetCharacterLevelMenu(
-                                              character: command.character));
+                                        context,
+                                        SetCharacterLevelMenu(character: command.character)
+                                      ).then((val) {
+                                        _gameState.syncCharacterShields();
+                                      });
                                     });
                                   }
                                 },

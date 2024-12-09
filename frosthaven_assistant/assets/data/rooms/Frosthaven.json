@@ -768,7 +768,7 @@
     {
       "start": {
         "Living Spirit (FH)": {
-          "normal": [2, 1, 1],
+          "normal": [2, 1, 2],
           "elite": [0, 1, 1]
         },
         "Frost Demon (FH)": {
@@ -2448,6 +2448,9 @@
           "elite": [0, 1, 2]
         }
       }
+    },
+    {
+      "115.4": {}
     }
   ],
   "61": [
@@ -5878,7 +5881,7 @@
           "normal": [2, 2, 4],
           "elite": [0, 1, 0]
         },
-        "Lurker wavethrower Scenario 128": {
+        "Lurker Wavethrower Scenario 128": {
           "normal": [1, 2, 2],
           "elite": [0, 0, 0]
         },
@@ -5902,7 +5905,7 @@
           "normal": [2, 1, 4],
           "elite": [2, 5, 4]
         },
-        "Lurker wavethrower Scenario 128": {
+        "Lurker Wavethrower Scenario 128": {
           "normal": [3, 4, 6],
           "elite": [0, 0, 0]
         },
@@ -5918,7 +5921,7 @@
           "normal": [0, 0, 0],
           "elite": [2, 3, 4]
         },
-        "Lurker wavethrower Scenario 128": {
+        "Lurker Wavethrower Scenario 128": {
           "normal": [2, 3, 4],
           "elite": [0, 0, 0]
         }
@@ -5940,7 +5943,7 @@
   "129": [
     {
       "start": {
-        "City Guard (FH)": {
+        "City Guard Scenario 129": {
           "normal": [0, 0, 0],
           "elite": [4, 3, 2]
         }

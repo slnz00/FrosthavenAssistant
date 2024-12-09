@@ -8,6 +8,7 @@ import 'package:frosthaven_assistant/Resource/commands/set_init_command.dart';
 import 'package:frosthaven_assistant/Resource/scaling.dart';
 import 'package:frosthaven_assistant/services/network/network.dart';
 import '../Resource/color_matrices.dart';
+import '../Resource/commands/change_stat_commands/change_xp_command.dart';
 import '../Resource/commands/next_turn_command.dart';
 import '../Resource/enums.dart';
 import '../Resource/state/game_state.dart';
@@ -34,13 +35,16 @@ class CharacterWidget extends StatefulWidget {
   CharacterWidgetState createState() => CharacterWidgetState();
 }
 
-class CharacterWidgetState extends State<CharacterWidget> {
+class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProviderStateMixin {
   final GameState _gameState = getIt<GameState>();
   late bool isCharacter = true;
   final _initTextFieldController = TextEditingController();
   late List<MonsterInstance> lastList = [];
   late Character character;
   final focusNode = FocusNode();
+
+  late AnimationController _xpAnimationController;
+  late Animation<Color?> _xpColor;
 
   String getInitiativeText () {
     return _initTextFieldController.text;
@@ -74,12 +78,29 @@ class CharacterWidgetState extends State<CharacterWidget> {
   @override
   void dispose() {
     _initTextFieldController.removeListener(_textFieldControllerListener);
+    _xpAnimationController.dispose();
+
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+
+    _xpAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 0),
+      reverseDuration: const Duration(milliseconds: 200)
+    );
+
+    _xpColor = ColorTween(
+      begin: Colors.blue,
+      end: Colors.white,
+    ).animate(CurvedAnimation(
+      parent: _xpAnimationController,
+      curve: Curves.easeOut,
+    ));
+
     for (var item in _gameState.currentList) {
       if (item.id == widget.characterId && item is Character) {
         character = item;
@@ -622,37 +643,59 @@ class CharacterWidgetState extends State<CharacterWidget> {
             ),
             isCharacter
                 ? Positioned(
-                top: 10 * scale,
-                left: 315 * scale,
-                child: Row(
-                  children: [
-                    Image(
-                      height: 16 * scale,
-                      color: Colors.blue,
-                      colorBlendMode: BlendMode.modulate,
-                      image: const AssetImage("assets/images/psd/xp.png"),
-                    ),
-                    ValueListenableBuilder<int>(
+                    top: 12 * scale,
+                    left: 310 * scale,
+                    child: InkWell(
+                      onDoubleTap: () {
+                        var addXp = ChangeXPCommand(1, widget.characterId, widget.characterId);
+
+                        if (_xpAnimationController.isAnimating) {
+                          _xpAnimationController.reset();
+                        }
+                        _xpAnimationController.forward()
+                            .then((_) => Future.delayed(const Duration(milliseconds: 100)))
+                            .then((_) => _xpAnimationController.reverse());
+
+                        _gameState.action(addXp);
+                      },
+                      child: ValueListenableBuilder<int>(
                         valueListenable: character.characterState.xp,
                         builder: (context, value, child) {
-                          return Text(
-                            character.characterState.xp.value.toString(),
-                            style: TextStyle(
-                                fontFamily: frosthavenStyle
-                                    ? 'GermaniaOne'
-                                    : 'Pirata',
-                                color: Colors.blue,
-                                fontSize: 14 * scale,
-                                shadows: [shadow]),
+                          return AnimatedBuilder(
+                            animation: _xpAnimationController,
+                            builder: (context, child) {
+                              return Row(
+                                children: [
+                                  Image(
+                                    height: 16 * scale,
+                                    color: _xpColor.value,
+                                    colorBlendMode: BlendMode.modulate,
+                                    image: const AssetImage("assets/images/psd/xp.png"),
+                                  ),
+                                  SizedBox(width: character.characterState.xp.value <= 9 ? 3 * scale : 1 * scale),
+                                  Text(
+                                    character.characterState.xp.value.toString(),
+                                    style: TextStyle(
+                                        fontFamily: frosthavenStyle
+                                            ? 'GermaniaOne'
+                                            : 'Pirata',
+                                        color: _xpColor.value,
+                                        fontSize: 14 * scale,
+                                        shadows: [shadow]),
+                                  )
+                                ],
+                              );
+                            }
                           );
-                        }),
-                  ],
-                ))
+                        }
+                      )
+                    )
+                    )
                 : Container(),
             isCharacter
                 ? Positioned(
-                    top: 20 * scale,
-                    left: 290 * scale,
+                    top: 21 * scale,
+                    left: 285 * scale,
                     child: Row(
                       children: [
                         Image(
@@ -664,8 +707,17 @@ class CharacterWidgetState extends State<CharacterWidget> {
                         ValueListenableBuilder<dynamic>(
                             valueListenable: _gameState.characterShields,
                             builder: (context, value, child) {
+                              var figure = GameMethods.getFigure(widget.characterId, widget.characterId);
+                              var fullId = figure?.getFullId();
+                              var baseId = figure?.getBaseId();
+                              var shieldMap = _gameState.characterShields.value;
+
+                              var shieldAmount = (fullId != null ? shieldMap[fullId] : null) ?? 0;
+                              var baseShieldAmount = (fullId != null ? shieldMap[baseId] : null) ?? 0;
+                              var value = baseShieldAmount + shieldAmount;
+
                               return Text(
-                                (_gameState.characterShields.value[character.id] ?? 0).toString(),
+                                value.toString(),
                                 style: TextStyle(
                                     fontFamily: frosthavenStyle
                                         ? 'GermaniaOne'
@@ -680,8 +732,8 @@ class CharacterWidgetState extends State<CharacterWidget> {
                 : Container(),
             isCharacter
                 ? Positioned(
-                    top: 28 * scale,
-                    left: 316 * scale,
+                    top: 30 * scale,
+                    left: 310 * scale,
                     child: Row(
                       children: [
                         Image(
@@ -689,6 +741,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
                           image:
                               const AssetImage("assets/images/psd/level.png"),
                         ),
+                        SizedBox(width: 3 * scale),
                         ValueListenableBuilder<int>(
                             valueListenable: character.characterState.level,
                             builder: (context, value, child) {
@@ -752,7 +805,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
       }
     }
 
-    return InkWell(
+    return GestureDetector(
         onTap: () {
           //open stats menu
           openDialog(
@@ -760,6 +813,7 @@ class CharacterWidgetState extends State<CharacterWidget> {
             ActionMenu(figureId: character.id, characterId: character.id),
           );
         },
+        behavior: HitTestBehavior.translucent,
         child: ValueListenableBuilder<dynamic>(
             valueListenable: getIt<GameState>().updateList,
             builder: (context, value, child) {

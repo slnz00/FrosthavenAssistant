@@ -8,7 +8,7 @@ import '../services/service_locator.dart';
 class CounterButton extends StatefulWidget {
   final ValueListenable<dynamic> notifier;
   final ChangeStatCommand? command;
-  final bool Function(int)? callback;
+  final int Function(int)? callback;
   final int Function()? getValue;
   final int maxValue;
   final String image;
@@ -38,6 +38,33 @@ class CounterButtonState extends State<CounterButton> {
   GameState gameState = getIt<GameState>();
   final totalChangeValue = ValueNotifier<int>(0);
 
+  void change (int changeAmount) {
+    FigureState? figure = GameMethods.getFigure(widget.ownerId, widget.figureId);
+
+    if (figure == null) {
+      return;
+    }
+
+    if (widget.callback != null) {
+      var override = widget.callback!(changeAmount);
+
+      totalChangeValue.value += override;
+
+      return;
+    }
+
+    if (widget.command != null) {
+      if (widget.notifier.value + changeAmount < 0) {
+        changeAmount = widget.notifier.value * -1;
+      }
+
+      totalChangeValue.value += changeAmount;
+
+      widget.command!.setChange(changeAmount);
+      gameState.action(widget.command!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     FigureState? figure =
@@ -50,37 +77,19 @@ class CounterButtonState extends State<CounterButton> {
       SizedBox(
           width: 40 * widget.scale,
           height: 40 * widget.scale,
-          child: IconButton(
-              icon: Image.asset('assets/images/psd/sub.png'),
+          child: InkWell(
+              child: Ink(
+                child: Image.asset('assets/images/psd/sub.png'),
+              ),
 //iconSize: 30,
-              onPressed: () {
-                if (widget.command != null) {
-                  widget.command!.setChange(-1);
-                }
-                if (widget.callback != null) {
-                  if (widget.callback!(-1)) {
-                    totalChangeValue.value--;
-                  }
-
-                  return;
-                }
-
-                if (widget.notifier.value > 0) {
-                  totalChangeValue.value--;
-
-                  if (widget.command != null) {
-                    gameState.action(widget.command!);
-                  }
-
-                  if (widget.figureId != "unknown" &&
-                      widget.notifier == figure!.health &&
-                      figure.health.value <= 0) {
-                    {
-                      Navigator.pop(context);
-                    }
-                  }
-                }
-              })),
+              onTap: () {
+                change(-1);
+              },
+              onLongPress: () {
+                change(-10);
+              },
+          )
+      ),
       Stack(children: [
         SizedBox(
           width: 30 * widget.scale,
@@ -130,36 +139,16 @@ class CounterButtonState extends State<CounterButton> {
       SizedBox(
           width: 40 * widget.scale,
           height: 40 * widget.scale,
-          child: IconButton(
-            icon: Image.asset('assets/images/psd/add.png'),
+          child: InkWell(
+            child: Ink(
+              child: Image.asset('assets/images/psd/add.png'),
+            ),
 //iconSize: 30,
-            onPressed: () {
-              if (widget.command != null) {
-                widget.command!.setChange(1);
-              }
-              if (widget.callback != null) {
-                if (widget.callback!(1)) {
-                  totalChangeValue.value++;
-                }
-
-                return;
-              }
-
-              if (widget.notifier.value < widget.maxValue) {
-
-                if (widget.command != null) {
-                  gameState.action(widget.command!);
-                }
-
-                totalChangeValue.value++;
-
-                if (widget.figureId != "unknown" &&
-                    widget.notifier.value <= 0 &&
-                    widget.notifier == figure!.health) {
-                  Navigator.pop(context);
-                }
-              }
-//increment
+            onTap: () {
+              change(1);
+            },
+            onLongPress: () {
+              change(10);
             },
           )),
     ]);

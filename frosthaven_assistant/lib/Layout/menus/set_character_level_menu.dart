@@ -154,16 +154,61 @@ class SetCharacterLevelMenuState extends State<SetCharacterLevelMenu> {
                 ),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 CounterButton(
-                    widget.character.characterState.maxHealth,
-                    ChangeMaxHealthCommand(
-                        0, widget.character.id, widget.character.id),
-                    900,
-                    "assets/images/abilities/heal.png",
-                    true,
-                    Colors.red,
-                    figureId: widget.character.id,
-                    ownerId: widget.character.id,
-                    scale: scale)
+                  widget.character.characterState.maxHealth,
+                  ChangeMaxHealthCommand(
+                      0, widget.character.id, widget.character.id),
+                  900,
+                  "assets/images/abilities/heal.png",
+                  true,
+                  Colors.red,
+                  figureId: widget.character.id,
+                  ownerId: widget.character.id,
+                  scale: scale
+                ),
+                CounterButton(
+                  _gameState.characterShields,
+                  null,
+                  999,
+                  "assets/images/abilities/shield_fh.png",
+                  true,
+                  Colors.white,
+                  getValue: () {
+                    var characterId = widget.character.id;
+                    var figure = GameMethods.getFigure(characterId, characterId);
+
+                    if (figure == null) {
+                      return 0;
+                    }
+
+                    var baseId = figure.getBaseId();
+                    var shieldMap = _gameState.characterShields.value;
+
+                    return shieldMap[baseId] ?? 0;
+                  },
+                  callback: (int change) {
+                    var characterId = widget.character.id;
+                    var figure = GameMethods.getFigure(characterId, characterId);
+
+                    if (figure == null) {
+                      return 0;
+                    }
+
+                    var baseId = figure.getBaseId();
+
+                    var shieldMap = _gameState.characterShields.value;
+                    var shieldAmount = _gameState.characterShields.value[baseId] ?? 0;
+
+                    if (shieldAmount + change < 0) {
+                      return 0;
+                    }
+
+                    shieldMap[baseId] = shieldAmount + change;
+                    _gameState.characterShields.value = Map<String,int>.from(shieldMap);
+
+                    return change;
+                  },
+                  figureId: widget.character.id, ownerId: widget.character.id, scale: scale
+                )
               ]),
               Text("Change name:", style: getTitleTextStyle(scale)),
               SizedBox(

@@ -24,13 +24,14 @@ class AddStandeeCommand extends Command {
   final MonsterType type;
   final String ownerId;
   final bool addAsSummon;
+  final bool ally;
 
   AddStandeeCommand(
-      this.nr, this.summon, this.ownerId, this.type, this.addAsSummon);
+      this.nr, this.summon, this.ownerId, this.type, this.addAsSummon, [this.ally = false]);
 
   @override
   void execute() {
-    GameMethods.executeAddStandee(stateAccess, nr, summon, type, ownerId, addAsSummon);
+    GameMethods.executeAddStandee(stateAccess, nr, summon, type, ownerId, addAsSummon, ally);
 
     if (getIt<GameState>().roundState.value == RoundState.playTurns) {
       Future.delayed(const Duration(milliseconds: 600), () {

@@ -14,6 +14,7 @@ import '../../Resource/commands/change_stat_commands/change_health_command.dart'
 import '../../Resource/commands/ice_wraith_change_form_command.dart';
 import '../../Resource/commands/remove_condition_command.dart';
 import '../../Resource/commands/set_as_summon_command.dart';
+import '../../Resource/effect_handler.dart';
 import '../../Resource/enums.dart';
 import '../../Resource/state/game_state.dart';
 import '../../Resource/settings.dart';
@@ -499,6 +500,11 @@ class StatusMenuState extends State<StatusMenu> {
                       ValueListenableBuilder<int>(
                           valueListenable: getIt<GameState>().updateList,
                           builder: (context, value, child) {
+                            //handle case when health is changed to zero: don't instantiate monster box
+                            if(GameMethods.getFigure(ownerId, figureId) == null) {
+                              return Container();
+                            }
+
                             return Container(
                                 height: 28 * scale,
                                 margin: EdgeInsets.only(top: 2 * scale),
@@ -577,7 +583,7 @@ class StatusMenuState extends State<StatusMenu> {
                           Colors.red,
                           callback: (int change) {
                             widget.healthChange.value += change;
-                            return true;
+                            return change;
                           }, figureId: figureId, ownerId: ownerId, scale: scale),
                       const SizedBox(height: 2),
                       hasXp
@@ -605,11 +611,11 @@ class StatusMenuState extends State<StatusMenu> {
                             var pierceAmount = widget.actionStats.pierceAmount.value;
 
                             if (pierceAmount + change < 0) {
-                              return false;
+                              change = pierceAmount * -1;
                             }
 
                             widget.actionStats.pierceAmount.value += change;
-                            return true;
+                            return change;
                           },
                           figureId: figureId, ownerId: ownerId, scale: scale)
                           : Container(),
@@ -623,12 +629,18 @@ class StatusMenuState extends State<StatusMenu> {
                           true,
                           Colors.white,
                           getValue: () {
-                            if (widget.characterId == null) {
+                            var figure = GameMethods.getFigure(ownerId, figureId);
+
+                            if (figure == null || widget.characterId == null) {
                               return 0;
                             }
 
+                            var fullId = figure.getFullId();
+                            var baseId = figure.getBaseId();
+
                             var shieldMap = _gameState.characterShields.value;
-                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+                            var baseShieldAmount = shieldMap[baseId] ?? 0;
+                            var shieldAmount = baseShieldAmount + (shieldMap[fullId] ?? 0);
 
                             if (widget.attack) {
                               shieldAmount += widget.actionStats.characterShieldModifier.value;
@@ -637,29 +649,34 @@ class StatusMenuState extends State<StatusMenu> {
                             return shieldAmount;
                           },
                           callback: (int change) {
-                            if (widget.characterId == null) {
-                              return false;
+                            var figure = GameMethods.getFigure(ownerId, figureId);
+
+                            if (figure == null || widget.characterId == null) {
+                              return 0;
                             }
+
+                            var fullId = figure.getFullId();
+                            var baseId = figure.getBaseId();
 
                             var shieldMap = _gameState.characterShields.value;
-                            var shieldAmount = shieldMap[widget.characterId] ?? 0;
+                            var baseShieldAmount = shieldMap[baseId] ?? 0;
+                            var shieldAmount = shieldMap[fullId] ?? 0;
                             var modifier = widget.actionStats.characterShieldModifier.value;
-
-                            if (widget.attack && shieldAmount + modifier + change < 0) {
-                              return false;
-                            }
-                            if (!widget.attack && shieldAmount + change < 0) {
-                              return false;
-                            }
+                            var totalShieldAmount = baseShieldAmount + shieldAmount + modifier;
 
                             if (widget.attack) {
+                              change = totalShieldAmount + change < 0 ? totalShieldAmount * -1 : change;
+
                               widget.actionStats.characterShieldModifier.value = modifier + change;
-                            } else {
-                              shieldMap[widget.characterId!] = shieldAmount + change;
+                            }
+                            else {
+                              change = shieldAmount + change < 0 ? shieldAmount * -1 : change;
+
+                              shieldMap[fullId] = shieldAmount + change;
                               _gameState.characterShields.value = Map<String,int>.from(shieldMap);
                             }
 
-                            return true;
+                            return change;
                           },
                           figureId: figureId, ownerId: ownerId, scale: scale)
                           : Container(),
@@ -743,16 +760,18 @@ class StatusMenuState extends State<StatusMenu> {
                                   if (figure is CharacterState) {
                                     openDialog(
                                       context,
-                                      SetCharacterLevelMenu(
-                                          character: character!),
-                                    );
+                                      SetCharacterLevelMenu(character: character!),
+                                    ).then((val) {
+                                      _gameState.syncCharacterShields();
+                                    });
                                   } else {
                                     openDialog(
                                       context,
                                       SetLevelMenu(
-                                          monster: monster,
-                                          figure: figure,
-                                          characterId: widget.characterId),
+                                        monster: monster,
+                                        figure: figure,
+                                        characterId: widget.characterId
+                                      ),
                                     );
                                   }
                                 },
