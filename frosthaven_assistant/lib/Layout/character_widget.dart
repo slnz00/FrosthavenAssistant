@@ -645,52 +645,38 @@ class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProvi
                 ? Positioned(
                     top: 12 * scale,
                     left: 310 * scale,
-                    child: InkWell(
-                      onDoubleTap: () {
-                        var addXp = ChangeXPCommand(1, widget.characterId, widget.characterId);
-
-                        if (_xpAnimationController.isAnimating) {
-                          _xpAnimationController.reset();
-                        }
-                        _xpAnimationController.forward()
-                            .then((_) => Future.delayed(const Duration(milliseconds: 100)))
-                            .then((_) => _xpAnimationController.reverse());
-
-                        _gameState.action(addXp);
-                      },
-                      child: ValueListenableBuilder<int>(
-                        valueListenable: character.characterState.xp,
-                        builder: (context, value, child) {
-                          return AnimatedBuilder(
-                            animation: _xpAnimationController,
-                            builder: (context, child) {
-                              return Row(
-                                children: [
-                                  Image(
-                                    height: 16 * scale,
-                                    color: _xpColor.value,
-                                    colorBlendMode: BlendMode.modulate,
-                                    image: const AssetImage("assets/images/psd/xp.png"),
-                                  ),
-                                  SizedBox(width: character.characterState.xp.value <= 9 ? 3 * scale : 1 * scale),
-                                  Text(
-                                    character.characterState.xp.value.toString(),
-                                    style: TextStyle(
-                                        fontFamily: frosthavenStyle
-                                            ? 'GermaniaOne'
-                                            : 'Pirata',
-                                        color: _xpColor.value,
-                                        fontSize: 14 * scale,
-                                        shadows: [shadow]),
-                                  )
-                                ],
-                              );
-                            }
-                          );
-                        }
-                      )
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: character.characterState.xp,
+                      builder: (context, value, child) {
+                        return AnimatedBuilder(
+                          animation: _xpAnimationController,
+                          builder: (context, child) {
+                            return Row(
+                              children: [
+                                Image(
+                                  height: 16 * scale,
+                                  color: _xpColor.value,
+                                  colorBlendMode: BlendMode.modulate,
+                                  image: const AssetImage("assets/images/psd/xp.png"),
+                                ),
+                                SizedBox(width: character.characterState.xp.value <= 9 ? 3 * scale : 1 * scale),
+                                Text(
+                                  character.characterState.xp.value.toString(),
+                                  style: TextStyle(
+                                      fontFamily: frosthavenStyle
+                                          ? 'GermaniaOne'
+                                          : 'Pirata',
+                                      color: _xpColor.value,
+                                      fontSize: 14 * scale,
+                                      shadows: [shadow]),
+                                )
+                              ],
+                            );
+                          }
+                        );
+                      }
                     )
-                    )
+                  )
                 : Container(),
             isCharacter
                 ? Positioned(
@@ -766,6 +752,30 @@ class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProvi
                     child: summonsButton(scale),
                   )
                 : Container(),
+            isCharacter
+                ? Positioned(
+                top: 10 * scale,
+                left: 305 * scale,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onDoubleTap: () {
+                      var addXp = ChangeXPCommand(1, widget.characterId, widget.characterId);
+
+                      if (_xpAnimationController.isAnimating) {
+                        _xpAnimationController.reset();
+                      }
+                      _xpAnimationController.forward()
+                          .then((_) => Future.delayed(const Duration(milliseconds: 100)))
+                          .then((_) => _xpAnimationController.reverse());
+
+                      _gameState.action(addXp);
+                    },
+                    child: SizedBox(
+                      width: 40 * scale,
+                      height: 40 * scale,
+                    )
+                )
+            ) : Container(),
             if (character.characterState.health.value > 0)
               InkWell(
                   onTap: () {
