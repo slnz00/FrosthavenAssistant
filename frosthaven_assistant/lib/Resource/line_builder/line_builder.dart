@@ -687,14 +687,14 @@ class LineBuilder {
                               : styleToUse.fontSize! * 1.2,
                           bottom: 0,
                           left: frosthavenStyle
-                              ? (iconGfxOverride != null ? -1.5 * scale : 2.8 * scale)
+                              ? (iconGfxOverride != null ? -1.3 * scale : 2.8 * scale)
                               : 0.0,
                           //why left?!
 
                           child: Image(
                             height: frosthavenStyle
                                 ? (iconGfxOverride != null
-                                    ? 13.1 * scale
+                                    ? (isBossStatCard ? 11.2 * scale : 13.1 * scale)
                                     : styleToUse.fontSize! * 1.0 * 0.5)
                                 : styleToUse.fontSize! * 1.2,
                             //width: frosthavenStyle? styleToUse.fontSize! * 1.2 * 0.5: styleToUse.fontSize! * 1.2,

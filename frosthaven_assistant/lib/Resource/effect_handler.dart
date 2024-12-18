@@ -8,6 +8,7 @@ import 'package:frosthaven_assistant/Resource/line_builder/stat_applier.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 
 import '../Layout/menus/action_menu.dart';
+import '../Model/monster.dart';
 import '../services/service_locator.dart';
 import 'commands/change_stat_commands/change_health_command.dart';
 import 'commands/remove_condition_command.dart';
@@ -75,6 +76,10 @@ class MonsterAbilityParser {
     return r'%([^%]+)%%use%';
   }
 
+  static patternSpecialAbility() {
+    return r'^special (\d+)$';
+  }
+
   static patternBaseValue(String attributeName) {
     return r'%' + attributeName + '%[\\s]*([0-9]+)';
   }
@@ -98,8 +103,10 @@ class MonsterAbilityParser {
 
   late final List<String> lines;
 
-  MonsterAbilityParser(MonsterAbilityCardModel ability) {
-    lines = _extractLines(ability);
+  MonsterAbilityParser(MonsterAbilityCardModel ability, MonsterStatsModel? bossStats) {
+    var specialAbility = _getSpecialAbility(ability, bossStats);
+
+    lines = _extractLines(specialAbility ?? ability);
   }
 
   (List<Elements>, bool) getActivateElements() {
@@ -348,6 +355,41 @@ class MonsterAbilityParser {
 
     return lines;
   }
+
+  MonsterAbilityCardModel? _getSpecialAbility(MonsterAbilityCardModel ability, MonsterStatsModel? bossStats) {
+    if (bossStats == null) {
+      return null;
+    }
+
+    var regexUseSpecial = RegExp(patternSpecialAbility());
+    var firstLine = ability.lines[0].trim().toLowerCase();
+
+    RegExpMatch? match;
+    int? specialValue;
+
+    if ((match = regexUseSpecial.firstMatch(firstLine)) != null) {
+      specialValue = int.parse(match!.group(1)!);
+    }
+
+    if (specialValue == null) {
+      return null;
+    }
+
+    List<String>? lines;
+
+    if (specialValue == 1) {
+      lines = bossStats.special1;
+    }
+    if (specialValue == 2) {
+      lines = bossStats.special2;
+    }
+
+    if (lines == null) {
+      return null;
+    }
+
+    return MonsterAbilityCardModel('tmp', 0, false, 1, lines, '', const []);
+  }
 }
 
 class EffectHandler {
@@ -484,11 +526,12 @@ class EffectHandler {
 
     if (data is Monster) {
       var ability = _getCurrentMonsterAbility(data);
+      var bossStats = _getBossStats(data);
       if (ability == null) {
         return;
       }
 
-      var parser = MonsterAbilityParser(ability);
+      var parser = MonsterAbilityParser(ability, bossStats);
       var (useElements, useAny) = parser.getUseElements();
       var (activateElements, activateAny) = parser.getActivateElements();
       var (convertFrom, convertFromAny, convertTo, convertToAny) = parser.getConvertElement();
@@ -565,6 +608,11 @@ class EffectHandler {
     var isWounded = _getWoundAmount(figure) != 0;
     if (isWounded) {
       _removeWound(figure);
+    }
+
+    var hasBrittle = _isConditionActive(Condition.brittle, figure);
+    if (hasBrittle) {
+      _removeCondition(Condition.brittle, figure);
     }
 
     var hasBane = _isConditionActive(Condition.bane, figure);
@@ -661,8 +709,7 @@ class EffectHandler {
     return 0;
   }
 
-  static int _getShieldAmount(
-      FigureData figure, int pierceAmount, int characterShieldModifier) {
+  static int _getShieldAmount(FigureData figure, int pierceAmount, int characterShieldModifier) {
     var owner = figure.getOwner();
 
     if (pierceAmount < 0) {
@@ -829,15 +876,15 @@ class EffectHandler {
     return elements[_random.nextInt(elements.length)];
   }
 
-  static MonsterAbilityAttribute? _getAbilityAttribute(
-      String attributeName, Monster monster) {
+  static MonsterAbilityAttribute? _getAbilityAttribute(String attributeName, Monster monster) {
     var ability = _getCurrentMonsterAbility(monster);
+    var bossStats = _getBossStats(monster);
 
     if (ability == null) {
       return null;
     }
 
-    return MonsterAbilityParser(ability).getAttribute(attributeName);
+    return MonsterAbilityParser(ability, bossStats).getAttribute(attributeName);
   }
 
   static MonsterAbilityCardModel? _getCurrentMonsterAbility(Monster monster) {
@@ -851,5 +898,9 @@ class EffectHandler {
     }
 
     return abilityDeck.discardPile.peek;
+  }
+
+  static MonsterStatsModel? _getBossStats(Monster monster) {
+    return monster.type.levels[monster.level.value].boss;
   }
 }
