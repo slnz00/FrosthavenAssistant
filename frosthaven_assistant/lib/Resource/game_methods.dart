@@ -1087,6 +1087,16 @@ class GameMethods {
     return initMessage;
   }
 
+  static ListItemData? getListItem(String id) {
+    for (var item in getIt<GameState>().currentList) {
+      if (item.id == id) {
+        return item;
+      }
+    }
+
+    return null;
+  }
+
   static FigureState? getFigure(String ownerId, String figureId) {
     for (var item in getIt<GameState>().currentList) {
       if (item.id == figureId) {

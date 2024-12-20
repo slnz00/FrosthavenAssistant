@@ -906,11 +906,7 @@ class EffectHandler {
     }
 
     if (owner is Monster) {
-      var elite = (figure.state as MonsterInstance).type == MonsterType.elite;
-      var monsterStats = StatApplier.getStatTokens(owner, elite);
-      var shieldStat = monsterStats['shield'] ?? 0;
-
-      var shieldAmount = _calculateAbilityAttributeValue(shieldStat, 'shield', owner) - pierceAmount;
+      var shieldAmount = calculateMonsterStat('shield', owner, figure.state as MonsterInstance) - pierceAmount;
 
       if (shieldAmount < 0) {
         return 0;
@@ -937,8 +933,15 @@ class EffectHandler {
     return gameState.isRoundFlagSet(characterId, flag);
   }
 
-  static int _calculateAbilityAttributeValue(
-      int statValue, String attributeName, Monster monster) {
+  static int calculateMonsterStat(String attributeName, Monster monster, MonsterInstance instance) {
+    var elite = instance.type == MonsterType.elite;
+    var monsterStats = StatApplier.getStatTokens(monster, elite);
+    var baseStat = monsterStats[attributeName] ?? 0;
+
+    return _calculateAbilityAttributeValue(baseStat, attributeName, monster);
+  }
+
+  static int _calculateAbilityAttributeValue(int statValue, String attributeName, Monster monster) {
     var attribute = _getAbilityAttribute(attributeName, monster);
 
     if (attribute == null) {

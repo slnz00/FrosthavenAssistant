@@ -26,6 +26,7 @@ class Settings {
   final noStandees = ValueNotifier<bool>(false);
   final randomStandees = ValueNotifier<bool>(false);
   final noCalculation = ValueNotifier<bool>(false);
+  final showShieldOnMonsters = ValueNotifier<bool>(true);
   final expireConditions = ValueNotifier<bool>(true);
   final hideLootDeck = ValueNotifier<bool>(false);
   final shimmer = ValueNotifier<bool>(true);
@@ -199,6 +200,9 @@ class Settings {
       if (data["noCalculation"] != null) {
         noCalculation.value = data["noCalculation"];
       }
+      if (data["showShieldOnMonsters"] != null) {
+        showShieldOnMonsters.value = data["showShieldOnMonsters"];
+      }
       if (data["hideLootDeck"] != null) {
         hideLootDeck.value = data["hideLootDeck"];
       }
@@ -272,6 +276,7 @@ class Settings {
         '"noStandees": ${noStandees.value}, '
         '"randomStandees": ${randomStandees.value}, '
         '"noCalculation": ${noCalculation.value}, '
+        '"showShieldOnMonsters": ${showShieldOnMonsters.value}, '
         '"expireConditions": ${expireConditions.value}, '
         '"hideLootDeck": ${hideLootDeck.value}, '
         '"style": ${style.value.index}, '

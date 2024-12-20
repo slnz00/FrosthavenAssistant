@@ -178,6 +178,16 @@ class SettingsMenuState extends State<SettingsMenu> {
                                     });
                                   }),
                               CheckboxListTile(
+                                  title: const Text("Show shield on monster standees"),
+                                  value: settings.showShieldOnMonsters.value,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      settings.showShieldOnMonsters.value = value!;
+                                      settings.saveToDisk();
+                                      getIt<GameState>().updateList.value++;
+                                    });
+                                  }),
+                              CheckboxListTile(
                                   title: const Text("Hide Loot Deck"),
                                   value: settings.hideLootDeck.value,
                                   onChanged: (bool? value) {

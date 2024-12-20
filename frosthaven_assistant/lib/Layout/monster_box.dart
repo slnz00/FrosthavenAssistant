@@ -4,10 +4,12 @@ import 'package:flutter_animation_progress_bar/flutter_animation_progress_bar.da
 import 'package:frosthaven_assistant/Layout/condition_icon.dart';
 import 'package:frosthaven_assistant/Layout/health_wheel_controller.dart';
 import 'package:frosthaven_assistant/Layout/menus/action_menu.dart';
+import 'package:frosthaven_assistant/Resource/effect_handler.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 import 'package:frosthaven_assistant/services/service_locator.dart';
 import '../Resource/color_matrices.dart';
 import '../Resource/enums.dart';
+import '../Resource/settings.dart';
 import '../Resource/ui_utils.dart';
 import 'dart:math' as math;
 
@@ -28,9 +30,9 @@ class MonsterBox extends StatefulWidget {
 
   static const double conditionSize = 14;
 
-  static double getBoxBaseWidth(MonsterInstance data) {
+  static double getBoxBaseWidth(ListItemData? owner, MonsterInstance instance) {
     double width = 47;
-    int shieldValue = getShieldValue(data);
+    int shieldValue = getShieldValue(owner, instance);
 
     if (shieldValue > 0) {
       width += 16;
@@ -39,19 +41,29 @@ class MonsterBox extends StatefulWidget {
     return width;
   }
 
-  static double getWidth(double scale, MonsterInstance data) {
-    double width = getBoxBaseWidth(data);
-    width += conditionSize * data.conditions.value.length / 2;
-    if (data.conditions.value.length % 2 != 0) {
+  static double getWidth(double scale, ListItemData? owner, MonsterInstance instance) {
+    double width = getBoxBaseWidth(owner, instance);
+    width += conditionSize * instance.conditions.value.length / 2;
+    if (instance.conditions.value.length % 2 != 0) {
       width += conditionSize / 2;
     }
     width = width * scale;
     return width;
   }
 
-  static int getShieldValue(MonsterInstance data) {
-    var instanceId = data.getFullId();
+  static int getShieldValue(ListItemData? owner, MonsterInstance instance) {
+    var instanceId = instance.getFullId();
     var gameState = getIt<GameState>();
+
+    if (owner is Monster) {
+      Settings settings = getIt<Settings>();
+
+      if (!settings.showShieldOnMonsters.value) {
+        return 0;
+      }
+
+      return EffectHandler.calculateMonsterStat('shield', owner, instance);
+    }
 
     return gameState.characterShields.value[instanceId] ?? 0;
   }
@@ -63,14 +75,15 @@ class MonsterBox extends StatefulWidget {
 class MonsterBoxState extends State<MonsterBox> {
   late MonsterInstance data;
   late String instanceId;
+  late ListItemData? owner;
 
   final GameState _gameState = getIt<GameState>();
 
   @override
   void initState() {
     super.initState();
-    data = GameMethods.getFigure(widget.ownerId, widget.figureId)
-    as MonsterInstance;
+    data = GameMethods.getFigure(widget.ownerId, widget.figureId) as MonsterInstance;
+    owner = GameMethods.getListItem(widget.ownerId);
     instanceId = data.getId();
   }
 
@@ -150,7 +163,7 @@ class MonsterBoxState extends State<MonsterBox> {
       }
     }
 
-    var shieldValue = MonsterBox.getShieldValue(data);
+    var shieldValue = MonsterBox.getShieldValue(owner, data);
 
     return ColorFiltered(
       //gray out if summoned this turn and it's still the character's/monster's turn
@@ -177,7 +190,7 @@ class MonsterBoxState extends State<MonsterBox> {
             child: Stack(alignment: Alignment.centerLeft, children: [
               Image(
                 height: 30 * scale,
-                width: MonsterBox.getBoxBaseWidth(data) * scale,
+                width: MonsterBox.getBoxBaseWidth(owner, data) * scale,
                 fit: BoxFit.fill,
                 color: borderColor,
                 colorBlendMode: blendMode,
@@ -283,7 +296,7 @@ class MonsterBoxState extends State<MonsterBox> {
               ),
               Positioned(
                   top: 0,
-                  left: (MonsterBox.getBoxBaseWidth(data) - 0.5) * scale,
+                  left: (MonsterBox.getBoxBaseWidth(owner, data) - 0.5) * scale,
                   child: ValueListenableBuilder<List<Condition>>(
                       valueListenable: data.conditions,
                       builder: (context, value, child) {
@@ -309,7 +322,7 @@ class MonsterBoxState extends State<MonsterBox> {
                   alignment: Alignment.bottomCenter,
                   width: math.max(
                     0,
-                    (MonsterBox.getBoxBaseWidth(data) - (shieldValue > 0 ? 7.7 : 5.5)) * scale
+                    (MonsterBox.getBoxBaseWidth(owner, data) - (shieldValue > 0 ? 7.7 : 5.5)) * scale
                   ),
                   child: ValueListenableBuilder<int>(
                       valueListenable: data.maxHealth,
@@ -371,7 +384,7 @@ class MonsterBoxState extends State<MonsterBox> {
       child: ValueListenableBuilder<dynamic>(
         valueListenable: _gameState.characterShields,
         builder: (context, value, child) {
-          double width = math.max(0, MonsterBox.getWidth(scale, data));
+          double width = math.max(0, MonsterBox.getWidth(scale, owner, data));
 
           return HealthWheelController(
             figureId: widget.figureId,

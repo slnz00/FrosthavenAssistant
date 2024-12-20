@@ -51,7 +51,7 @@ class Item extends StatelessWidget {
         double summonsTotalWidth = 0;
         for (var monsterInstance in character.characterState.summonList) {
           summonsTotalWidth +=
-              MonsterBox.getWidth(scale, monsterInstance) + 2 * scale;
+              MonsterBox.getWidth(scale, character, monsterInstance) + 2 * scale;
         }
         double rows = summonsTotalWidth / listWidth;
         height += 32 * rows.ceil() * scale;
@@ -64,9 +64,9 @@ class Item extends StatelessWidget {
         standeeRows = 1;
       }
       double totalWidthOfMonsterBoxes = 0;
-      for (var item in monster.monsterInstances) {
+      for (var instance in monster.monsterInstances) {
         totalWidthOfMonsterBoxes +=
-            MonsterBox.getWidth(scale, item) + 2 * scale;
+            MonsterBox.getWidth(scale, monster, instance) + 2 * scale;
       }
       if (totalWidthOfMonsterBoxes > listWidth) {
         standeeRows = 2;
@@ -244,7 +244,7 @@ class MainListState extends State<MainList> {
         if (item.characterState.summonList.isNotEmpty) {
           double listWidth = 0;
           for (var monsterInstance in item.characterState.summonList) {
-            listWidth += MonsterBox.getWidth(scale, monsterInstance);
+            listWidth += MonsterBox.getWidth(scale, item, monsterInstance);
           }
           double rows = listWidth / mainListWidth;
           listHeight += 32 * (rows.ceil());
@@ -255,7 +255,7 @@ class MainListState extends State<MainList> {
         if (item.monsterInstances.isNotEmpty) {
           double listWidth = 0;
           for (var monsterInstance in item.monsterInstances) {
-            listWidth += MonsterBox.getWidth(scale, monsterInstance);
+            listWidth += MonsterBox.getWidth(scale, item, monsterInstance);
           }
 
           double rows = listWidth / mainListWidth;
