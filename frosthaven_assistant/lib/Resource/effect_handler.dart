@@ -562,7 +562,7 @@ class EffectHandler {
     gameState.action(command);
   }
 
-  static List<String> extendAbilityLines(MonsterAbilityCardModel card, Monster monster) {
+  static List<String> extendAbilityLines(MonsterAbilityCardModel card, Monster monster, bool alwaysShowExtra) {
     var baseAttributes = monster.type.levels[monster.level.value];
     var bossStats = _getBossStats(monster);
     var abilityParser = MonsterAbilityParser(card, bossStats);
@@ -639,6 +639,22 @@ class EffectHandler {
     int? getAttributeAdditionalValue (String attributeName) {
       if (!hasBaseAttribute(attributeName)) {
         return null;
+      }
+
+      var onlyElites = monster.monsterInstances.every((instance) => instance.type == MonsterType.elite);
+      if (onlyElites) {
+        var hasAttribute = baseAttributes.elite?.attributes.any((attr) => attr.contains('%$attributeName%')) ?? true;
+        if (!hasAttribute && !alwaysShowExtra) {
+          return null;
+        }
+      }
+
+      var onlyNormals = monster.monsterInstances.every((instance) => instance.type == MonsterType.normal);
+      if (onlyNormals) {
+        var hasAttribute = baseAttributes.normal?.attributes.any((attr) => attr.contains('%$attributeName%')) ?? true;
+        if (!hasAttribute && !alwaysShowExtra) {
+          return null;
+        }
       }
 
       var abilityHasAttribute = card.lines.any((value) => value.contains('%$attributeName%'));

@@ -184,7 +184,7 @@ class MonsterAbilityCardWidget extends StatefulWidget {
                     width: 142.4 * scale, //needed for line breaks in lines
                     //color: Colors.amber,
                     child: LineBuilder.createLines(
-                        EffectHandler.extendAbilityLines(card, data),
+                        EffectHandler.extendAbilityLines(card, data, !isMonsterWidget),
                         false,
                         !getIt<Settings>().noCalculation.value,
                         calculateAll,
