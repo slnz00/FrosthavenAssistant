@@ -102,11 +102,52 @@ class MonsterAbilityParser {
   }
 
   late final List<String> lines;
+  late final MonsterAbilityCardModel abilityCard;
 
-  MonsterAbilityParser(MonsterAbilityCardModel ability, MonsterStatsModel? bossStats) {
-    var specialAbility = _getSpecialAbility(ability, bossStats);
+  MonsterAbilityParser(MonsterAbilityCardModel card, MonsterStatsModel? bossStats) {
+    var specialAbility = _getSpecialAbility(card, bossStats);
 
-    lines = _extractLines(specialAbility ?? ability);
+    abilityCard = card;
+    lines = _extractLines(specialAbility ?? card);
+  }
+
+  int getMainActionCount() {
+    int count = 0;
+    bool elementUseCounted = false;
+    bool elementActivateCounted = false;
+
+    var elementUseRegex = RegExp(patternElementUse());
+    var elementActivateRegex = RegExp(patternElementActivate());
+
+    for (int i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      var elementUseMatch = elementUseRegex.firstMatch(line);
+      var elementActivateMatch = elementActivateRegex.firstMatch(line);
+
+      if (elementUseMatch != null && !elementUseCounted) {
+        elementUseCounted = true;
+        count++;
+        continue;
+      }
+      if (elementActivateMatch != null && elementUseMatch == null && !elementActivateCounted) {
+        elementUseMatch = i > 0 ? elementUseRegex.firstMatch(lines[i - 1]) : null;
+        var isConvert = elementUseMatch != null;
+        if (isConvert) {
+          continue;
+        }
+
+        elementActivateCounted = true;
+        count++;
+        continue;
+      }
+
+      if (line.startsWith('%heal%') || line.startsWith('%attack%') || line.startsWith('%move%') || line.startsWith('¤aoe')) {
+        count++;
+      }
+    }
+
+    return count;
   }
 
   (List<Elements>, bool) getActivateElements() {
@@ -331,8 +372,8 @@ class MonsterAbilityParser {
     return (value, modifier);
   }
 
-  List<String> _extractLines(MonsterAbilityCardModel ability) {
-    var lines = ability.lines
+  List<String> _extractLines(MonsterAbilityCardModel card) {
+    var lines = card.lines
         .map((line) {
           line = line.toLowerCase().trim();
 
@@ -342,12 +383,12 @@ class MonsterAbilityParser {
 
           return line;
         })
-        .where((line) => line.contains('%') || line.contains('....'))
+        .where((line) => line.contains('%') || line.contains('....') || line.startsWith('¤'))
         .toList();
 
     var elementTypes = ['any', ...elementMap.keys];
 
-    for (var pos in ability.graphicPositional) {
+    for (var pos in card.graphicPositional) {
       if (elementTypes.contains(pos.gfx)) {
         lines.add('%${pos.gfx}%');
       }
@@ -521,11 +562,144 @@ class EffectHandler {
     gameState.action(command);
   }
 
+  static List<String> extendAbilityLines(MonsterAbilityCardModel card, Monster monster) {
+    var baseAttributes = monster.type.levels[monster.level.value];
+    var bossStats = _getBossStats(monster);
+    var abilityParser = MonsterAbilityParser(card, bossStats);
+
+    bool hasBaseAttribute (String attributeName) {
+      if (baseAttributes.boss != null) {
+        return baseAttributes.boss != null
+            ? baseAttributes.boss!.attributes.any((value) => value.contains('%$attributeName%'))
+            : false;
+      }
+
+      var hasNormalAttribute = baseAttributes.normal != null
+          ? baseAttributes.normal!.attributes.any((value) => value.contains('%$attributeName%'))
+          : false;
+
+      var hasEliteAttribute = baseAttributes.elite != null
+          ? baseAttributes.elite!.attributes.any((value) => value.contains('%$attributeName%'))
+          : false;
+
+      return hasNormalAttribute || hasEliteAttribute;
+    }
+
+    String? getRangeToken (String attributeName) {
+      int normalIndex = baseAttributes.normal?.attributes.indexWhere((value) => value.contains('%$attributeName%')) ?? -1;
+      var normalToken =  normalIndex != -1 && normalIndex != baseAttributes.normal!.attributes.length - 1
+        ? baseAttributes.normal?.attributes[normalIndex + 1] : null;
+
+      int eliteIndex = baseAttributes.elite?.attributes.indexWhere((value) => value.contains('%$attributeName%')) ?? -1;
+      var eliteToken =  eliteIndex != -1 && eliteIndex != baseAttributes.elite!.attributes.length - 1
+        ? baseAttributes.elite?.attributes[eliteIndex + 1] : null;
+
+      int bossIndex = baseAttributes.boss?.attributes.indexWhere((value) => value.contains('%$attributeName%')) ?? -1;
+      var bossToken =  bossIndex != -1 && bossIndex != baseAttributes.boss!.attributes.length - 1
+          ? baseAttributes.boss?.attributes[bossIndex + 1] : null;
+
+      if (baseAttributes.boss != null) {
+        if (bossToken == null || !bossToken.contains('%range%')) {
+          return null;
+        }
+
+        return bossToken.substring(1, bossToken.length);
+      }
+
+      if (eliteToken != null && !eliteToken.contains('%range%')) {
+        eliteToken = null;
+      }
+
+      if (normalToken != null && !normalToken.contains('%range%')) {
+        normalToken = null;
+      }
+
+      if (normalToken != null && normalToken.startsWith('^')) {
+        normalToken = normalToken.substring(1, normalToken.length);
+      }
+      if (eliteToken != null && eliteToken.startsWith('^')) {
+        eliteToken = eliteToken.substring(1, eliteToken.length);
+      }
+
+      if (normalToken != null && eliteToken != null) {
+        return normalToken;
+      }
+
+      if (normalToken != null) {
+        return 'Normal:$normalToken';
+      }
+
+      if (eliteToken != null) {
+        return 'Elite:$eliteToken';
+      }
+
+      return null;
+    }
+
+    int? getAttributeAdditionalValue (String attributeName) {
+      if (!hasBaseAttribute(attributeName)) {
+        return null;
+      }
+
+      var abilityHasAttribute = card.lines.any((value) => value.contains('%$attributeName%'));
+      if (!abilityHasAttribute) {
+        return 0;
+      }
+
+      var attribute = abilityParser.getAttribute(attributeName);
+      var upgraded = _isElementUsed(monster.id, attribute.upgradeElement, attribute.upgradeElementAny);
+      var upgradable = attribute.upgradeElement != null || attribute.upgradeElementAny;
+
+      if (!upgradable) {
+        return null;
+      }
+
+      if (upgraded) {
+        return attribute.upgradeValue;
+      }
+
+      return 0;
+    }
+
+    List<String> additional = [];
+
+    var retaliateValue = getAttributeAdditionalValue('retaliate');
+
+    if (retaliateValue != null) {
+      var base = '%retaliate% + $retaliateValue';
+
+      var range = getRangeToken('retaliate');
+      if (range != null) {
+        additional.add('$base $range');
+      } else {
+        additional.add(base);
+      }
+    }
+
+    if (additional.isEmpty) {
+      return card.lines;
+    }
+
+    var exceptions = [
+      "Flame Jets",
+      "Spinning Charge",
+      "Increase Momentum",
+      "Piercing Parasites"
+    ];
+
+    var mainActionsCount = abilityParser.getMainActionCount();
+    if (!exceptions.contains(card.title) && mainActionsCount < 4) {
+      additional = ['* ', ...additional];
+    }
+
+    return [...card.lines, ...additional];
+  }
+
   static void _handleElements(ListItemData data) {
     var gameState = getIt<GameState>();
 
     if (data is Monster) {
-      var ability = _getCurrentMonsterAbility(data);
+      var ability = _getMonsterCurrentAbilityCard(data);
       var bossStats = _getBossStats(data);
       if (ability == null) {
         return;
@@ -736,9 +910,7 @@ class EffectHandler {
       var monsterStats = StatApplier.getStatTokens(owner, elite);
       var shieldStat = monsterStats['shield'] ?? 0;
 
-      var shieldAmount =
-          _calculateAbilityAttributeValue(shieldStat, 'shield', owner) -
-              pierceAmount;
+      var shieldAmount = _calculateAbilityAttributeValue(shieldStat, 'shield', owner) - pierceAmount;
 
       if (shieldAmount < 0) {
         return 0;
@@ -767,7 +939,7 @@ class EffectHandler {
 
   static int _calculateAbilityAttributeValue(
       int statValue, String attributeName, Monster monster) {
-    var attribute = _getAbilityAttribute('shield', monster);
+    var attribute = _getAbilityAttribute(attributeName, monster);
 
     if (attribute == null) {
       return statValue;
@@ -877,7 +1049,7 @@ class EffectHandler {
   }
 
   static MonsterAbilityAttribute? _getAbilityAttribute(String attributeName, Monster monster) {
-    var ability = _getCurrentMonsterAbility(monster);
+    var ability = _getMonsterCurrentAbilityCard(monster);
     var bossStats = _getBossStats(monster);
 
     if (ability == null) {
@@ -887,7 +1059,7 @@ class EffectHandler {
     return MonsterAbilityParser(ability, bossStats).getAttribute(attributeName);
   }
 
-  static MonsterAbilityCardModel? _getCurrentMonsterAbility(Monster monster) {
+  static MonsterAbilityCardModel? _getMonsterCurrentAbilityCard(Monster monster) {
     var gameState = getIt<GameState>();
 
     var abilityDeck = gameState.currentAbilityDecks

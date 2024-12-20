@@ -595,6 +595,15 @@ class LineBuilder {
           }
         }
       }
+
+      var isExtra = false;
+
+      if (line.startsWith('+')) {
+        sizeToken = '^';
+        styleToUse = midStyle;
+        line = line.substring(1, line.length);
+        isExtra = true;
+      }
       if (line.startsWith('^')) {
         sizeToken = '^';
         styleToUse = midStyle;

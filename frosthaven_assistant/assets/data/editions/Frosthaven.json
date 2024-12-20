@@ -437,7 +437,7 @@
         ["Exploding Ammunition", 627, true, 71, "%attack% + 0", "^%range% 5","*.........", "^All enemies adjacent to","^the target suffer damage 2" ],
         ["Exploding Ammunition", 628, true, 71, "%attack% + 0", "^%range% 5", "*.........", "^All enemies adjacent to","^the target suffer damage 2" ],
         ["Grenade", 629, false, 37, "%push% 1", "^Target all, %range% 1","*.........", "[r]", "[c]","%attack% - 1", "^%range% 4","[/c]", "¤aoe-triangle-2-side", "[/r]" ],
-        [ "Massive Blast", 630, false, 57, "%push% 1", "^Target all, %range% 1","*.........", "[r]", "[c]", "%attack% - 1", "^%range% 3","[/c]", "¤aoe-circle", "[/r]" ],
+        ["Massive Blast", 630, false, 57, "%push% 1", "^Target all, %range% 1","*.........", "[r]", "[c]", "%attack% - 1", "^%range% 3","[/c]", "¤aoe-circle", "[/r]" ],
         ["Defensive Ordinance", 632, false, 17, "%push% 2", "^Target all, %range% 1","*.........", "%attack% - 2", "^%range% 5","*.........", "%shield% + 2" ],
         ["Heavy Shot", 631, false, 95, "%attack% + 1", "^%range% 5" ],
         ["Concussive Burst", 633, false, 46, "[r]", "[c]", "%attack% - 1", "^%range% 5,", "^%immobilize%","[/c]","¤aoe-triangle-2-side", "[/r]" ]
@@ -582,7 +582,7 @@
           "x": 0.73,
           "y": 0.63,
           "angle": 210.0
-        }],"%move% - 1","*.........", "%attack% + 0","**.........", "[r]","%dark%%use%", "[c]","^Perform \"%heal% X, self\" where X is","^^twice the number of enemies", "^^targeted by the attack ability.", "[/c]","[/r]"],
+        }],"%move% - 1","*.........", "%attack% + 0","**.........", "[r]","%dark%%use%", "[c]","^Perform \"%heal% X, self\" where X","^^2 x number of targets", "[/c]","[/r]"],
         ["Clouds of Hate", 809, false, 38, "%move% + 0","*.........", "%attack% - 1", "^%target% 2,", "^%impair%", "[r]", "%dark%%use%", "^+1%attack%", "[/r]" ],
         ["Drain the Essence", 805, true, 7, "%attack% - 1", "^%range% 3,", "^%muddle%","*.........", "%heal% 4", "^Self" ]
       ]
@@ -858,7 +858,7 @@
         ["Heated Sweep", 614, false, 58, "%move% + 0", "*.........","%attack% + 0", "[r]", "%fire%%use%", "[c]","^+1%attack%,", "^%wound%","[/c]", "[/r]" ],
         ["Flame Jets", 615, false, 43, "%move% + 2", "*.........", "^All enemies within %range% 2", "^^suffer damage 1.","*.........", "[r]", "%fire%%use%", "%wound%", "^Target all, %range% 2", "[/r]"],
         ["Firestorm", 616, false, 17, "%shield% 1", "*.........", "%retaliate% 2", "^%range% 3" ],
-        ["Spinning Charge", 617, false, 68, "^Focus on the enemy", "^^farthest away.","%move% + 1", "^%jump%","**.........","%attack% - 1","[newLine]", "^%target% all enemies occupying or adjacent to", "^^hexes entered during the move ability", "[subLineEnd]", "[r]", "%fire%%use%", "^%wound%", "[/r]"]
+        ["Spinning Charge", 617, false, 68, "^Focus on farthest away.","%move% + 1", "^%jump%","**.........","%attack% - 1","[newLine]", "^%target% adjacent, occupying hexes while %move%", "[subLineEnd]", "[r]", "%fire%%use%", "^%wound%", "[/r]"]
       ]
     },
     {
@@ -868,8 +868,8 @@
         ["Nothing Special", 635, true, 71, "%move% + 0", "*.........","%attack% + 0", "%ice%" ],
         ["Cold Snap", 636, false, 42, "%move% + 1", "*.........","%attack% - 1", "[r]", "%ice%%use%", "^%brittle%", "[/r]"],
         ["Cold Snap", 637, false, 42, "%move% + 1", "*.........","%attack% - 1", "[r]", "%ice%%use%", "^%brittle%", "[/r]"],
-        ["Thawed Strike", 638, false, 68, "%move% - 1", "[r]", "%fire%%use%", "^+2%move%","[/r]","**.........","^If the element is consumed by", "^^the Frozen Corpse during the","^^move ability, it suffers damage 2.","**.........","%attack% + 1"],
-        ["Thawed Strike", 639, false, 68, "%move% - 1", "[r]", "%fire%%use%","^+2%move%","[/r]","**.........","^If the element is consumed by", "^^the Frozen Corpse during the","^^move ability, it suffers damage 2.","**.........","%attack% + 1"],
+        ["Thawed Strike", 638, false, 68, "%move% - 1", "[r]", "%fire%%use%", "^+2%move%,  suffers damage 2","[/r]", "**.........","%attack% + 1"],
+        ["Thawed Strike", 639, false, 68, "%move% - 1", "[r]", "%fire%%use%", "^+2%move%,  suffers damage 2","[/r]", "**.........","%attack% + 1"],
         ["Frost Breath", 640, true, 39, "%move% + 0", "*.........","[r]", "%attack% - 1", "¤aoe-triangle-3-side-with-corner-black", "[/r]", "%ice%" ],
         ["Icy Swipe", 641, false, 84, "%move% - 1", "*.........", "[r]","%attack% + 1", "¤aoe-triangle-2-side-with-black", "[/r]", "%ice%" ]
       ]
@@ -877,7 +877,7 @@
     {
       "name": "Ice Wraith",
       "cards": [
-        ["Shift Form", 642, true, 95,"^^All elite Ice Wraiths","^^become normal, and all","^^normal Ice Wraiths become elite.", "**.........", "%heal% 1", "^Self", "**.........",  "%move% + 0", "**.........","%attack% - 1", "^Normal:%range% 4"],
+        ["Shift Form", 642, true, 95,"^^Swap monster types", "**.........", "%heal% 1", "^Self", "**.........",  "%move% + 0", "**.........","%attack% - 1", "^Normal:%range% 4"],
         ["Renewed Aggression", 643, true, 44,"%heal% 1", "^Self", "*.........",  "%move% + 0", "*.........","%attack% + 0","^Normal:%range% 4", "%ice%" ],
         ["Unholy Strength", 644, false, 59, "[r]", "%ice%%use%", "[c]","%bless%, %strengthen%", "^Self","[/c]", "[/r]",  "*.........","%attack% + 0", "^%range% 3"],
         ["Fade Out", 645, false, 59, "%invisible%", "^Self","*.........", "[r]","%ice%%use%", "[c]","%strengthen%, %bless%", "^Self","[/c]", "[/r]", "%ice%"],
