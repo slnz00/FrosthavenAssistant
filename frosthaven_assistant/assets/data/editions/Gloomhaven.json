@@ -537,11 +537,11 @@
           "x": 0.65,
           "y": 0.28
         }],"%attack% + 0", "^%pierce% 3" ],
-        [ 735, false, 84, "%attack% - 1", "^Target all adjacent enemies","*.........", "%attack% + 0", "^%range% 4", "^%wound%" ],
+        [ 735, false, 84, "%attack% - 1", "^Target adjacent enemies","*.........", "%attack% + 0", "^%range% 4", "^%wound%" ],
         [ 736, false, 75, "%attack% + 0", "^%poison%","*.........", "%attack% - 1", "^%range% 5", "^%immobilize%" ],
-        [ 737, false, 75, "%attack% - 2", "^Target all adjacent enemies", "^%disarm%","*.........", "%attack% + 0", "^%range% 3", "^%target% 2" ],
+        [ 737, false, 75, "%attack% - 2", "^Target adjacent enemies", "^%disarm%","*.........", "%attack% + 0", "^%range% 3", "^%target% 2" ],
         [ 738, false, 96, "%attack% - 2", "^%range% 6","*", "^Summon normal Deep Terror","^in a hex adjacent to the target." ],
-        [ 739, false, 54, "%wound% and", "%poison%", "^Target all adjacent enemies","*.........", "%attack% + 0", "^%range% 4" ]
+        [ 739, false, 54, "%wound% and", "%poison%", "^Target adjacent enemies","*.........", "%attack% + 0", "^%range% 4" ]
       ]
     },
 
@@ -571,7 +571,7 @@
           "angle": -60.0
         }], "%attack% + 0", "!ÅKKKKK","","*.........", "[r]","%fire%%use%", "[c]", "^+1 %attack%", "^%wound%","[/c]", "[/r]"],
         [ 632, false, 67, "%move% - 1","*.........", "%attack% + 1", "^%range% - 1", "%fire%" ],
-        [ 633, false, 77, "%attack% + 0", "^Target all adjacent enemies","*.........", "[r]", "%ice%%use%", "^Flame Demon suffers 1 damage.", "[/r]" ],
+        [ 633, false, 77, "%attack% + 0", "^Target adjacent enemies","*.........", "[r]", "%ice%%use%", "^Flame Demon suffers 1 damage.", "[/r]" ],
         [ 634, true, 30,
           "[r]","%fire%%use%", "[c]","*All adjacent enemies","*suffer 2 damage.", "[/c]","[/r]",
           "**.........","%move% + 0","**.........", "%attack% - 2", "^%range% + 0", "^%wound%", "^%target% 2"
@@ -582,7 +582,7 @@
     {
       "name": "Frost Demon",
       "cards": [
-        [ 620, false, 18, "%immobilize%", "^Target all enemies within %range% 2","*.........", "[r]", "%ice%%use%", "[c]", "^%heal% 3", "^Self","[/c]", "[/r]" ],
+        [ 620, false, 18, "%immobilize%", "^Target enemies within %range% 2","*.........", "[r]", "%ice%%use%", "[c]", "^%heal% 3", "^Self","[/c]", "[/r]" ],
         [ 621, false, 38, "%move% + 1","*.........", "%attack% - 1" ],
         [ 622, false, 58, "%move% + 0","*.........", "%attack% + 0" ],
         [ 623, false, 58, "%move% - 1","*.........", "%attack% + 0", "^%range% 2", "[r]","%ice%%use%","[c]", "^+2 %attack%","^+1 %range%", "[/c]", "[/r]" ],
@@ -640,7 +640,7 @@
       "name": "Hound",
       "cards": [
         [ 540, false, 6, "%move% - 1","*.........", "%attack% + 0", "^%immobilize%" ],
-        [ 541, false, 7, "%move% + 0","*.........", "%muddle%", "^Target all adjacent enemies" ],
+        [ 541, false, 7, "%move% + 0","*.........", "%muddle%", "^Target adjacent enemies" ],
         [ 542, true, 19, "%move% + 0","*.........", "%attack% + 0","[r]","[c]", "^Add +2 %attack% if the target is adjacent", "^to any of the Hound's allies","[/c]", "[/r]" ],
         [ 543, true, 19, "%move% + 0","*.........", "%attack% + 0", "[r]","[c]","^Add +2 %attack% if the target is adjacent", "^to any of the Hound's allies", "[/c]", "[/r]" ],
         [ 544, false, 26, "%move% + 0","*.........", "%attack% + 0" ],
