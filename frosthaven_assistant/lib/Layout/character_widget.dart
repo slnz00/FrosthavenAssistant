@@ -754,8 +754,8 @@ class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProvi
                 : Container(),
             isCharacter
                 ? Positioned(
-                top: 10 * scale,
-                left: 305 * scale,
+                top: 2.5 * scale,
+                left: 280 * scale,
                 child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onDoubleTap: () {
@@ -771,8 +771,8 @@ class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProvi
                       _gameState.action(addXp);
                     },
                     child: SizedBox(
-                      width: 40 * scale,
-                      height: 40 * scale,
+                      width: 65 * scale,
+                      height: 55 * scale,
                     )
                 )
             ) : Container(),
