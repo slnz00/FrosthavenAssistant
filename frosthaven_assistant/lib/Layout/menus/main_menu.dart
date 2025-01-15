@@ -108,7 +108,7 @@ Container createMainMenu(BuildContext context) {
                         right: 9,
                         bottom: 4,
                         child: Text(
-                          "1.11.2",
+                          "1.12.0",
                           style: TextStyle(
                             fontSize: 15
                           )
