@@ -79,7 +79,13 @@ class CounterButtonState extends State<CounterButton> {
           height: 40 * widget.scale,
           child: InkWell(
               child: Ink(
-                child: Image.asset('assets/images/psd/sub.png'),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24 * widget.scale,
+                      height: 24 * widget.scale,
+                      child: Image.asset('assets/images/psd/sub.png'),
+                    ),
+                  )
               ),
 //iconSize: 30,
               onTap: () {
@@ -141,7 +147,13 @@ class CounterButtonState extends State<CounterButton> {
           height: 40 * widget.scale,
           child: InkWell(
             child: Ink(
-              child: Image.asset('assets/images/psd/add.png'),
+                child: Center(
+                  child: SizedBox(
+                    width: 24 * widget.scale,
+                    height: 24 * widget.scale,
+                    child: Image.asset('assets/images/psd/add.png'),
+                  ),
+                )
             ),
 //iconSize: 30,
             onTap: () {

@@ -84,7 +84,7 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
   @override
   Widget build(BuildContext context) {
     int nrOfStandees = widget.monster.type.count;
-    double scale = 1;
+    double scale = 1.5;
     if (!isPhoneScreen(context)) {
       scale = 1.5;
       if (isLargeTablet(context)) {
@@ -100,7 +100,15 @@ class AddStandeeMenuState extends State<AddStandeeMenu> {
       height = 211;
     }
 
-    height += 15;
+    if (scale == 1) {
+      height += 55;
+    }
+    if (scale == 1.5) {
+      height += 30;
+    }
+    if (scale == 2) {
+      height += 15;
+    }
 
     return Container(
         width: 250 *

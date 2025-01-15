@@ -121,10 +121,17 @@ class StatusMenuState extends State<StatusMenu> {
       SizedBox(
           width: 40 * scale,
           height: 40 * scale,
-          child: IconButton(
-              icon: Image.asset('assets/images/psd/sub.png'),
-              //iconSize: 30,
-              onPressed: () {
+          child: InkWell(
+              child: Ink(
+                  child: Center(
+                    child: SizedBox(
+                      width: 24 * scale,
+                      height: 24 * scale,
+                      child: Image.asset('assets/images/psd/sub.png'),
+                    ),
+                  )
+              ),
+              onTap: () {
                 if (notifier.value > 0) {
                   _gameState.action(ChangeChillCommand(-1, figureId, ownerId));
                   _gameState.action(RemoveConditionCommand(
@@ -167,10 +174,17 @@ class StatusMenuState extends State<StatusMenu> {
       SizedBox(
           width: 40 * scale,
           height: 40 * scale,
-          child: IconButton(
-            icon: Image.asset('assets/images/psd/add.png'),
-            //iconSize: 30,
-            onPressed: () {
+          child: InkWell(
+            child: Ink(
+                child: Center(
+                  child: SizedBox(
+                    width: 24 * scale,
+                    height: 24 * scale,
+                    child: Image.asset('assets/images/psd/add.png'),
+                  ),
+                )
+            ),
+            onTap: () {
               if (notifier.value < maxValue) {
                 _gameState.action(ChangeChillCommand(1, figureId, ownerId));
                 _gameState.action(AddConditionCommand(Condition.chill, figureId, ownerId));
