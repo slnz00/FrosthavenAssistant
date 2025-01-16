@@ -36,6 +36,8 @@ class DrawCommand extends Command {
 
   @override
   void undo() {
+    _gameState.syncCharacterRoundFlags();
+    _gameState.characterRoundFlags.value = {};
     _gameState.updateList.value++;
   }
 
