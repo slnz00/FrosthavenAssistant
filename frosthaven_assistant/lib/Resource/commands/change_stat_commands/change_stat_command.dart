@@ -61,6 +61,16 @@ abstract class ChangeStatCommand extends Command {
         for (var instance in item.characterState.summonList) {
           if (instance.health.value == 0) {
             item.characterState.getMutableSummonList(stateAccess).remove(instance);
+
+            var gameState = getIt<GameState>();
+            var shieldMap = gameState.characterShields.value;
+
+            shieldMap.remove(instance.getBaseId());
+            shieldMap.remove(instance.getFullId());
+
+            gameState.characterShields.value = Map<String,int>.from(shieldMap);
+            gameState.syncCharacterShields();
+
             Future.delayed(const Duration(milliseconds: 600), () {
               getIt<GameState>().killMonsterStandee.value++;
             });
@@ -76,6 +86,7 @@ abstract class ChangeStatCommand extends Command {
             } else {
               getIt<GameState>().updateList.value++;
             }
+
             break;
           }
         }

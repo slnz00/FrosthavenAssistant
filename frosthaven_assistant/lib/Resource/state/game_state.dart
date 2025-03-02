@@ -255,6 +255,8 @@ class GameState extends ActionHandler {
         '"lootDeck": ${_lootDeck.toString()}, ' //does this work if null?
         '"unlockedClasses": ${jsonEncode(unlockedClasses.toList())}, '
         '"showAllyDeck": ${showAllyDeck.value}, '
+        '"characterShields": ${jsonEncode(characterShields.value)}, '
+        '"characterRoundFlags": ${jsonEncode(characterRoundFlags.value)}, '
         '"elementState": ${json.encode(elements)} '
         '}';
   }

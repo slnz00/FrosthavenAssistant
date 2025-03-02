@@ -195,6 +195,18 @@ class GameSaveState {
           gameState.showAllyDeck.value = data["showAllyDeck"];
         }
 
+        if (data.containsKey("characterShields")) {
+          gameState.characterShields.value = Map<String,int>.from(
+            data["characterShields"].map((key, value) => MapEntry(key, value as int))
+          );
+        }
+
+        if (data.containsKey("characterRoundFlags")) {
+          gameState.characterRoundFlags.value = Map<String, String>.from(
+            data["characterRoundFlags"].map((key, value) => MapEntry(key, value.toString()))
+          );
+        }
+
         //////elements
         Map elementData = data['elementState'];
         //Map<Elements, ElementState> newMap = {};
