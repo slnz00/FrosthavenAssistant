@@ -9972,6 +9972,7 @@
   },
 
   "treasures": {
+    "0": "[Example] Gain 3 gold.",
     "1": "Gain 4 loot cards.",
     "2": "Suffer 3 damage, then gain muddle.",
     "3": "Gain a random item blueprint.",

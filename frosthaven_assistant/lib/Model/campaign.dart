@@ -11,17 +11,20 @@ import 'package:frosthaven_assistant/Model/scenario.dart';
 
 @immutable
 class CampaignModel {
-  const CampaignModel(
-      {required this.edition,
-      required this.monsterAbilities,
-      required this.monsters,
-      required this.characters,
-      required this.scenarios});
+  const CampaignModel({
+    required this.edition,
+    required this.monsterAbilities,
+    required this.monsters,
+    required this.characters,
+    required this.scenarios,
+    required this.treasures
+  });
   final String edition;
   final List<MonsterAbilityDeckModel> monsterAbilities;
   final Map<String, MonsterModel> monsters;
   final List<CharacterClass> characters;
   final Map<String, ScenarioModel> scenarios;
+  final Map<String, String> treasures;
 
   factory CampaignModel.fromJson(
       Map<String, dynamic> data, List<RoomsModel> roomsData) {
@@ -56,11 +59,18 @@ class CampaignModel {
       scenarioMap[key] = ScenarioModel.fromJson(key, scenarios[key], rooms);
     }
 
+    Map<String, String> treasureMap = {};
+    if (data.containsKey('treasures')) {
+      treasureMap = Map<String, String>.from(data['treasures']);
+    }
+
     return CampaignModel(
-        edition: edition,
-        monsterAbilities: deckDataList,
-        monsters: monsterMap,
-        characters: characterDataList,
-        scenarios: scenarioMap);
+      edition: edition,
+      monsterAbilities: deckDataList,
+      monsters: monsterMap,
+      characters: characterDataList,
+      scenarios: scenarioMap,
+      treasures: treasureMap
+    );
   }
 }
