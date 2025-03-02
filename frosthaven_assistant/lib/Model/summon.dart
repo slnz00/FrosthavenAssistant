@@ -7,11 +7,22 @@ class SummonModel {
   final int move;
   final int attack;
   final int range;
+  final int shield;
   final int level;
   final String gfx;
   final int standees;
-  const SummonModel(this.name, this.health, this.move, this.attack, this.range,
-      this.level, this.gfx, this.standees);
+
+  const SummonModel(
+    this.name,
+    this.health,
+    this.move,
+    this.attack,
+    this.range,
+    this.shield,
+    this.level,
+    this.gfx,
+    this.standees
+  );
 
   factory SummonModel.fromJson(Map<String, dynamic> data, String key) {
     String name = key;
@@ -31,6 +42,10 @@ class SummonModel {
     if (data.containsKey('attack')) {
       attack = data['attack'];
     }
+    int shield = 0;
+    if (data.containsKey('shield')) {
+      shield = data['shield'];
+    }
     int level = 0;
     if (data.containsKey('level')) {
       level = data['level'];
@@ -45,6 +60,6 @@ class SummonModel {
       standees = data['standees'];
     }
 
-    return SummonModel(name, health, move, attack, range, level, gfx, standees);
+    return SummonModel(name, health, move, attack, range, shield, level, gfx, standees);
   }
 }

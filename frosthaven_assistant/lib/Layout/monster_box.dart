@@ -52,7 +52,6 @@ class MonsterBox extends StatefulWidget {
   }
 
   static int getShieldValue(ListItemData? owner, MonsterInstance instance) {
-    var instanceId = instance.getFullId();
     var gameState = getIt<GameState>();
 
     if (owner is Monster) {
@@ -65,7 +64,10 @@ class MonsterBox extends StatefulWidget {
       return EffectHandler.calculateMonsterStat('shield', owner, instance);
     }
 
-    return gameState.characterShields.value[instanceId] ?? 0;
+    var baseShield = gameState.characterShields.value[instance.getBaseId()] ?? 0;
+    var shield = gameState.characterShields.value[instance.getFullId()] ?? 0;
+
+    return baseShield + shield;
   }
 
   @override

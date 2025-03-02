@@ -394,7 +394,7 @@ class GameMethods {
               //create the bear summon
               final int bearHp = 8 + item.characterState.level.value * 2;
               MonsterInstance bear = MonsterInstance.summon(
-                  0, MonsterType.summon, "Bear", bearHp, 3, 2, 0, "beast", -1);
+                  0, MonsterType.summon, "Bear", bearHp, 3, 2, 0, 0, "beast", -1);
               item.characterState._summonList.add(bear);
             }
 
@@ -847,8 +847,11 @@ class GameMethods {
       final MonsterType type, final String ownerId, final bool addAsSummon, [final bool ally = false]) {
     MonsterInstance instance;
     Monster? monster;
+
+    var gameState = getIt<GameState>();
+
     if (summon == null) {
-      for (var item in getIt<GameState>().currentList) {
+      for (var item in gameState.currentList) {
         if (item.id == ownerId && item is Monster) {
           monster = item;
         }
@@ -856,15 +859,17 @@ class GameMethods {
       instance = MonsterInstance(nr, type, addAsSummon, monster!, ally);
     } else {
       instance = MonsterInstance.summon(
-          summon.standeeNr,
-          type,
-          summon.name,
-          summon.health,
-          summon.move,
-          summon.attack,
-          summon.range,
-          summon.gfx,
-          getIt<GameState>().round.value);
+        summon.standeeNr,
+        type,
+        summon.name,
+        summon.health,
+        summon.move,
+        summon.attack,
+        summon.range,
+        summon.shield,
+        summon.gfx,
+        gameState.round.value
+      );
     }
 
     List<MonsterInstance>? monsterList;
@@ -897,6 +902,7 @@ class GameMethods {
                   summon.move,
                   summon.attack,
                   summon.range,
+                  summon.shield,
                   summon.gfx,
                   getIt<GameState>().round.value);
               ok = false;
@@ -1170,7 +1176,7 @@ class GameMethods {
           final int bearHp = 8 + characterState.level.value * 2;
 
           MonsterInstance bear = MonsterInstance.summon(
-              0, MonsterType.summon, "Bear", bearHp, 3, 2, 0, "beast", -1);
+              0, MonsterType.summon, "Bear", bearHp, 3, 2, 0, 0, "beast", -1);
 
           character.characterState._summonList.add(bear);
         }

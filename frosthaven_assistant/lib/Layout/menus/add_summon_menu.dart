@@ -254,7 +254,9 @@ class AddSummonMenuState extends State<AddSummonMenu> {
                                   model.move,
                                   model.attack,
                                   model.range,
-                                  gfx);
+                                  model.shield,
+                                  gfx
+                              );
                               _gameState.action(AddStandeeCommand(
                                   chosenNr,
                                   summonData,

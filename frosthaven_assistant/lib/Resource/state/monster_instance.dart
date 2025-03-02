@@ -16,11 +16,31 @@ class MonsterInstance extends FigureState {
     }
   }
 
-  MonsterInstance.summon(this.standeeNr, this._type, this.name, int summonHealth,
-      this.move, this.attack, this.range, this.gfx, this._roundSummoned, [this.ally = false]) {
-    //deal with summon init
+  MonsterInstance.summon(
+    this.standeeNr,
+    this._type,
+    this.name,
+    int summonHealth,
+    this.move,
+    this.attack,
+    this.range,
+    this.shield,
+    this.gfx,
+    this._roundSummoned,
+    [this.ally = false]
+  ) {
+    var gameState = getIt<GameState>();
+
     _maxHealth.value = summonHealth;
     _health.value = summonHealth;
+
+    if (shield > 0) {
+      var shieldMap = gameState.characterShields.value;
+      shieldMap[getBaseId()] = shield;
+
+      gameState.characterShields.value = Map<String,int>.from(shieldMap);
+      gameState.syncCharacterShields();
+    }
   }
 
   String getId() {
@@ -44,6 +64,8 @@ class MonsterInstance extends FigureState {
   late final int move;
   late final int attack;
   late final int range;
+
+  late final int shield;
 
   int get roundSummoned => _roundSummoned;
   setRoundSummoned(_StateModifier stateModifier, int value) {_roundSummoned = value;}

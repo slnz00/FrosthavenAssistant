@@ -754,14 +754,22 @@ class EffectHandler {
       return 0;
     }
 
-    if (_isConditionActive(Condition.ward, figure) &&
-        _isConditionActive(Condition.brittle, figure)) {
-      _removeCondition(Condition.ward, figure);
-      _removeCondition(Condition.brittle, figure);
-    }
-
     if (actionStats.attack) {
       amount += _getPoisonAmount(figure);
+      amount += _getShieldAmount(
+        figure,
+        actionStats.pierceAmount.value,
+        actionStats.characterShieldModifier.value
+      );
+    }
+
+    if (amount >= 0) {
+      return 0;
+    }
+
+    if (_isConditionActive(Condition.ward, figure) && _isConditionActive(Condition.brittle, figure)) {
+      _removeCondition(Condition.ward, figure);
+      _removeCondition(Condition.brittle, figure);
     }
 
     if (_isConditionActive(Condition.ward, figure)) {
@@ -776,18 +784,7 @@ class EffectHandler {
       _removeCondition(Condition.brittle, figure);
     }
 
-    if (actionStats.attack) {
-      amount += _getShieldAmount(figure, actionStats.pierceAmount.value,
-          actionStats.characterShieldModifier.value);
-    }
-
-    if (amount < 0) {
-      _removeCondition(Condition.regenerate, figure);
-    }
-
-    if (amount > 0) {
-      return 0;
-    }
+    _removeCondition(Condition.regenerate, figure);
 
     return amount;
   }

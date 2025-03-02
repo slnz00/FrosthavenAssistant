@@ -11,10 +11,11 @@ class SummonData {
   int move;
   int attack;
   int range;
+  int shield;
   String gfx;
 
   SummonData(this.standeeNr, this.name, this.health, this.move, this.attack,
-      this.range, this.gfx);
+      this.range, this.shield, this.gfx);
 }
 
 class AddStandeeCommand extends Command {
