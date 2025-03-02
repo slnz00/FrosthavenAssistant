@@ -152,7 +152,7 @@ class SetLevelMenuState extends State<SetLevelMenu> {
     //if summon:
     bool isSummon = widget.monster == null && widget.figure is MonsterInstance;
     if (isSummon) {
-      title = "Set ${(widget.figure as MonsterInstance).name}'s max health";
+      title = "${(widget.figure as MonsterInstance).name}'s max health";
     }
 
     String name = "";
@@ -261,7 +261,7 @@ class SetLevelMenuState extends State<SetLevelMenu> {
                             ])
                       : Container(),
                   widget.figure != null
-                      ? Row(
+                      ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                               CounterButton(
@@ -273,7 +273,52 @@ class SetLevelMenuState extends State<SetLevelMenu> {
                                   Colors.red,
                                   figureId: figureId,
                                   ownerId: ownerId,
-                                  scale: scale)
+                                  scale: scale
+                              ),
+                              widget.characterId != null ? CounterButton(
+                                _gameState.characterShields,
+                                null,
+                                999,
+                                "assets/images/abilities/shield_fh.png",
+                                true,
+                                Colors.white,
+                                getValue: () {
+                                  var figure = widget.figure;
+
+                                  if (figure == null) {
+                                    return 0;
+                                  }
+
+                                  var baseId = figure.getBaseId();
+                                  var shieldMap = _gameState.characterShields.value;
+
+                                  return shieldMap[baseId] ?? 0;
+                                },
+                                callback: (int change) {
+                                  var figure = widget.figure;
+
+                                  if (figure == null) {
+                                    return 0;
+                                  }
+
+                                  var baseId = figure.getBaseId();
+
+                                  var shieldMap = _gameState.characterShields.value;
+                                  var shieldAmount = _gameState.characterShields.value[baseId] ?? 0;
+
+                                  if (shieldAmount + change < 0) {
+                                    return 0;
+                                  }
+
+                                  shieldMap[baseId] = shieldAmount + change;
+                                  _gameState.characterShields.value = Map<String,int>.from(shieldMap);
+
+                                  return change;
+                                },
+                                figureId: widget.characterId!,
+                                ownerId: widget.characterId!,
+                                scale: scale
+                            ) : Container()
                             ])
                       : Container(),
                   if (showLegend == true)
