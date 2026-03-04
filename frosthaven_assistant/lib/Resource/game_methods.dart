@@ -84,7 +84,7 @@ class GameMethods {
       for (var item in _gameState.currentList) {
         if (item is Monster) {
           if (item.type.deck == deck.name) {
-            if (item.monsterInstances.isNotEmpty || item.isActive) {
+            if ((item.monsterInstances.isNotEmpty || item.isActive) && !GameMethods.isInactiveForRule(item.type.name)) {
               if (deck.lastRoundDrawn < _gameState.round.value) {
                 deck.draw(stateModifier);
                 break;
@@ -101,7 +101,9 @@ class GameMethods {
       for (var item in _gameState.currentList) {
         if (item is Monster) {
           if (item.type.deck == deck.name) {
-            if (item.monsterInstances.isNotEmpty || item.isActive) {
+            bool specialInactive = GameMethods.isInactiveForRule(item.type.name);
+
+            if ((item.monsterInstances.isNotEmpty || item.isActive) && !specialInactive) {
               deck.draw(stateModifier);
               //only draw once from each deck
               break;
@@ -110,6 +112,16 @@ class GameMethods {
         }
       }
     }
+  }
+
+  static bool isInactiveForRule(String monsterId) {
+    final GameState gameState = getIt<GameState>();
+    final rule = gameState.scenarioSpecialRules.firstWhereOrNull(
+            (rule) => rule.type == "InactiveMonster" && rule.name == monsterId);
+    if (rule != null && rule.list.contains(gameState.round.value)) {
+      return true;
+    }
+    return false;
   }
 
   static MonsterAbilityState? getDeck(String name) {
@@ -196,7 +208,7 @@ class GameMethods {
       for (var deck in _gameState.currentAbilityDecks) {
         if (deck.name == item.type.deck) {
           if (deck.discardPile.isNotEmpty) {
-            return deck.discardPile.peek.initiative;
+            return deck.discardPile.peek!.initiative;
           }
         }
       }
@@ -289,7 +301,7 @@ class GameMethods {
         //find the deck
         for (var item in _gameState.currentAbilityDecks) {
           if (item.name == a.type.deck) {
-            aInitiative = item.discardPile.peek.initiative;
+            aInitiative = item.discardPile.peek?.initiative ?? 99;
           }
         }
       }
@@ -305,7 +317,7 @@ class GameMethods {
         //find the deck
         for (var item in _gameState.currentAbilityDecks) {
           if (item.name == b.type.deck) {
-            bInitiative = item.discardPile.peek.initiative;
+            bInitiative = item.discardPile.peek?.initiative ?? 99;
           }
         }
       }
@@ -408,25 +420,21 @@ class GameMethods {
       _gameState._currentList = newList;
 
       //loot deck init
-      if (scenario != "custom") {
+
+      if (_gameState.currentCampaign.value == "Frosthaven") {
+        //add loot deck for random scenarios
+        LootDeckModel? lootDeckModel = const LootDeckModel(2, 2, 2, 12, 1, 1, 1, 1, 1, 1, 0);
+        _gameState._lootDeck = LootDeck(lootDeckModel, _gameState.lootDeck);
+      } else {
         LootDeckModel? lootDeckModel = _gameData
             .modelData
             .value[_gameState.currentCampaign.value]!
             .scenarios[scenario]!
             .lootDeck;
-        if (lootDeckModel != null) {
-          _gameState._lootDeck = LootDeck(lootDeckModel, _gameState.lootDeck);
-        } else {
-          _gameState._lootDeck = LootDeck.from(_gameState.lootDeck);
-        }
-      } else {
-        if (_gameState.currentCampaign.value == "Frosthaven") {
-          //add loot deck for random scenarios
-          LootDeckModel? lootDeckModel = const LootDeckModel(2, 2, 2, 12, 1, 1, 1, 1, 1, 1, 0);
-          _gameState._lootDeck = LootDeck(lootDeckModel, _gameState.lootDeck);
-        } else {
-          _gameState._lootDeck = LootDeck.from(_gameState.lootDeck);
-        }
+
+        lootDeckModel ??= LootDeckModel.defaultDeck();
+
+        _gameState._lootDeck = LootDeck(lootDeckModel, _gameState.lootDeck);
       }
 
       GameMethods.clearTurnState(_, true, true);
@@ -491,6 +499,9 @@ class GameMethods {
 
     //add objectives and escorts
     for (var item in specialRules) {
+      if (item.type == "AllyDeck") {
+        _gameState.showAllyDeck.value = true;
+      }
       if (item.type == "Objective") {
         if (item.condition == "" ||
             StatCalculator.evaluateCondition(item.condition)) {
@@ -558,6 +569,9 @@ class GameMethods {
 
       if (item.type == "ResetRound") {
         GameMethods.setRound(_, 1);
+      }
+      if (item.type == "Unlock") {
+        initMessage += item.note;
       }
     }
 
@@ -680,11 +694,15 @@ class GameMethods {
 
   static void returnLootCard(bool top) {
     var card = _gameState._lootDeck._discardPile.pop();
-      card.owner = "";
-      if(top) {
-        _gameState._lootDeck._drawPile.push(card);
-      } else {
-        _gameState._lootDeck._drawPile.insert(0, card);
+    if (card == null) {
+      return;
+    }
+
+    card.owner = "";
+    if(top) {
+      _gameState._lootDeck._drawPile.push(card);
+    } else {
+      _gameState._lootDeck._drawPile.insert(0, card);
     }
   }
 
@@ -787,7 +805,7 @@ class GameMethods {
 
   static void shuffleDecksIfNeeded(_StateModifier _) {
     for (var deck in _gameState.currentAbilityDecks) {
-      if (deck.discardPile.isNotEmpty && deck.discardPile.peek.shuffle ||
+      if (deck.discardPile.isNotEmpty && deck.discardPile.peek!.shuffle ||
           deck.drawPile.isEmpty == true) {
         deck._shuffle();
       }
@@ -1373,7 +1391,7 @@ class GameMethods {
     for (; newIndex < _gameState.currentList.length; newIndex++) {
       ListItemData data = _gameState.currentList[newIndex];
       if (data is Monster) {
-        if (data.monsterInstances.isNotEmpty || data.isActive) {
+        if ((data.monsterInstances.isNotEmpty || data.isActive) && !GameMethods.isInactiveForRule(data.type.name)) {
           if (data.turnState == TurnsState.done) {
             reapplyConditionsFromListItem(_, data);
           }

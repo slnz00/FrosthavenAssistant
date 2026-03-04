@@ -7,9 +7,9 @@ class CardStack<E> {
 
   void push(E value) => _list.add(value);
 
-  E pop() => _list.removeLast();
+  E? pop() => isNotEmpty ? _list.removeLast() : null;
 
-  E get peek => _list.last;
+  E? get peek => isNotEmpty ? _list.last : null;
 
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;

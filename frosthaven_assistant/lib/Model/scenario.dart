@@ -19,6 +19,8 @@ class LootDeckModel {
   final int flamefruit;
   final int rockroot;
   final int treasure;
+  final bool stackCoins;
+
   const LootDeckModel(
       this.lumber,
       this.hide,
@@ -30,13 +32,19 @@ class LootDeckModel {
       this.axenut,
       this.flamefruit,
       this.rockroot,
-      this.treasure);
+      this.treasure,
+      [this.stackCoins = true]
+  );
 
   static int _getValueFromJson(Map<String, dynamic> data, String value) {
     if (data.containsKey(value)) {
       return data[value];
     }
     return 0;
+  }
+
+  factory LootDeckModel.defaultDeck() {
+    return const LootDeckModel(0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, false);
   }
 
   factory LootDeckModel.fromJson(Map<String, dynamic> data) {
@@ -51,7 +59,9 @@ class LootDeckModel {
         _getValueFromJson(data, "axenut"),
         _getValueFromJson(data, "flamefruit"),
         _getValueFromJson(data, "rockroot"),
-        _getValueFromJson(data, "treasure"));
+        _getValueFromJson(data, "treasure"),
+        true
+    );
   }
 }
 

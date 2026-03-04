@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frosthaven_assistant/Layout/menus/status_menu.dart';
@@ -74,6 +75,16 @@ class ActionData {
       if (!newConditions.contains(condition)) {
         _saveConditionToGameState(condition, false);
       }
+    }
+
+    var hasSafeguard = newConditions.contains(Condition.safeguard);
+    var firstNewNegativeCondition = newConditions.firstWhereOrNull((Condition c) => (
+        negativeConditions.contains(c) && !currentConditions.contains(c)
+    ));
+
+    if (hasSafeguard && firstNewNegativeCondition != null) {
+      _saveConditionToGameState(Condition.safeguard, false);
+      _saveConditionToGameState(firstNewNegativeCondition, false);
     }
   }
 

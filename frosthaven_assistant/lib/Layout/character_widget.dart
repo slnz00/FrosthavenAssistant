@@ -631,9 +631,11 @@ class CharacterWidgetState extends State<CharacterWidget> with SingleTickerProvi
                                           valueListenable: character
                                               .characterState.conditions,
                                           builder: (context, value, child) {
-                                            return Row(
-                                              children:
-                                                  createConditionList(scale),
+                                            return Padding(
+                                              padding: const EdgeInsets.only(left: 4), // Change 16.0 to whatever spacing you need
+                                              child: Row(
+                                                children: createConditionList(scale),
+                                              ),
                                             );
                                           }),
                                     ])));

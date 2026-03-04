@@ -1,6 +1,25 @@
 import 'package:collection/collection.dart';
 import 'package:frosthaven_assistant/Resource/state/game_state.dart';
 
+final negativeConditions = <Condition>[
+  Condition.stun,
+  Condition.immobilize,
+  Condition.disarm,
+  Condition.wound,
+  Condition.wound2,
+  Condition.muddle,
+  Condition.poison,
+  Condition.poison2,
+  Condition.poison3,
+  Condition.poison4,
+  Condition.bane,
+  Condition.brittle,
+  Condition.chill,
+  Condition.infect,
+  Condition.impair,
+  Condition.rupture,
+];
+
 enum Condition {
   stun,
   immobilize,
@@ -22,6 +41,7 @@ enum Condition {
   invisible,
   regenerate,
   ward,
+  safeguard,
   dodge,
 
   character1,

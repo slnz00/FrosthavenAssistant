@@ -64,6 +64,7 @@ class LootCard {
 class LootDeck {
 
   List<LootCard> _coinPool = [];
+  List<LootCard> _singleCoinPool = [];
   List<LootCard> _lumberPool = [];
   List<LootCard> _hidePool = [];
   List<LootCard> _metalPool = [];
@@ -247,7 +248,12 @@ class LootDeck {
     _addCardFromPool(model.rockroot, _rockrootPool, cards);
     _addCardFromPool(model.snowthistle, _snowthistlePool, cards);
 
-    _addCardFromPool(model.coin, _coinPool, cards);
+    if (model.stackCoins) {
+      _addCardFromPool(model.coin, _coinPool, cards);
+    } else {
+      _addCardFromPool(model.coin, _singleCoinPool, cards);
+    }
+
     _addCardFromPool(model.metal, _metalPool, cards);
     _addCardFromPool(model.hide, _hidePool, cards);
     _addCardFromPool(model.lumber, _lumberPool, cards);
@@ -343,6 +349,10 @@ class LootDeck {
 
     for (int i = 0; i < 12; i++) {
       _addOtherType(id, _coinPool, "coin 1");
+      id++;
+    }
+    for (int i = 0; i < 25; i++) {
+      _addOtherType(id, _singleCoinPool, "coin 1");
       id++;
     }
     for (int i = 0; i < 6; i++) {
@@ -511,7 +521,7 @@ class LootDeck {
 
   void _shuffle() {
     while (_discardPile.isNotEmpty) {
-      LootCard card = _discardPile.pop();
+      LootCard card = _discardPile.pop()!;
       _drawPile.push(card);
     }
     _drawPile.shuffle();
@@ -520,7 +530,7 @@ class LootDeck {
 
   void draw(_StateModifier _) {
     //put top of draw pile on discard pile
-    LootCard card = _drawPile.pop();
+    LootCard card = _drawPile.pop()!;
 
     //mark owner
     for (var item in getIt<GameState>().currentList) {

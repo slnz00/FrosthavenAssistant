@@ -43,7 +43,7 @@ class Settings {
   final focusEmptyInitiatives = ValueNotifier<bool>(false);
   final hideAllInitiatives = ValueNotifier<bool>(false);
 
-  final style = ValueNotifier<Style>(Style.original);
+  final style = ValueNotifier<Style>(Style.frosthaven);
 
   //network
   final server = ValueNotifier<bool>(false); //not saving these

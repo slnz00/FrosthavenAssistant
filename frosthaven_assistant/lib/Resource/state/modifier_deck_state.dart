@@ -284,7 +284,7 @@ class ModifierDeck {
 
   void _shuffle() {
     while (_discardPile.isNotEmpty) {
-      ModifierCard card = _discardPile.pop();
+      ModifierCard card = _discardPile.pop()!;
       //remove curse and bless
       if (card.type != CardType.bless &&
           card.type != CardType.curse &&
@@ -304,7 +304,7 @@ class ModifierDeck {
       _shuffle();
     }
     //put top of draw pile on discard pile
-    ModifierCard card = _drawPile.pop();
+    ModifierCard card = _drawPile.pop()!;
     if (card.type == CardType.multiply) {
       _needsShuffle = true;
     }

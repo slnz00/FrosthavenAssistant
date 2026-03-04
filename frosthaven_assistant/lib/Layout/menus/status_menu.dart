@@ -893,9 +893,8 @@ class StatusMenuState extends State<StatusMenu> {
                         ownerId, immunities, scale),
                     buildConditionButton(
                         Condition.ward, figureId, ownerId, immunities, scale),
-                    if (showCustomContent)
-                      buildConditionButton(Condition.dodge, figureId, ownerId,
-                          immunities, scale),
+                    buildConditionButton(Condition.safeguard, figureId, ownerId,
+                        immunities, scale),
                   ],
                 ),
                 if (monster != null)

@@ -293,9 +293,10 @@ class MonsterAbilityCardWidgetState extends State<MonsterAbilityCardWidget> {
         valueListenable: _gameState.commandIndex,
         builder: (context, value, child) {
           MonsterAbilityCardModel? card;
+          final data = widget.data;
           if (_gameState.roundState.value == RoundState.playTurns &&
               (widget.data.monsterInstances.isNotEmpty ||
-                  widget.data.isActive)) {
+                  widget.data.isActive) && !GameMethods.isInactiveForRule(data.type.name)) {
             CardStack stack =
                 GameMethods.getDeck(widget.data.type.deck)!.discardPile;
             if (stack.isNotEmpty) {

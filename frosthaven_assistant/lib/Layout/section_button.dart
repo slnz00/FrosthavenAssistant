@@ -31,7 +31,7 @@ class SectionButtonState extends State<SectionButton> {
               padding: EdgeInsets.zero,
               foregroundColor: Colors.black,
               disabledBackgroundColor: Colors.blueGrey,
-              fixedSize: Size(55 * scale, 25 * scale),
+              fixedSize: Size(65 * scale, 25 * scale),
               backgroundColor: Colors.white70,
               elevation: 4,
             ),

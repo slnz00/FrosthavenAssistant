@@ -214,7 +214,7 @@ class ModifierDeckWidgetState extends State<ModifierDeckWidget> {
                           child: Stack(children: [
                             deck.drawPile.isNotEmpty
                                 ? ModifierCardWidget(
-                                    card: deck.drawPile.peek,
+                                    card: deck.drawPile.peek!,
                                     name: deck.name,
                                     revealed: isAnimating)
                                 : Container(
@@ -293,7 +293,7 @@ class ModifierDeckWidgetState extends State<ModifierDeckWidget> {
                                       name: deck.name,
                                       key: Key(
                                           deck.discardPile.size().toString()),
-                                      card: deck.discardPile.peek,
+                                      card: deck.discardPile.peek!,
                                       revealed: true,
                                     ),
                                     Key((-deck.discardPile.size()).toString()))

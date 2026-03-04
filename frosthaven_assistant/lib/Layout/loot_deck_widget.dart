@@ -213,7 +213,7 @@ class LootDeckWidgetState extends State<LootDeckWidget> {
                                 child: Stack(children: [
                                   deck.drawPile.isNotEmpty
                                       ? LootCardWidget(
-                                          card: deck.drawPile.peek,
+                                          card: deck.drawPile.peek!,
                                           revealed: isAnimating)
                                       : Container(
                                           width: 40 *
@@ -310,7 +310,7 @@ class LootDeckWidgetState extends State<LootDeckWidget> {
                                             key: Key(deck.discardPile
                                                 .size()
                                                 .toString()),
-                                            card: deck.discardPile.peek,
+                                            card: deck.discardPile.peek!,
                                             revealed: true,
                                           ),
                                           Key((-deck.discardPile.size())

@@ -36,14 +36,14 @@ class MonsterAbilityState {
 
   void _shuffle() {
     while (discardPile.isNotEmpty) {
-      drawPile.push(discardPile.pop());
+      drawPile.push(discardPile.pop()!);
     }
     drawPile.shuffle();
   }
 
   void draw(_StateModifier _) {
     //put top of draw pile on discard pile
-    discardPile.push(drawPile.pop());
+    discardPile.push(drawPile.pop()!);
     _lastRoundDrawn = getIt<GameState>().round.value;
   }
 

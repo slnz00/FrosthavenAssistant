@@ -5,14 +5,18 @@ import 'package:frosthaven_assistant/Resource/enums.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/frosthaven_converter.dart';
 import 'package:frosthaven_assistant/Resource/line_builder/stat_applier.dart';
 import 'package:frosthaven_assistant/Resource/ui_utils.dart';
+
 import '../../services/service_locator.dart';
 import '../state/game_state.dart';
 
 class LineBuilder {
   static const bool debugColors = false;
+
+  // TODO: safeguard
   static const Map<String, String> _tokens = {
     "attack": "Attack",
     "move": "Move",
+    "teleport": "Teleport",
     "range": "Range",
     "heal": "Heal",
     "target": "Target",
@@ -41,7 +45,10 @@ class LineBuilder {
     "pierce": "PIERCE",
     "curse": "CURSE",
     "enfeeble": "ENFEEBLE",
+    "empower": "EMPOWER",
     "bless": "BLESS",
+    "safeguard": "SAFEGUARD",
+    "flip": "ROLLING",
     "damage": "damage",
     "and": "and"
   };
@@ -116,6 +123,7 @@ class LineBuilder {
         iconToken == "bane" ||
         iconToken == "brittle" ||
         iconToken == "invisible" ||
+        iconToken == "safeguard" ||
         iconToken == "muddle") {
       if (mainLine) {
         //smaller margins for secondary modifiers
