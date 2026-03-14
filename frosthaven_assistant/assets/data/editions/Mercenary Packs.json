@@ -220,7 +220,7 @@
     }
   },
   "scenarios": {
-    "#MP The Baron's Blockade": {
+    "#MP: The Baron's Blockade": {
       "monsters": ["Bandit Archer (2e)", "Bandit Scout (2e)", "Flame Demon (2e)","Lurker Soldier (2e)"],
       "sections": {
         "#2": {
