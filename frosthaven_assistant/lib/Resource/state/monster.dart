@@ -2,7 +2,7 @@ part of 'game_state.dart';
 // ignore_for_file: library_private_types_in_public_api
 
 class Monster extends ListItemData {
-  Monster(String name, int level, this._isAlly) {
+  Monster(String name, int level, this.isAlly) {
     id = name;
     _level.value = level;
     GameData gameData = getIt<GameData>();
@@ -28,8 +28,7 @@ class Monster extends ListItemData {
   ValueListenable<int> get level => _level;
   final _level = ValueNotifier<int>(0);
 
-  bool get isAlly => _isAlly;
-  bool _isAlly;
+  bool isAlly;
 
   //note: this is only used for the no standee tracking setting
   bool get isActive => _isActive;
@@ -85,12 +84,12 @@ class Monster extends ListItemData {
         '}';
   }
 
-  Monster.fromJson(Map<String, dynamic> json) : _isAlly = false {
+  Monster.fromJson(Map<String, dynamic> json) : isAlly = false {
     id = json['id'];
     _turnState = TurnsState.values[json['turnState']];
     _level.value = json['level'];
     if (json.containsKey("isAlly")) {
-      _isAlly = json['isAlly'];
+      isAlly = json['isAlly'];
     }
     if (json.containsKey("isActive")) {
       _isActive = json['isActive'];

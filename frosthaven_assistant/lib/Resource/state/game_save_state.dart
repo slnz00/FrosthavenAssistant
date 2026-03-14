@@ -207,6 +207,12 @@ class GameSaveState {
           );
         }
 
+        if (data.containsKey("revealedModifiers")) {
+          gameState.revealedModifiers.value = Map<String, int>.from(
+              data["revealedModifiers"].map((key, value) => MapEntry(key, value))
+          );
+        }
+
         //////elements
         Map elementData = data['elementState'];
         //Map<Elements, ElementState> newMap = {};

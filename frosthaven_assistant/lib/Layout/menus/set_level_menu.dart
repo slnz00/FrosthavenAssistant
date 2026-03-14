@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frosthaven_assistant/Layout/counter_button.dart';
 import 'package:frosthaven_assistant/Resource/commands/change_stat_commands/change_max_health_command.dart';
+import 'package:frosthaven_assistant/Resource/commands/set_ally_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/set_solo_command.dart';
 import '../../Resource/commands/set_level_command.dart';
 import '../../Resource/state/game_state.dart';
@@ -189,7 +190,7 @@ class SetLevelMenuState extends State<SetLevelMenu> {
 
     return Container(
         width: 230 * scale,
-        height: showLegend ? 300 * scale : 187 * scale,
+        height: showLegend ? 300 * scale : 200 * scale,
         decoration: BoxDecoration(
           //color: Colors.black,
           //borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -318,7 +319,32 @@ class SetLevelMenuState extends State<SetLevelMenu> {
                                 figureId: widget.characterId!,
                                 ownerId: widget.characterId!,
                                 scale: scale
-                            ) : Container()
+                            ) : Container(),
+                            widget.figure is MonsterInstance && !isSummon ?
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Ally:",
+                                    style: getSmallTextStyle(scale)),
+                                    ValueListenableBuilder(
+                                      valueListenable: _gameState.updateList,
+                                      builder: (context, value, child) {
+                                        return Checkbox(
+                                          checkColor: Colors.black,
+                                          activeColor: Colors.grey.shade200,
+                                          side: BorderSide(
+                                              color: getIt<Settings>().darkMode.value
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                          onChanged: (bool? newValue) {
+                                            _gameState.action(
+                                                SetAllyCommand(ownerId, figureId, !(widget.figure as MonsterInstance).ally)
+                                            );
+                                          },
+                                          value: (widget.figure as MonsterInstance).ally,
+                                        );
+                                      })
+                                ]) : Container(),
                             ])
                       : Container(),
                   if (showLegend == true)

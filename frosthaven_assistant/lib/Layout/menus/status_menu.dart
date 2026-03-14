@@ -553,12 +553,9 @@ class StatusMenuState extends State<StatusMenu> {
                 builder: (context, value, child) {
                   ModifierDeck deck = _gameState.modifierDeck;
                   if (widget.monsterId != null) {
-                    for (var item in _gameState.currentList) {
-                      if (item.id == widget.monsterId) {
-                        if (item is Monster && item.isAlly) {
-                          deck = _gameState.modifierDeckAllies;
-                        }
-                      }
+                    var figure = GameMethods.getFigure(widget.ownerId, widget.figureId);
+                    if (figure is MonsterInstance && figure.ally) {
+                      deck = _gameState.modifierDeckAllies;
                     }
                   }
                   bool hasXp = false;
@@ -701,7 +698,7 @@ class StatusMenuState extends State<StatusMenu> {
                       widget.monsterId != null
                           ? CounterButton(
                               deck.blesses,
-                              ChangeBlessCommand(0, figureId, ownerId),
+                              ChangeBlessCommand.deck(deck),
                               10,
                               "assets/images/abilities/bless.png",
                               true,
@@ -714,7 +711,7 @@ class StatusMenuState extends State<StatusMenu> {
                       widget.monsterId != null && canBeCursed
                           ? CounterButton(
                               deck.curses,
-                              ChangeCurseCommand(0, figureId, ownerId),
+                              ChangeCurseCommand.deck(deck),
                               10,
                               "assets/images/abilities/curse.png",
                               true,

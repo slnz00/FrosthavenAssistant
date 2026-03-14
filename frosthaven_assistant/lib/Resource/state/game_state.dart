@@ -217,11 +217,14 @@ class GameState extends ActionHandler {
   BuiltMap<Elements, ElementState> get elementState => BuiltMap.of(_elementState);
   final Map<Elements, ElementState> _elementState = HashMap();
 
+  final revealedModifiers = ValueNotifier<Map<String, int>>({});
+
   //modifierDeck
-  ModifierDeck get modifierDeck => _modifierDeck; //todo: still mutable
+  ModifierDeck get modifierDeck => _modifierDeck;
   ModifierDeck _modifierDeck = ModifierDeck("");
+
   ModifierDeck get modifierDeckAllies =>
-      _modifierDeckAllies; //todo: still mutable
+      _modifierDeckAllies;
   ModifierDeck _modifierDeckAllies = ModifierDeck("allies");
 
   //unlocked characters
@@ -257,6 +260,7 @@ class GameState extends ActionHandler {
         '"showAllyDeck": ${showAllyDeck.value}, '
         '"characterShields": ${jsonEncode(characterShields.value)}, '
         '"characterRoundFlags": ${jsonEncode(characterRoundFlags.value)}, '
+        '"revealedModifiers": ${jsonEncode(revealedModifiers.value)}, '
         '"elementState": ${json.encode(elements)} '
         '}';
   }

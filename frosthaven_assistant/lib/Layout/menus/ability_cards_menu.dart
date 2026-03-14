@@ -194,6 +194,7 @@ class AbilityCardMenuState extends State<AbilityCardMenu> {
                                       const Text(
                                         "  Reveal:",
                                       ),
+                                      buildRevealButton(drawPile.length, 0),
                                       if (drawPile.length > 0)
                                         buildRevealButton(drawPile.length, 1),
                                       if (drawPile.length > 1)
@@ -225,6 +226,7 @@ class AbilityCardMenuState extends State<AbilityCardMenu> {
                                           _gameState.action(
                                               ShuffleAbilityCardCommand(
                                                   widget.monsterData.id));
+                                          markAsOpen(0);
                                         },
                                         child: const Text(
                                           "Extra Shuffle",

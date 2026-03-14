@@ -21,6 +21,16 @@ class ChangeCurseCommand extends ChangeStatCommand {
         }
       }
     }
+
+    if (deck!.curses.value < 0) {
+      deck!.setCurse(stateAccess, 0);
+      return;
+    }
+
+    if (deck!.curses.value + change < 0) {
+      return;
+    }
+
     deck!.setCurse(stateAccess, deck!.curses.value + change);
   }
 

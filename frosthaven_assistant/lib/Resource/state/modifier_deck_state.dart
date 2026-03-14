@@ -64,7 +64,7 @@ class ModifierDeck {
     }
     _drawPile.setList(cards);
     _discardPile.setList([]);
-    _shuffle();
+    _shuffle(true);
     _cardCount.value = _drawPile.size();
     _curses.value = 0;
     _blesses.value = 0;
@@ -123,6 +123,7 @@ class ModifierDeck {
     _addedMinusOnes.value++;
     _drawPile.add(ModifierCard(CardType.add, "minus1$suffix"));
     _drawPile.shuffle();
+    setRevealed(0);
     _cardCount.value++;
   }
 
@@ -139,6 +140,7 @@ class ModifierDeck {
     if (card != null) {
       _drawPile.remove(card);
       _drawPile.shuffle();
+      setRevealed(0);
       _cardCount.value--;
     }
   }
@@ -194,6 +196,7 @@ class ModifierDeck {
     if (card != null) {
       _drawPile.remove(card);
       _drawPile.shuffle();
+      setRevealed(0);
       _cardCount.value--;
     }
   }
@@ -220,6 +223,7 @@ class ModifierDeck {
     if (card != null) {
       _drawPile.remove(card);
       _drawPile.shuffle();
+      setRevealed(0);
       _cardCount.value--;
     }
   }
@@ -274,6 +278,7 @@ class ModifierDeck {
     }
     if (shuffle) {
       _drawPile.shuffle();
+      setRevealed(0);
     }
     _cardCount.value = _drawPile.size();
   }
@@ -282,7 +287,18 @@ class ModifierDeck {
     _shuffle();
   }
 
-  void _shuffle() {
+  void setRevealed(int revealed) {
+    _gameState.revealedModifiers.value = {
+      ..._gameState.revealedModifiers.value,
+      name: revealed,
+    };
+  }
+
+  int getRevealed() {
+    return _gameState.revealedModifiers.value[name] ?? 0;
+  }
+
+  void _shuffle([bool init=false]) {
     while (_discardPile.isNotEmpty) {
       ModifierCard card = _discardPile.pop()!;
       //remove curse and bless
@@ -293,7 +309,9 @@ class ModifierDeck {
       }
     }
     _drawPile.shuffle();
-
+    if (!init) {
+      setRevealed(0);
+    }
     _needsShuffle = false;
     _cardCount.value = _drawPile.size();
   }
@@ -321,6 +339,14 @@ class ModifierDeck {
 
     _discardPile.push(card);
     _cardCount.value = _drawPile.size();
+
+    var revealed = _gameState.revealedModifiers.value[name] ?? 0;
+    if (revealed > 0) {
+      _gameState.revealedModifiers.value = {
+        ..._gameState.revealedModifiers.value,
+        name: revealed - 1,
+      };
+    }
   }
 
   @override

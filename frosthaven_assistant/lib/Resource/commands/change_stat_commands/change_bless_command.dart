@@ -21,6 +21,15 @@ class ChangeBlessCommand extends ChangeStatCommand {
       }
     }
 
+    if (deck!.blesses.value < 0) {
+      deck!.setBless(stateAccess, 0);
+      return;
+    }
+
+    if (deck!.blesses.value + change < 0) {
+      return;
+    }
+
     deck!.setBless(stateAccess, deck!.blesses.value +change);
   }
 

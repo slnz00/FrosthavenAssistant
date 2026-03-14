@@ -17,7 +17,16 @@ class ReorderModifierListCommand extends Command {
     }
     List<ModifierCard> list = List.from(deck.drawPile.getList());
 
+    var revealed = deck.getRevealed();
+    var topIndex = list.length - (oldIndex + 1);
+    if (topIndex < revealed) {
+      deck.setRevealed(revealed - 1);
+    }
+
     var item = list.removeAt(oldIndex);
+    
+
+    
     list.insert(newIndex, item);
     deck.drawPile.setList(list);
   }
