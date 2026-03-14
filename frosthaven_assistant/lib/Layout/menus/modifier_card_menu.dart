@@ -5,6 +5,7 @@ import 'package:frosthaven_assistant/Layout/menus/remove_amd_card_menu.dart';
 import 'package:frosthaven_assistant/Layout/menus/send_to_bottom_menu.dart';
 import 'package:frosthaven_assistant/Layout/modifier_card.dart';
 import 'package:frosthaven_assistant/Resource/commands/amd_remove_minus_1_command.dart';
+import 'package:frosthaven_assistant/Resource/commands/amd_reveal_cards.dart';
 import 'package:frosthaven_assistant/Resource/commands/bad_omen_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/enfeebling_hex_command.dart';
 import 'package:frosthaven_assistant/Resource/commands/reorder_modifier_list_command.dart';
@@ -63,10 +64,7 @@ class ModifierCardMenuState extends State<ModifierCardMenu> {
   }
 
   void markAsOpen(int revealed, ModifierDeck deck) {
-    _gameState.revealedModifiers.value = {
-      ..._gameState.revealedModifiers.value,
-      deck.name: revealed,
-    };
+    _gameState.action(AMDRevealCards(deck.name == "allies", revealed));
   }
 
   bool isRevealed(int index, ModifierDeck deck) {
